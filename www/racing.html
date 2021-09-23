@@ -1,0 +1,734 @@
+<style type="text/css" id="mine"></style>
+    
+            <div id="main">
+                <div id="infoPane">
+                    <div id="raceSelect">
+    <select>
+        <? races = getRaceData(); ?>
+        <? for(i=0;i<races.length;i++){ ?>
+        <option value="<?= races[i][1] ?>"><?= races[i][0] ?></option>
+        <?} //for ?>
+    </select>
+            </div>
+            <!-- NEEDTO: set value from raceData -->
+            <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
+                <div id="startSetBtn" class="btn">Set Start</div>
+            </div>
+            <div id="save" class="btn">save</div>
+                    <div id="clock"></div>
+                </div>
+                
+        <div id="mainPane">
+                <table cellpadding="0" cellspacing="5px" width="100%">
+                <tr><td>
+                
+                <div id="compPane">
+                    <div class="app">
+                    <table class="appTable" cellpadding="0" cellspacing="5px" height="1400px">
+
+    <!-- start template -->	
+                    <tr><td>
+                        <table id="comp-<?= comps[i].id ?>" class="compPanel" cellpadding="0" cellspacing="0" data-id="<?= comps[i].id ?>">
+                            <tr class="compRow">
+                                <td class="boat">
+                                    <div class="cueNo"></div>
+                                    <div class="helm"><?= comps[i].helm?></div>
+                    <div class="boatName"><?= comps[i].boat?></div>
+                    <div class="fleet"><?= comps[i].fleet?></div>
+                                    <div class="rating"><?= comps[i].rating?></div>
+                    <div class="compId"><?= comps[i].id?></div>
+                                </td>
+                                <td width="20px">
+                                    <div class="adj">
+                                        <ul>
+                                            <li class="plus button">+</li>
+                                            <li class="minus button">-</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                                <td class="time">
+                                    <table class="timeTable" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td class="timeDisplay"></td>
+                                    </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td></tr>
+              
+    <!-- end template-->
+                </table>
+            </div><!-- app -->
+        </div><!-- compPane -->
+        </td><!-- compPane cell -->
+        <td width="160px" id="btnPaneCell">
+                
+        <div id="btnPane">
+                    <div id="finishBtn" class="btn"><div class="finishLabel">Finish</div></div>
+                    <div id="codeBtn" class="btn"><div id="codeLabel">Set Code</div></div>
+                    
+                    <div id="codeSelect">
+                        <select>
+                            <option value="DNF">DNF</option>
+                            <option value="OCS">OCS</option>
+                            <option value="DSQ">DSQ</option>
+                            <option value="RAF">RAF</option>
+                        </select>
+                    </div>
+            <div id="finishPane">
+              <!-- 
+              Replaced by finishPaneTemplate
+              <? fleets = getFleetData(); ?>
+              <? for(i=0;i<fleets.length;i++){?>
+              <ul class="finishListTitle"><?= fleets[i] ?>
+                <ol id="<?= fleets[i].replace(/ /g,'') ?>" class="finishList"></ol>
+              </ul>
+              <?}?>
+            </div>
+                    -->		
+            </div>
+         </td><!-- btn cell -->
+         </tr></table><!-- mainPaneTable -->
+    </div> <!-- mainPane -->
+    </div><!-- main -->
+    
+    
+    <!-- Templates -->
+    <template id="raceSelectItems">
+        <!-- <option value="<?= races[i][1] ?>"><?= races[i][0] ?></option> 
+        I dont think i need this, just create it-->
+        <option value=""></option>
+    </template>
+
+    <template id="finishPaneTemplate">
+      <!-- need to set finishListTitle textContent and <ol> id -->
+      <ul class="finishListTitle"><!-- <?= fleets[i] ?> -->
+        <ol id="" class="finishList"></ol>
+      </ul>
+    </template>
+    
+    <template id="compTemplate">
+      <tr><td>
+        <!--   id="comp-<?= comps[i].id ?>"                            data-id="<?= comps[i].id ?>   -->  
+        <table id="" class="compPanel" cellpadding="0" cellspacing="0" data-id="">
+          <tr class="compRow">
+            <td class="boat">
+              <div class="cueNo"></div>
+              <!-- just textContent-->
+              <div class="helm">/div>
+              <div class="boatName"></div>
+              <div class="fleet"></div>
+              <div class="rating"></div>
+              <div class="compId"></div>
+              <!-- -->
+            </td>
+            <td width="20px">
+              <div class="adj">
+                <ul>
+                  <li class="plus button">+</li>
+                  <li class="minus button">-</li>
+                </ul>
+              </div>
+            </td>
+            <td class="time">
+              <table class="timeTable" cellpadding="0" cellspacing="0">
+              <tr>
+                <td class="timeDisplay"></td>
+              </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td></tr>
+    </template>
+    
+    <!-- Load the jQuery and jQuery UI libraries. -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <!-- colorChanger script -->
+    <script src="js/colorChanger.js"></script>
+    <script src="js/importFile.js"></script>
+    <script src="js/papaparse.min.js"></script>
+    
+    <!-- IndexedDB Testing -->
+    <script type="text/javascript">
+    var LL = console.log;
+    var db;
+    var dbPromise;
+    function openDatabase(name){
+      if (!window.indexedDB) {
+          console.log("Your browser doesn't support a stable version of IndexedDB.");
+      }
+      let dbPromise = indexedDB.open(name, 1);
+    
+        dbPromise.onupgradeneeded = function(e) {
+        console.log('onupgradeneeded');
+        db = e.target.result;
+       
+        if (!db.objectStoreNames.contains('races')) {
+          let store = db.createObjectStore('races', {keyPath: 'id'});
+          store.createIndex("name", "name", { unique: true });
+        }
+    
+        if (!db.objectStoreNames.contains('comps')) {
+          let store = db.createObjectStore('comps', {keyPath: 'id'});
+          store.createIndex("id", "id", { unique: true });
+          store.createIndex("boat", "boat", { unique: true });
+          store.createIndex("fleet", "fleet", { unique: false });
+          store.createIndex("helm", "helm", { unique: true });
+        }
+    
+        if (!db.objectStoreNames.contains('fleets')) {
+          let store = db.createObjectStore('fleets', {keyPath: 'id'}); 
+          //something is wrong with this index???
+          store.createIndex("fleetName", "name", { unique: true });
+        }
+    
+        if (!db.objectStoreNames.contains('results')) { 
+          let store = db.createObjectStore('results', {keyPath: 'id', autoIncrement:true});
+          store.createIndex("raceId", "raceId", { unique: false });
+          store.createIndex("compId", "compId", { unique: false });
+          store.createIndex("boat", "boat", { unique: false });
+          store.createIndex("raceName", "raceName", { unique: false });
+          store.createIndex("id", "id", { unique: true });
+        }
+    
+        return db;
+    
+        };// onupgradeneeded
+    
+        dbPromise.onerror = function(e) {
+          console.warn("Error", e.target.result);
+        };
+    
+        dbPromise.onsuccess = function(e) {
+          db = e.target.result;
+          //writeRacesDB(db);
+          writeCompsDB(db);
+          //writeFleetsDB(db) 
+          return db;
+        };
+    
+    }
+    var dbw = openDatabase('store');
+
+  //////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+   
+    function writeCompsDB(db){
+        let comps = Csv.getComps()
+        let transaction = db.transaction("comps", "readwrite");
+        let compsData = transaction.objectStore("comps");
+        comps.forEach(function(comps){
+          let comp = {'boat': comps.compboat, 'rating': comps.comprating, 'fleet': comps.compfleet, 'id': comps.compid, 'helm': comps.comphelmname, 
+                      'alias':comps.compalias, 'club':comps.compclub, 'exclude':comps.compexclude, 'high':comps.comphigh, 
+                      'medicalflag':comps.compmedicalflag, 'nett':comps.compnett, 'rank':comps.comprank, 'total':comps.comptotal}
+          let request = compsData.add(comp);
+          console.log(comp);
+        });
+    }
+
+
+    function makeTX(storeName,mode){
+      //console.log('makeTX',db)
+      let tx = db.transaction(storeName, mode);
+      tx.onerror = (err) => {
+        console.log('makeTX onerror',err.target.error);
+      }
+      return tx;
+    }
+    
+    function getStore(storeName,mode){
+      if(mode == 'undefined'){mode = 'readwrite'}
+      let tx = makeTX(storeName,mode).objectStore(storeName);
+      return tx;
+    }
+    
+    // function writeFleetsDB(db){
+    //   google.script.run.withSuccessHandler(function(fleets){
+    //     let tx = makeTX('fleets', 'readwrite');
+    //     let store = tx.objectStore('fleets')
+    //     //console.log(fleets)
+    //     for (let i = 0; i < fleets.length; i++) {
+    //       let fleet = {'name':fleets[i],'id':i}
+    //       let request = store.put(fleet);
+    //     }
+    //     store.onerror = function(e){
+    //       console.warn('onerror',e)
+    //     }
+    //   }).getFleetData();
+    // }
+    
+    // function writeRacesDB(db){
+    //   google.script.run.withSuccessHandler(function(races){
+    //     let transaction = makeTX("races", "readwrite");
+    //     let racesData = transaction.objectStore("races");
+    //     for (let i = 0; i < races.length; i++) {
+    //       let race = {'name':races[i][0],'id':races[i][1]}
+    //       let request = racesData.put(race);
+    //       //console.log(races[i]);
+    //     }
+    //   }).getRaceData();
+    // }
+    
+    function writeResult(resultObj){
+      /*  TODO:
+      * try to cursor by race then look for compId instead of using
+      * my fabricated 'id' as lookup value
+      */
+       //L(resultObj)
+      if(resultObj.compId){
+       
+        let tx = getStore("results",'readwrite');
+        tx.openCursor(resultObj.id).onsuccess = function(e){
+          var cursor = e.target.result;
+          if (cursor){
+            console.log('result already entered');
+          }else{
+            tx.add(resultObj)
+            console.log('add result:', resultObj.boat);
+          }
+        } 
+      }else{
+        console.log("no resultObj")
+      }
+    }
+    
+    /*
+    *store1obj = {'store':'results','index':'raceId','search':'106'}
+    *store2obj = {}
+    */
+    
+    async function relate(store1, store2, callback){
+      let related = new Array;
+      let tx = db.transaction([ store1.store, store2.store ], 'readonly')
+      tx.oncomplete = function(){
+        let txcomplete = 1
+        callback(related)
+      }
+      let results = tx.objectStore(store1.store).index(store1.index)
+      let result = results.openCursor(store1.search)
+      result.onsuccess = function(e){
+        let cursor = event.target.result
+        if (cursor){
+          let comps = tx.objectStore(store2.store).index(store2.index)
+          let comp = comps.get(cursor.value.compId)
+          comp.onsuccess = function(e){
+            let first = e.target.result
+            let second = cursor.value
+            //let merged = Object.assign(related, first, second)
+            let merged = {...first, ...second}
+            //console.log('merged results',merged)
+            related.push(merged)
+            
+          }
+        cursor.continue(); 
+        }// if cursor
+      }// onsuccess
+      
+    }
+    
+    
+    
+    
+    // function getResults(){
+    //   google.script.run.withSuccessHandler(function(results){
+    //     let transaction = makeTX("results", "readwrite");
+    //     let resultsData = transaction.objectStore("results");
+    //     for (let i = 0; i < results.length; i++) {
+    //       let result = {'id':parseInt(results[i][3]+results[i][2]),
+    //                     'compId':results[i][2],
+    //                     'raceId':results[i][3], 
+    //                     'resultTime':results[i][1]
+    //                   }
+    //       let request = resultsData.put(result);
+    //       //console.log(races[i]);
+    //     }
+    //   }).getResultData('finishes');
+    // }
+    // getResults();
+    
+    function getFleets(){
+      let result = [];
+      let store = db.transaction("fleets", "readonly")
+                  .objectStore("fleets")
+                  .getAll().onsuccess = function(e){
+                    //console.log('getFleets:',e.target.result);
+                    let result = e.target.result
+                    makeFinishPane(result)
+                    //L(result)
+                  };
+    
+    }
+    
+    function makeFinishPane(fleets){
+        let template = document.querySelector('#finishPaneTemplate')
+        let insertAt = document.querySelector('#finishPane');
+        fleets.forEach(function(e){
+            let clone = template.content.cloneNode(true);
+            let title = clone.querySelector(".finishListTitle");
+              //L('e',e)
+              title.textContent = e.name;
+              title.setAttribute('id', e.id)
+              title.setAttribute('data-key', e.name.replace(/ /g,''))
+              insertAt.appendChild(clone);
+        });// forEach
+    updateFinishPane()
+    }// makeFinishPane
+    
+    function updateFinishPane(){
+      //clear finishPane li's
+      document.querySelectorAll('.finishListTitle li').forEach(function(item){
+        item.remove();
+      })
+      //get Current race
+      let raceSelect = document.querySelector('#raceSelect select')
+      let raceSelected = raceSelect.options[raceSelect.selectedIndex].value
+      let store1 = {'store':'results','index':'raceId','search':'106'}
+      let store2 = {'store':'comps','index':'id','search':''}
+      let rel = relate(store1, store2, relateDone)
+    }// updateFinishPane
+    
+    function relateDone(related){
+    related.forEach(function(relatedItems){
+    L(relatedItems)
+    
+      let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
+        let dataKey = item.getAttribute('data-key');
+        if(dataKey == relatedItems.fleet.replace(/ /g,'')){
+          let listItem = document.createElement('li')
+          listItem.setAttribute('key',relatedItems.compId)
+          listItem.textContent = relatedItems.boat
+          item.append(listItem)
+        }
+      })
+      let compPane = document.querySelectorAll('.compRow').forEach(function(item){
+        
+      })
+    })// related.forEach
+    
+    }
+    
+    function matchCompToRace(resultsArr){
+      L(resultsArr)
+      let store = getStore('comps').index('id')
+      resultsArr.forEach(function(item){
+    
+      })
+    }
+    
+    </script>
+    
+    
+    
+    
+    <script type="text/javascript">
+    //Globals
+    var cue = [];
+    var finished = [];
+    
+    $( document ).ready(function() {
+    
+    setTimeout(function(){
+      let fleets = getFleets();
+      //relate('results', 'comps', 'id')
+    }, 3000);
+    
+    // backUpCsv();
+    // function backUpCsv(){
+    //   let csv = google.script.run.withSuccessHandler(function(csv){
+    //     if(!localStorage.getItem('blw')){
+    //       localStorage.setItem('blw',csv);
+    //     }
+    //   }).getData();
+    // }
+    
+    function removeFromCue(compId, compPanel){
+        compPanel.removeAttr('style').find('.cueNo').text('');
+        compPanel.find('.adj li').removeAttr('style');
+        for(var i=cue.length-1; i>=0;i--){
+            if(cue[i]===compId){
+               cue.splice(i,1);
+            }
+        }
+    }
+    
+    $('.button').on('click',function(){
+        if ($(this).closest('.compPanel').hasClass('finished')) {
+            var timeDisplay = $(this).closest('.compRow').find('.timeDisplay');
+            var d = new Date();
+            if ($(this).hasClass('minus')) {
+                //subtract 10ths
+                var timeText= timeDisplay.text().split(':');
+                var t = new Date();
+                var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
+                t.setTime(t.getTime()-1000);
+                var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
+                //add 0 where needed
+                if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
+                console.log(ta);
+                //timeText[3] = new Number(timeText[3])-1;
+                timeDisplay.text(ta.join(':'))
+            }
+            else if($(this).hasClass('plus')) {
+                //add 10ths
+                var timeText= timeDisplay.text().split(':');
+                var t = new Date();
+                var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
+                t.setTime(t.getTime()+1000);
+                var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
+                //add 0 where needed
+                if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
+                console.log(ta);
+                //timeText[3] = new Number(timeText[3])-1;
+                timeDisplay.text(ta.join(':'))
+            }
+        }
+        else if($(this).closest('.compPanel').hasClass('selected')){
+            var compPanel = $(this).closest('.compPanel');
+            var cueNo = $(this).closest('.compRow').find('.cueNo').text();
+            var compId = compPanel.attr('id');
+            removeFromCue(compId, compPanel);
+            if ($(this).hasClass('minus')) {
+                cue.splice(new Number(cueNo), 0, compId);
+            }
+            else if($(this).hasClass('plus')) {
+                cue.splice(new Number(cueNo) - 2, 0, compId);
+            }
+            console.log('adjust(cue to finish):',cue);
+            formatRows();
+        }
+    });
+    
+    function formatRows(){
+        var color = '#000099';
+        var gradColor = '#66FF33';
+        var ratio = '0.20';
+        for (var i=0; i<cue.length; i++) {
+            var newColor = changeColor(color, ratio, false);
+            var next = $('#'+cue[i]);
+            next.css('border-color',color);
+            next.find('.cueNo').text(i+1).css('color',color)
+            next.find('.adj li').css({
+                'border-right-color': color,
+                'border-top-color': color,
+                'border-left-color': color,
+            }).css('color',changeColor(color,'.2',true));
+            next.css('background-color',changeColor(newColor,'.3',false))
+            //next.css(makeGradient(changeColor(newColor,'.2',false)));
+            color = newColor;
+        };
+    }
+    
+    
+    $(".boat").on("click", function(event){
+        var compPanel = $(this).closest('.compPanel');
+        var compId = compPanel.attr('id');
+        if(compPanel.hasClass('finished')){return;}
+        if(compPanel.hasClass('selected')){
+            compPanel.removeClass('selected').removeAttr('style').find('.cueNo').text('');
+            compPanel.find('.adj li').removeAttr('style');
+            for(var i=cue.length-1; i>=0;i--){
+                if(cue[i]===compId){
+                   cue.splice(i,1);
+                }
+            }
+        }else{
+            cue.push(compId);
+            compPanel.addClass('selected');
+        }
+        formatRows();
+    });//.boat on click
+    
+     $('.btn').on('mousedown',function(){ $(this).toggleClass('mousedown'); });
+     $('.btn').on('mouseup',function(){ $(this).toggleClass('mousedown'); });
+     
+    $('#startSetBtn').on('click',function(){
+         var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        var sec = date.getSeconds();
+        $('#startTimeInput').val(hour+":"+min+":"+sec);
+    });
+    
+     $('#finishBtn').on('click',function(){
+         var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        var sec = date.getSeconds();
+        if (min<=9){min="0"+min;} 
+        if (sec<=9){ sec="0"+sec;}
+        
+        var compPanel = $(this).closest('#main').find('#'+cue[0]);
+      var boat = compPanel.find('.boatName').text();
+      //console.log(compPanel.find('.boatName').text());
+      var compId = compPanel.find('.compId').text();
+      //console.log(compId)
+      var fleet = compPanel.find('.fleet').text().replace(/ /g,'')
+      //console.log(fleet)
+      var raceId = $('#raceSelect option:selected').val();
+      var raceName = $('#raceSelect option:selected').text();
+      //console.log(raceId);
+      if(compPanel.find('.boatName').text() != ''){
+        var btnPaneList = $('#'+fleet).append('<li>'+compPanel.find('.boatName').text()+'</li>');
+      }
+      //TODO: need to write results to DB and then update html from data
+      //this will require that we keep track of the race we have selected.
+         compPanel.find('.timeDisplay').text(hour+':'+min+':'+sec);
+      var resultTime = hour+':'+min+':'+sec;
+        compPanel.removeClass('selected').removeAttr('style').addClass('finished').find('.cueNo').text('');
+        compPanel.find('.adj li').removeAttr('style');
+      cue.shift();
+        formatRows();
+      //write result to database after each click
+      //neeed to extend this functionality to the adjust buttons
+      //"rft","19:37:23","26","106"
+      var resultObj = {'id':parseInt(raceId+compId), 'boat':boat, 'compId':compId, 'raceId':raceId, 'raceName':raceName,      'resultTime':resultTime, 'timeStamp':Date.now()};
+      //console.log(resultObj);
+      writeResult(resultObj);
+      updateFinishPane();
+    
+    });
+    
+    
+    
+     $('#codeBtn').on('click',function(){
+          //get select value
+        var code = $('#codeSelect select').val();
+        //write value to timeDisplay
+        var compPanel = $(this).closest('#main').find('#'+cue[0]);
+         compPanel.find('.timeDisplay').text(code);
+        compPanel.removeClass('selected').removeAttr('style').addClass('finished').find('.cueNo').text('');
+        compPanel.find('.adj li').removeAttr('style');
+        //addToFinished(cue);
+        cue.shift();
+        formatRows();
+      });
+      
+    //  $('#save').on('click',function(){
+    //    google.script.run.setRaceResults(comps,race);
+    //  });
+     
+    // function addToFinished(comp){
+    //     finished.push(comp);
+    //     for(i=0;i>finished.length;i++){
+    //         //$('#finishPane').append('<li>'+finished[i][0]+'</li>')
+    //         console.log("addToFinished",finished[i][0]);
+    //     }
+    
+    // }
+    
+    });//ready
+    
+    
+    
+    
+    function showClock(){
+        var Digital=new Date();
+        var hours=Digital.getHours();
+        var minutes=Digital.getMinutes();
+        var seconds=Digital.getSeconds();
+        
+        if (minutes<=9){
+            minutes="0"+minutes;
+        } 
+        if (seconds <= 9) {
+            seconds = "0" + seconds;
+        }
+        $('#clock').text(hours+":"+minutes+":"+seconds);
+        setTimeout(showClock,1000);
+    }//show
+    showClock();
+    //-->
+    </script>
+    
+    <script type="text/javascript" name="CSVToArray">
+        // ref: http://stackoverflow.com/a/1293163/2343
+        // This will parse a delimited string into an array of
+        // arrays. The default delimiter is the comma, but this
+        // can be overriden in the second argument.
+        function CSVToArray( strData, strDelimiter ){
+            // Check to see if the delimiter is defined. If not,
+            // then default to comma.
+            strDelimiter = (strDelimiter || ",");
+    
+            // Create a regular expression to parse the CSV values.
+            var objPattern = new RegExp(
+                (
+                    // Delimiters.
+                    "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+    
+                    // Quoted fields.
+                    "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+    
+                    // Standard fields.
+                    "([^\"\\" + strDelimiter + "\\r\\n]*))"
+                ),
+                "gi"
+                );
+    
+    
+            // Create an array to hold our data. Give the array
+            // a default empty first row.
+            var arrData = [[]];
+    
+            // Create an array to hold our individual pattern
+            // matching groups.
+            var arrMatches = null;
+    
+    
+            // Keep looping over the regular expression matches
+            // until we can no longer find a match.
+            while (arrMatches = objPattern.exec( strData )){
+    
+                // Get the delimiter that was found.
+                var strMatchedDelimiter = arrMatches[ 1 ];
+    
+                // Check to see if the given delimiter has a length
+                // (is not the start of string) and if it matches
+                // field delimiter. If id does not, then we know
+                // that this delimiter is a row delimiter.
+                if (
+                    strMatchedDelimiter.length &&
+                    strMatchedDelimiter !== strDelimiter
+                    ){
+    
+                    // Since we have reached a new row of data,
+                    // add an empty row to our data array.
+                    arrData.push( [] );
+    
+                }
+    
+                var strMatchedValue;
+    
+                // Now that we have our delimiter out of the way,
+                // let's check to see which kind of value we
+                // captured (quoted or unquoted).
+                if (arrMatches[ 2 ]){
+    
+                    // We found a quoted value. When we capture
+                    // this value, unescape any double quotes.
+                    strMatchedValue = arrMatches[ 2 ].replace(
+                        new RegExp( "\"\"", "g" ),
+                        "\""
+                        );
+    
+                } else {
+    
+                    // We found a non-quoted value.
+                    strMatchedValue = arrMatches[ 3 ];
+    
+                }
+    
+    
+                // Now that we have our value string, let's add
+                // it to the data array.
+                arrData[ arrData.length - 1 ].push( strMatchedValue );
+            }
+    
+            // Return the parsed data.
+            return( arrData );
+        }
+    
+    </script>
+    

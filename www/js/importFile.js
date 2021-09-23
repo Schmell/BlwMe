@@ -1,5 +1,4 @@
 const Csv = {
-
     /**
      * 
      */
@@ -52,7 +51,7 @@ const Csv = {
     sortedBoats.forEach(function(compBoat){
         let competitor = {};
         competitor.id = parseInt(compBoat[2]);
-        competitor.compId = compBoat[2];
+        competitor.compid = compBoat[2];
             let compRows = data.filter(function(item){
                 var regex = new RegExp(`^comp`, "g");
                 return item[0].match(regex)&&item[2]==compBoat[2];
@@ -89,8 +88,8 @@ const Csv = {
         // LL('results', results)
         results.forEach(function(result){
             let resultRow = {
-                compId: result[2],
-                raceId: result[3],
+                compid: result[2],
+                raceid: result[3],
                 finish: Csv.resultHelp('rft',data,result),
                 start: Csv.resultHelp("rst",data,result),
                 points: Csv.resultHelp("rpts",data,result),
