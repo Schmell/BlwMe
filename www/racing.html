@@ -1,14 +1,12 @@
 <style type="text/css" id="mine"></style>
-    
+<link rel="stylesheet" href="css/racing.css"></link>
             <div id="main">
                 <div id="infoPane">
                     <div id="raceSelect">
-    <select>
-        <? races = getRaceData(); ?>
-        <? for(i=0;i<races.length;i++){ ?>
-        <option value="<?= races[i][1] ?>"><?= races[i][0] ?></option>
-        <?} //for ?>
-    </select>
+                        <!-- raceSelected template -- option only-->
+                        <select>
+                            <option value=""></option>
+                        </select>
             </div>
             <!-- NEEDTO: set value from raceData -->
             <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
@@ -28,15 +26,15 @@
 
     <!-- start template -->	
                     <tr><td>
-                        <table id="comp-<?= comps[i].id ?>" class="compPanel" cellpadding="0" cellspacing="0" data-id="<?= comps[i].id ?>">
+                        <table id="comp-" class="compPanel" cellpadding="0" cellspacing="0" data-id="">
                             <tr class="compRow">
                                 <td class="boat">
                                     <div class="cueNo"></div>
-                                    <div class="helm"><?= comps[i].helm?></div>
-                    <div class="boatName"><?= comps[i].boat?></div>
-                    <div class="fleet"><?= comps[i].fleet?></div>
-                                    <div class="rating"><?= comps[i].rating?></div>
-                    <div class="compId"><?= comps[i].id?></div>
+                                    <div class="helm"></div>
+                                    <div class="boatName"></div>
+                                    <div class="fleet"></div>
+                                    <div class="rating"></div>
+                                    <div class="compId"></div>
                                 </td>
                                 <td width="20px">
                                     <div class="adj">
@@ -152,83 +150,76 @@
     
     <!-- IndexedDB Testing -->
     <script type="text/javascript">
+    //LazyLog
     var LL = console.log;
     var db;
     var dbPromise;
+    const dbVersion = 1;
     function openDatabase(name){
-      if (!window.indexedDB) {
-          console.log("Your browser doesn't support a stable version of IndexedDB.");
-      }
-      let dbPromise = indexedDB.open(name, 1);
+        if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
+
+        let dbPromise = indexedDB.open(name, dbVersion);
     
         dbPromise.onupgradeneeded = function(e) {
-        console.log('onupgradeneeded');
-        db = e.target.result;
-       
-        if (!db.objectStoreNames.contains('races')) {
-          let store = db.createObjectStore('races', {keyPath: 'id'});
-          store.createIndex("name", "name", { unique: true });
-        }
+            console.log('onupgradeneeded');
+            db = e.target.result;
+        
+            if (!db.objectStoreNames.contains('races')) {
+                let store = db.createObjectStore('races', {keyPath: 'id'});
+                store.createIndex("name", "name", { unique: true });
+                store.createIndex("date", "date", { unique: false });
+                store.createIndex("time", "time", { unique: false });
+                store.createIndex("sailed", "sailed", { unique: false });
+            }
+        
+            if (!db.objectStoreNames.contains('comps')) {
+                let store = db.createObjectStore('comps', {keyPath: 'id'});
+                store.createIndex("id", "id", { unique: true });
+                store.createIndex("compid", "compid", { unique: false });
+                store.createIndex("boat", "boat", { unique: true });
+                store.createIndex("fleet", "fleet", { unique: false });
+                store.createIndex("helm", "helm", { unique: true });
+                store.createIndex("sailno", "sailno", { unique: false });
+                store.createIndex("class", "class", { unique: false });
+                store.createIndex("rank", "rank", { unique: false });
+                store.createIndex("nett", "nett", { unique: false });
+                store.createIndex("total", "total", { unique: false });
+            }
+        
+            if (!db.objectStoreNames.contains('fleets')) {
+                let store = db.createObjectStore('fleets', {keyPath: 'id'});
+                store.createIndex("name", "name", { unique: false });
+            }
+        
+            if (!db.objectStoreNames.contains('results')) { 
+                let store = db.createObjectStore('results', {keyPath: 'id', autoIncrement:true});
+                store.createIndex("raceid", "raceid", { unique: false });
+                store.createIndex("compid", "compid", { unique: false });
+                store.createIndex("start", "start", { unique: false });
+                store.createIndex("elapsed", "elapsed", { unique: false });
+                store.createIndex("finish", "finish", { unique: false });
+            }
+            return db;
     
-        if (!db.objectStoreNames.contains('comps')) {
-          let store = db.createObjectStore('comps', {keyPath: 'id'});
-          store.createIndex("id", "id", { unique: true });
-          store.createIndex("boat", "boat", { unique: true });
-          store.createIndex("fleet", "fleet", { unique: false });
-          store.createIndex("helm", "helm", { unique: true });
-        }
+        }; // onupgradeneeded
     
-        if (!db.objectStoreNames.contains('fleets')) {
-          let store = db.createObjectStore('fleets', {keyPath: 'id'}); 
-          //something is wrong with this index???
-          store.createIndex("fleetName", "name", { unique: true });
-        }
-    
-        if (!db.objectStoreNames.contains('results')) { 
-          let store = db.createObjectStore('results', {keyPath: 'id', autoIncrement:true});
-          store.createIndex("raceId", "raceId", { unique: false });
-          store.createIndex("compId", "compId", { unique: false });
-          store.createIndex("boat", "boat", { unique: false });
-          store.createIndex("raceName", "raceName", { unique: false });
-          store.createIndex("id", "id", { unique: true });
-        }
-    
-        return db;
-    
-        };// onupgradeneeded
-    
-        dbPromise.onerror = function(e) {
-          console.warn("Error", e.target.result);
-        };
-    
+        dbPromise.onerror = function(e) { console.warn("Error", e.target.result); };
+
         dbPromise.onsuccess = function(e) {
-          db = e.target.result;
-          //writeRacesDB(db);
-          writeCompsDB(db);
-          //writeFleetsDB(db) 
-          return db;
+            db = e.target.result;
+            writeRacesDB(db);
+            writeCompsDB(db);
+            writeFleetsDB(db)
+            writeResultsDB(db)
+            return db;
         };
     
-    }
+    } // openDatabase
     var dbw = openDatabase('store');
 
-  //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
-   
-    function writeCompsDB(db){
-        let comps = Csv.getComps()
-        let transaction = db.transaction("comps", "readwrite");
-        let compsData = transaction.objectStore("comps");
-        comps.forEach(function(comps){
-          let comp = {'boat': comps.compboat, 'rating': comps.comprating, 'fleet': comps.compfleet, 'id': comps.compid, 'helm': comps.comphelmname, 
-                      'alias':comps.compalias, 'club':comps.compclub, 'exclude':comps.compexclude, 'high':comps.comphigh, 
-                      'medicalflag':comps.compmedicalflag, 'nett':comps.compnett, 'rank':comps.comprank, 'total':comps.comptotal}
-          let request = compsData.add(comp);
-          console.log(comp);
-        });
-    }
-
-
+//////////////////////////////////////////////////////////////////////////
+ 
     function makeTX(storeName,mode){
       //console.log('makeTX',db)
       let tx = db.transaction(storeName, mode);
@@ -243,42 +234,81 @@
       let tx = makeTX(storeName,mode).objectStore(storeName);
       return tx;
     }
+
+    function writeCompsDB(db){
+        let comps = Csv.getComps()
+        let transaction = db.transaction("comps", "readwrite");
+        let compsData = transaction.objectStore("comps");
+        comps.forEach(function(comps){
+          let comp = {
+              'boat': comps.compboat, 
+              'rating': comps.comprating, 
+              'fleet': comps.compfleet, 
+              'id': comps.compid, 
+              'helm': comps.comphelmname, 
+              'alias':comps.compalias, 
+              'club':comps.compclub, 
+              'exclude':comps.compexclude, 
+              'high':comps.comphigh, 
+              'medicalflag':comps.compmedicalflag, 
+              'nett':comps.compnett, 
+              'rank':comps.comprank, 
+              'total':comps.comptotal
+            }
+          let request = compsData.add(comp);
+          //console.log(comp);
+        });
+    }
+
+    function writeFleetsDB(db){
+         let fleets = Csv.getFleets();
+        let tx = makeTX('fleets', 'readwrite');
+        let store = tx.objectStore('fleets')
+        for (let i = 0; i < fleets.length; i++) {
+          let fleet = {'name':fleets[i],'id':i}
+          let request = store.put(fleet);
+        }
+        store.onerror = function(e){
+          console.warn('onerror',e)
+        }
+    }
     
-    // function writeFleetsDB(db){
-    //   google.script.run.withSuccessHandler(function(fleets){
-    //     let tx = makeTX('fleets', 'readwrite');
-    //     let store = tx.objectStore('fleets')
-    //     //console.log(fleets)
-    //     for (let i = 0; i < fleets.length; i++) {
-    //       let fleet = {'name':fleets[i],'id':i}
-    //       let request = store.put(fleet);
-    //     }
-    //     store.onerror = function(e){
-    //       console.warn('onerror',e)
-    //     }
-    //   }).getFleetData();
-    // }
-    
-    // function writeRacesDB(db){
-    //   google.script.run.withSuccessHandler(function(races){
-    //     let transaction = makeTX("races", "readwrite");
-    //     let racesData = transaction.objectStore("races");
-    //     for (let i = 0; i < races.length; i++) {
-    //       let race = {'name':races[i][0],'id':races[i][1]}
-    //       let request = racesData.put(race);
-    //       //console.log(races[i]);
-    //     }
-    //   }).getRaceData();
-    // }
-    
+    function writeRacesDB(db){
+        let races = Csv.getRaces();
+        let transaction = makeTX("races", "readwrite");
+        let racesData = transaction.objectStore("races");
+        
+        for (let i = 0; i < races.length; i++) {
+          let race = {
+            'id':races[i].id,
+            'raceid':races[i].raceid,
+            'name':races[i].racename,
+            'date':races[i].racedate, 
+            'notes':races[i].racenotes, 
+            'rank':races[i].racerank, 
+            'sailed': races[i].racesailed, 
+            'start':races[i].racestart, 
+            'time':races[i].racetime
+            }
+          let request = racesData.put(race);
+          //console.log('race',race);
+        }
+    }
+
+    function writeResultsDB(db){
+        let results = Csv.getResults();
+        //LL(results)  
+        let transaction = makeTX("results", "readwrite");
+        let resultsData = transaction.objectStore("results");
+        for (let i = 0; i < results.length; i++) {
+
+            let request = resultsData.put(results[i]);
+            //console.log(results[i]);
+        }
+    }
+
     function writeResult(resultObj){
-      /*  TODO:
-      * try to cursor by race then look for compId instead of using
-      * my fabricated 'id' as lookup value
-      */
-       //L(resultObj)
       if(resultObj.compId){
-       
         let tx = getStore("results",'readwrite');
         tx.openCursor(resultObj.id).onsuccess = function(e){
           var cursor = e.target.result;
@@ -292,7 +322,7 @@
       }else{
         console.log("no resultObj")
       }
-    }
+    } // writeResult
     
     /*
     *store1obj = {'store':'results','index':'raceId','search':'106'}
@@ -328,26 +358,6 @@
       
     }
     
-    
-    
-    
-    // function getResults(){
-    //   google.script.run.withSuccessHandler(function(results){
-    //     let transaction = makeTX("results", "readwrite");
-    //     let resultsData = transaction.objectStore("results");
-    //     for (let i = 0; i < results.length; i++) {
-    //       let result = {'id':parseInt(results[i][3]+results[i][2]),
-    //                     'compId':results[i][2],
-    //                     'raceId':results[i][3], 
-    //                     'resultTime':results[i][1]
-    //                   }
-    //       let request = resultsData.put(result);
-    //       //console.log(races[i]);
-    //     }
-    //   }).getResultData('finishes');
-    // }
-    // getResults();
-    
     function getFleets(){
       let result = [];
       let store = db.transaction("fleets", "readonly")
@@ -373,7 +383,7 @@
               title.setAttribute('data-key', e.name.replace(/ /g,''))
               insertAt.appendChild(clone);
         });// forEach
-    updateFinishPane()
+//updateFinishPane()
     }// makeFinishPane
     
     function updateFinishPane(){
@@ -391,7 +401,7 @@
     
     function relateDone(related){
     related.forEach(function(relatedItems){
-    L(relatedItems)
+    //LL(relatedItems)
     
       let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
         let dataKey = item.getAttribute('data-key');
@@ -401,7 +411,7 @@
           listItem.textContent = relatedItems.boat
           item.append(listItem)
         }
-      })
+      }) // list forEach
       let compPane = document.querySelectorAll('.compRow').forEach(function(item){
         
       })
@@ -426,22 +436,12 @@
     //Globals
     var cue = [];
     var finished = [];
-    
-    $( document ).ready(function() {
-    
+    document.addEventListener('DOMContentLoaded', (event) => {
+
     setTimeout(function(){
       let fleets = getFleets();
       //relate('results', 'comps', 'id')
     }, 3000);
-    
-    // backUpCsv();
-    // function backUpCsv(){
-    //   let csv = google.script.run.withSuccessHandler(function(csv){
-    //     if(!localStorage.getItem('blw')){
-    //       localStorage.setItem('blw',csv);
-    //     }
-    //   }).getData();
-    // }
     
     function removeFromCue(compId, compPanel){
         compPanel.removeAttr('style').find('.cueNo').text('');
@@ -452,8 +452,8 @@
             }
         }
     }
-    
-    $('.button').on('click',function(){
+
+    document.querySelector('.button').addEventListener('click', function(){
         if ($(this).closest('.compPanel').hasClass('finished')) {
             var timeDisplay = $(this).closest('.compRow').find('.timeDisplay');
             var d = new Date();
@@ -520,8 +520,8 @@
         };
     }
     
-    
-    $(".boat").on("click", function(event){
+     
+    document.querySelector('.boat').addEventListener('click', function(event){
         var compPanel = $(this).closest('.compPanel');
         var compId = compPanel.attr('id');
         if(compPanel.hasClass('finished')){return;}
@@ -539,20 +539,20 @@
         }
         formatRows();
     });//.boat on click
-    
-     $('.btn').on('mousedown',function(){ $(this).toggleClass('mousedown'); });
-     $('.btn').on('mouseup',function(){ $(this).toggleClass('mousedown'); });
-     
-    $('#startSetBtn').on('click',function(){
-         var date = new Date();
+
+    document.querySelector('.btn').addEventListener('mousedown',function(){ $(this).toggleClass('mousedown'); });
+    document.querySelector('.btn').addEventListener('mouseup',function(){ $(this).toggleClass('mousedown'); });
+ //   document.querySelector('#startSetBtn').addEventListener('click', 
+    document.querySelector('#startSetBtn').addEventListener('click',function(){
+        var date = new Date();
         var hour = date.getHours();
         var min = date.getMinutes();
         var sec = date.getSeconds();
-        $('#startTimeInput').val(hour+":"+min+":"+sec);
+        document.querySelector('#startTimeInput').val(hour+":"+min+":"+sec);
     });
     
-     $('#finishBtn').on('click',function(){
-         var date = new Date();
+    document.querySelector('#finishBtn').addEventListener('click',function(){
+        var date = new Date();
         var hour = date.getHours();
         var min = date.getMinutes();
         var sec = date.getSeconds();
@@ -560,17 +560,20 @@
         if (sec<=9){ sec="0"+sec;}
         
         var compPanel = $(this).closest('#main').find('#'+cue[0]);
-      var boat = compPanel.find('.boatName').text();
-      //console.log(compPanel.find('.boatName').text());
-      var compId = compPanel.find('.compId').text();
-      //console.log(compId)
-      var fleet = compPanel.find('.fleet').text().replace(/ /g,'')
-      //console.log(fleet)
-      var raceId = $('#raceSelect option:selected').val();
-      var raceName = $('#raceSelect option:selected').text();
-      //console.log(raceId);
-      if(compPanel.find('.boatName').text() != ''){
-        var btnPaneList = $('#'+fleet).append('<li>'+compPanel.find('.boatName').text()+'</li>');
+        var boat = compPanel.find('.boatName').text();
+        //console.log(compPanel.find('.boatName').text());
+        var compId = compPanel.find('.compId').text();
+        //console.log(compId)
+        var fleet = compPanel.find('.fleet').text().replace(/ /g,'')
+        //console.log(fleet)
+        document.querySelector('#raceSelect option:selected')
+        var raceId = document.querySelector('#raceSelect option:selected').val();
+        var raceName = document.querySelector('#raceSelect option:selected').text();
+        //console.log(raceId);
+        if(compPanel.find('.boatName').text() != ''){
+        //document.querySelector('#'+fleet)
+        //var btnPaneList = $('#'+fleet).append('<li>'+compPanel.find('.boatName').text()+'</li>');
+        var btnPaneList = document.querySelector('#'+fleet).append('<li>'+compPanel.find('.boatName').text()+'</li>');
       }
       //TODO: need to write results to DB and then update html from data
       //this will require that we keep track of the race we have selected.
@@ -590,13 +593,12 @@
     
     });
     
-    
-    
-     $('#codeBtn').on('click',function(){
-          //get select value
-        var code = $('#codeSelect select').val();
+    document.querySelector('#codeBtn').addEventListener('click',function(){
+        //get select value
+        var code = document.querySelector('#codeSelect select').val();
         //write value to timeDisplay
-        var compPanel = $(this).closest('#main').find('#'+cue[0]);
+///////////////////////????? for $(this)
+         var compPanel = $(this).closest('#main').find('#'+cue[0]);
          compPanel.find('.timeDisplay').text(code);
         compPanel.removeClass('selected').removeAttr('style').addClass('finished').find('.cueNo').text('');
         compPanel.find('.adj li').removeAttr('style');
@@ -618,10 +620,7 @@
     
     // }
     
-    });//ready
-    
-    
-    
+    });// dom ready
     
     function showClock(){
         var Digital=new Date();
@@ -637,98 +636,6 @@
         }
         $('#clock').text(hours+":"+minutes+":"+seconds);
         setTimeout(showClock,1000);
-    }//show
+    } // showClock
     showClock();
-    //-->
     </script>
-    
-    <script type="text/javascript" name="CSVToArray">
-        // ref: http://stackoverflow.com/a/1293163/2343
-        // This will parse a delimited string into an array of
-        // arrays. The default delimiter is the comma, but this
-        // can be overriden in the second argument.
-        function CSVToArray( strData, strDelimiter ){
-            // Check to see if the delimiter is defined. If not,
-            // then default to comma.
-            strDelimiter = (strDelimiter || ",");
-    
-            // Create a regular expression to parse the CSV values.
-            var objPattern = new RegExp(
-                (
-                    // Delimiters.
-                    "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
-    
-                    // Quoted fields.
-                    "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-    
-                    // Standard fields.
-                    "([^\"\\" + strDelimiter + "\\r\\n]*))"
-                ),
-                "gi"
-                );
-    
-    
-            // Create an array to hold our data. Give the array
-            // a default empty first row.
-            var arrData = [[]];
-    
-            // Create an array to hold our individual pattern
-            // matching groups.
-            var arrMatches = null;
-    
-    
-            // Keep looping over the regular expression matches
-            // until we can no longer find a match.
-            while (arrMatches = objPattern.exec( strData )){
-    
-                // Get the delimiter that was found.
-                var strMatchedDelimiter = arrMatches[ 1 ];
-    
-                // Check to see if the given delimiter has a length
-                // (is not the start of string) and if it matches
-                // field delimiter. If id does not, then we know
-                // that this delimiter is a row delimiter.
-                if (
-                    strMatchedDelimiter.length &&
-                    strMatchedDelimiter !== strDelimiter
-                    ){
-    
-                    // Since we have reached a new row of data,
-                    // add an empty row to our data array.
-                    arrData.push( [] );
-    
-                }
-    
-                var strMatchedValue;
-    
-                // Now that we have our delimiter out of the way,
-                // let's check to see which kind of value we
-                // captured (quoted or unquoted).
-                if (arrMatches[ 2 ]){
-    
-                    // We found a quoted value. When we capture
-                    // this value, unescape any double quotes.
-                    strMatchedValue = arrMatches[ 2 ].replace(
-                        new RegExp( "\"\"", "g" ),
-                        "\""
-                        );
-    
-                } else {
-    
-                    // We found a non-quoted value.
-                    strMatchedValue = arrMatches[ 3 ];
-    
-                }
-    
-    
-                // Now that we have our value string, let's add
-                // it to the data array.
-                arrData[ arrData.length - 1 ].push( strMatchedValue );
-            }
-    
-            // Return the parsed data.
-            return( arrData );
-        }
-    
-    </script>
-    
