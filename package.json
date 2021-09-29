@@ -1,0 +1,19 @@
+{
+  "name": "blwtest",
+  "version": "1.0.0",
+  "description": "test for blwme app",
+  "main": "index.js",
+  "scripts": {
+    "test": "runTest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Schmell/BlwTest.git"
+  },
+  "author": "Sheldon Street",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Schmell/BlwTest/issues"
+  },
+  "homepage": "https://github.com/Schmell/BlwTest#readme"
+}
