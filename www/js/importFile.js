@@ -151,7 +151,7 @@ const Csv = {
                 
             })
             for(let i=0; i < raceStarts.length; i++){
-                raceObj.start = raceStarts
+                raceObj.racestart = raceStarts
             }
             raceData.push(raceObj);
         });

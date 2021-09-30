@@ -601,7 +601,6 @@ function finishButton(e){
   if (min<=9){min="0"+min;} 
   if (sec<=9){ sec="0"+sec;}
   let time = `${hour}:${min}:${sec}`;
-
   var compPanel = document.querySelector(`[id="${cue[0]}"]`)
   removeFromCue(cue[0], compPanel)
   compPanel.classList.remove('selected')
@@ -611,23 +610,42 @@ function finishButton(e){
 //write to db 
   // get raceId from selector
   let raceId = document.querySelector('#raceSelect select').value
+  let compId = compPanel.getAttribute('id')
   // get start time for current fleet
-
-let str = "Fleet^White Sail 1^^^^^^^^^^^=^=^=^=^=^=|18:35:00|Finish time|Start 1|||0||0|0|1 5 1 5|10 kts|330|1"
-//get fleet first then match our comp
-//then get start time
-let stringToSplit = str.split("|") 
-LL(stringToSplit[1])
-let fleetStart = stringToSplit[0].split('^')[1] //fleet
-LL(fleetStart)
-
-
-  let fleet = compPanel.querySelector('.fleet').textContent
- // LL(fleet)
-  //calculate elapsed time
-  //should try to put position for one design later
-  
-
+  let currentFleet = compPanel.querySelector('.fleet').textContent
+  let races = getStore('races')
+  let race = races.get(parseInt(raceId))
+  race.onsuccess = (e)=>{
+    let result = e.target.result
+    var currentStart
+    result.start.forEach((item)=>{
+      let stringToSplit = item.split("|")
+      let fleetStart = stringToSplit[1]
+      let fleetName = stringToSplit[0].split('^')[1]
+      if(currentFleet == fleetName){
+        currentStart = fleetStart
+      }
+      
+    })
+    let finishTime = new Date().getTime()
+    LL(finishTime)
+    let compTime = new Date().setTime(currentStart)
+    LL(compTime)
+LL(result.date)
+    let currentResult = {
+      'id':parseInt(raceId+compId),
+      'compId': compId,
+      'raceId': raceId,
+      'finish': time,
+      'start': currentStart
+    }
+    let resultStore = getStore('results','readwrite')
+//?????????????????????????????????????
+//this will fail if result is already there
+//need to figure out
+    resultStore.add(currentResult)
+  } // race.onsuccess
+ 
 } // finishButton
 
 ///////////////////////////////////////////////////////////////////////////////////////////
