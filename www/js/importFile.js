@@ -10,7 +10,7 @@ const Csv = {
             last = {};
             last.name = 'nofile';
             last.lastModified = Date.now();
-        }localStorage
+        }//localStorage
         if(file.name != last.name || file.lastModified != last.lastModified && last){
             console.log('File has been changed, using new file');
             //TODO: backup old files text to a new file
@@ -35,7 +35,7 @@ const Csv = {
             console.log('File not changed, using file from storage');
             console.log('using:', JSON.parse(localStorage.getItem('using')));
         }
-    }, //fromInput
+    }, // fromInput
 
     /**
      * 
@@ -88,6 +88,7 @@ const Csv = {
         // LL('results', results)
         results.forEach(function(result){
             let resultRow = {
+                id: parseInt(result[3]+result[2]),
                 compid: result[2],
                 raceid: result[3],
                 finish: Csv.resultHelp('rft',data,result),
@@ -135,7 +136,7 @@ const Csv = {
             //console.log('race',race)
             var raceObj = {};
             raceObj.id = parseInt(race[3]);
-            raceObj.raceId = race[3];
+            raceObj.raceid = race[3];
             let resultRows = data.filter(function(item){
                 var regex = new RegExp(`^race`, "g");
                 return item[0].match(regex)&&item[3]==race[3];
