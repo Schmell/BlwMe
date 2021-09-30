@@ -146,81 +146,14 @@
     <!-- colorChanger script -->
     <script src="js/colorChanger.js"></script>
     <script src="js/importFile.js"></script>
+    <script src="js/dbUtility.js"></script>
     <script src="js/papaparse.min.js"></script>
     
     <!-- IndexedDB Testing -->
     <script type="text/javascript">
     //LazyLog
     var LL = console.log;
-    var db;
-    var dbPromise;
-    const dbVersion = 1;
-    function openDatabase(name){
-        if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
-
-        let dbPromise = indexedDB.open(name, dbVersion);
-    
-        dbPromise.onupgradeneeded = function(e) {
-            console.log('onupgradeneeded');
-            db = e.target.result;
-        
-            if (!db.objectStoreNames.contains('races')) {
-                let store = db.createObjectStore('races', {keyPath: 'id'});
-                store.createIndex("name", "name", { unique: true });
-                store.createIndex("date", "date", { unique: false });
-                store.createIndex("time", "time", { unique: false });
-                store.createIndex("sailed", "sailed", { unique: false });
-            }
-        
-            if (!db.objectStoreNames.contains('comps')) {
-                let store = db.createObjectStore('comps', {keyPath: 'id'});
-                store.createIndex("id", "id", { unique: true });
-                store.createIndex("compid", "compid", { unique: false });
-                store.createIndex("boat", "boat", { unique: true });
-                store.createIndex("fleet", "fleet", { unique: false });
-                store.createIndex("helm", "helm", { unique: true });
-                store.createIndex("sailno", "sailno", { unique: false });
-                store.createIndex("class", "class", { unique: false });
-                store.createIndex("rank", "rank", { unique: false });
-                store.createIndex("nett", "nett", { unique: false });
-                store.createIndex("total", "total", { unique: false });
-            }
-        
-            if (!db.objectStoreNames.contains('fleets')) {
-                let store = db.createObjectStore('fleets', {keyPath: 'id'});
-                store.createIndex("name", "name", { unique: false });
-            }
-        
-            if (!db.objectStoreNames.contains('results')) { 
-                let store = db.createObjectStore('results', {keyPath: 'id', autoIncrement:true});
-                store.createIndex("raceid", "raceid", { unique: false });
-                store.createIndex("compid", "compid", { unique: false });
-                store.createIndex("start", "start", { unique: false });
-                store.createIndex("elapsed", "elapsed", { unique: false });
-                store.createIndex("finish", "finish", { unique: false });
-            }
-            return db;
-    
-        }; // onupgradeneeded
-    
-        dbPromise.onerror = function(e) { console.warn("Error", e.target.result); };
-
-        dbPromise.onsuccess = function(e) {
-            db = e.target.result;
-            writeRacesDB(db);
-            writeCompsDB(db);
-            writeFleetsDB(db)
-            writeResultsDB(db)
-            return db;
-        };
-        
-    
-    } // openDatabase
-    var dbw = openDatabase('store');
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
- 
+     
     function makeTX(storeName,mode){
       //console.log('makeTX',db)
       let tx = db.transaction(storeName, mode);
@@ -235,79 +168,6 @@
       let tx = makeTX(storeName,mode).objectStore(storeName);
       return tx;
     }
-
-    function writeCompsDB(db){
-        let comps = Csv.getComps()
-        let transaction = db.transaction("comps", "readwrite");
-        let compsData = transaction.objectStore("comps");
-        comps.forEach(function(comps){
-          let comp = {
-              'boat': comps.compboat, 
-              'rating': comps.comprating, 
-              'fleet': comps.compfleet, 
-              'id': comps.compid, 
-              'helm': comps.comphelmname, 
-              'alias':comps.compalias, 
-              'club':comps.compclub, 
-              'exclude':comps.compexclude, 
-              'high':comps.comphigh, 
-              'medicalflag':comps.compmedicalflag, 
-              'nett':comps.compnett, 
-              'rank':comps.comprank, 
-              'total':comps.comptotal
-            }
-          let request = compsData.add(comp);
-          //console.log(comp);
-        });
-    }
-
-    function writeFleetsDB(db){
-         let fleets = Csv.getFleets();
-        let tx = makeTX('fleets', 'readwrite');
-        let store = tx.objectStore('fleets')
-        for (let i = 0; i < fleets.length; i++) {
-          let fleet = {'name':fleets[i],'id':i}
-          let request = store.put(fleet);
-        }
-        store.onerror = function(e){
-          console.warn('onerror',e)
-        }
-    }
-    
-    function writeRacesDB(db){
-        let races = Csv.getRaces();
-        let transaction = makeTX("races", "readwrite");
-        let racesData = transaction.objectStore("races");
-        
-        for (let i = 0; i < races.length; i++) {
-          let race = {
-            'id':races[i].id,
-            'raceid':races[i].raceid,
-            'name':races[i].racename,
-            'date':races[i].racedate, 
-            'notes':races[i].racenotes, 
-            'rank':races[i].racerank, 
-            'sailed': races[i].racesailed, 
-            'start':races[i].racestart, 
-            'time':races[i].racetime
-            }
-          let request = racesData.put(race);
-          //console.log('race',race);
-        }
-    }
-
-    function writeResultsDB(db){
-        let results = Csv.getResults();
-        //LL(results)  
-        let transaction = makeTX("results", "readwrite");
-        let resultsData = transaction.objectStore("results");
-        for (let i = 0; i < results.length; i++) {
-
-            let request = resultsData.put(results[i]);
-            //console.log(results[i]);
-        }
-    }
-
 
     function writeResult(resultObj){
       /*  TODO:
@@ -400,6 +260,9 @@ function buildCompsRows(){
       clone.querySelector('.rating').textContent = comp.rating
       insert.appendChild(clone);
     }) // forEach
+
+    document.querySelectorAll('.boat').forEach((elem)=>{elem.addEventListener('click',boatClick)})
+
   } // onsuccess
 
 } // buildCompsRows
@@ -445,7 +308,7 @@ function buildCompsRows(){
       let store2 = {'store':'comps','index':'id','search':''}
       let rel = relate(store1, store2, relateDone)
     }// updateFinishPane
-    
+   
    
     
     function matchCompToRace(resultsArr){
@@ -466,6 +329,58 @@ function buildCompsRows(){
     var cue = [];
     var finished = [];
 
+function boatClick(e){
+  LL(e)
+  var compPanel = e.target.closest('.compPanel');
+  var compId = compPanel.getAttribute('id');
+  if(compPanel.classList.contains('finished')){return;}
+  if(compPanel.classList.contains('selected')){
+      compPanel.classList.remove('selected').removeAttribute('style').find('.cueNo').text('');
+      compPanel.find('.adj li').removeAttribute('style');
+      for(var i=cue.length-1; i>=0;i--){
+          if(cue[i]===compId){
+              cue.splice(i,1);
+          }
+      }
+  }else{
+      cue.push(compId);
+      compPanel.classList.add('selected');
+  }
+  formatRows();
+}; // .boat click
+
+function formatRows(){
+        var color = '#000099';
+        var gradColor = '#66FF33';
+        var ratio = '0.20';
+        for (var i=0; i<cue.length; i++) {
+            var newColor = changeColor(color, ratio, false);
+            let qString  = toString('#'+cue[i])
+            let next = document.querySelector(qString)
+            //var next = $('#'+cue[i]);
+            next.css('border-color',color);
+            next.find('.cueNo').text(i+1).css('color',color)
+            next.find('.adj li').css({
+                'border-right-color': color,
+                'border-top-color': color,
+                'border-left-color': color,
+            }).css('color',changeColor(color,'.2',true));
+            next.css('background-color',changeColor(newColor,'.3',false))
+            //next.css(makeGradient(changeColor(newColor,'.2',false)));
+            color = newColor;
+        };
+    } // formatRows
+
+    function removeFromCue(compId, compPanel){
+        compPanel.removeAttr('style').find('.cueNo').text('');
+        compPanel.find('.adj li').removeAttr('style');
+        for(var i=cue.length-1; i>=0;i--){
+            if(cue[i]===compId){
+               cue.splice(i,1);
+            }
+        }
+    }
+
 document.addEventListener('DOMContentLoaded', function(){
    // $( document ).ready(function() {
     
@@ -484,15 +399,7 @@ document.addEventListener('DOMContentLoaded', function(){
     //   }).getData();
     // }
     
-    function removeFromCue(compId, compPanel){
-        compPanel.removeAttr('style').find('.cueNo').text('');
-        compPanel.find('.adj li').removeAttr('style');
-        for(var i=cue.length-1; i>=0;i--){
-            if(cue[i]===compId){
-               cue.splice(i,1);
-            }
-        }
-    }
+
     
     $('.button').on('click',function(){
         if ($(this).closest('.compPanel').hasClass('finished')) {
@@ -541,49 +448,9 @@ document.addEventListener('DOMContentLoaded', function(){
         }
     });
     
-    function formatRows(){
-        var color = '#000099';
-        var gradColor = '#66FF33';
-        var ratio = '0.20';
-        for (var i=0; i<cue.length; i++) {
-            var newColor = changeColor(color, ratio, false);
-            var next = $('#'+cue[i]);
-            next.css('border-color',color);
-            next.find('.cueNo').text(i+1).css('color',color)
-            next.find('.adj li').css({
-                'border-right-color': color,
-                'border-top-color': color,
-                'border-left-color': color,
-            }).css('color',changeColor(color,'.2',true));
-            next.css('background-color',changeColor(newColor,'.3',false))
-            //next.css(makeGradient(changeColor(newColor,'.2',false)));
-            color = newColor;
-        };
-    }
     
-    let boat = document.querySelector('.boat')
-    LL('boatName')
-// //    $(".boat").on("click", function(event){
-//     document.querySelector('.boat').addEventListener('click', function(event){
-//         //LL(event)
-//         // var compPanel = "" //$(this).closest('.compPanel');
-//         // var compId = compPanel.attr('id');
-//         // LL(compId)
-//         // if(compPanel.hasClass('finished')){return;}
-//         // if(compPanel.hasClass('selected')){
-//         //     compPanel.removeClass('selected').removeAttr('style').find('.cueNo').text('');
-//         //     compPanel.find('.adj li').removeAttr('style');
-//         //     for(var i=cue.length-1; i>=0;i--){
-//         //         if(cue[i]===compId){
-//         //            cue.splice(i,1);
-//         //         }
-//         //     }
-//         // }else{
-//         //     cue.push(compId);
-//         //     compPanel.addClass('selected');
-//         // }
-//         // formatRows();
-//     }); // .boat click
+    
+ 
     
      $('.btn').on('mousedown',function(){ $(this).toggleClass('mousedown'); });
      $('.btn').on('mouseup',function(){ $(this).toggleClass('mousedown'); });
