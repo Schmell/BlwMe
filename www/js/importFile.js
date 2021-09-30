@@ -10,7 +10,7 @@ const Csv = {
             last = {};
             last.name = 'nofile';
             last.lastModified = Date.now();
-        }localStorage
+        }//localStorage
         if(file.name != last.name || file.lastModified != last.lastModified && last){
             console.log('File has been changed, using new file');
             //TODO: backup old files text to a new file
@@ -35,7 +35,7 @@ const Csv = {
             console.log('File not changed, using file from storage');
             console.log('using:', JSON.parse(localStorage.getItem('using')));
         }
-    }, //fromInput
+    }, // fromInput
 
     /**
      * 
