@@ -1,20 +1,23 @@
-<style type="text/css" id="mine"></style>
-<link rel="stylesheet" href="css/racing.css"></link>
-            <div id="main">
-                <div id="infoPane">
-                    <div id="raceSelect">
-                        <!-- raceSelected template -- option only-->
-                        <select>
-                            <option value=""></option>
-                        </select>
-            </div>
-            <!-- NEEDTO: set value from raceData -->
-            <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
-                <div id="startSetBtn" class="btn">Set Start</div>
-            </div>
-            <div id="save" class="btn">save</div>
-                    <div id="clock"></div>
-                </div>
+<head>
+  <style type="text/css" id="mine"></style>
+  <link rel="stylesheet" href="css/racing.css"></link>
+</head>
+<body>
+<div id="main">
+    <div id="infoPane">
+      <div id="raceSelect">
+        <!-- raceSelected template -- option only-->
+        <select>
+            <option value=""></option>
+        </select>
+      </div>
+      <!-- NEEDTO: set value from raceData -->
+      <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
+        <div id="startSetBtn" class="btn">Set Start</div>
+      </div>
+      <div id="save" class="btn">save</div>
+        <div id="clock"></div>
+      </div>
                 
         <div id="mainPane">
                 <table cellpadding="0" cellspacing="5px" width="100%">
@@ -23,8 +26,8 @@
                 <div id="compPane">
                     <div class="app">
                     <table class="appTable" cellpadding="0" cellspacing="5px" height="1400px">
-
-    <!-- start template -->	
+    <!-- 
+    start template
                     <tr><td>
                         <table id="comp-" class="compPanel" cellpadding="0" cellspacing="0" data-id="">
                             <tr class="compRow">
@@ -54,8 +57,8 @@
                             </tr>
                         </table>
                     </td></tr>
-              
-    <!-- end template-->
+    end template 
+    -->
                 </table>
             </div><!-- app -->
         </div><!-- compPane -->
@@ -90,7 +93,7 @@
          </tr></table><!-- mainPaneTable -->
     </div> <!-- mainPane -->
     </div><!-- main -->
-    
+  </body> 
     
     <!-- Templates -->
     <template id="raceSelectItems">
@@ -108,18 +111,15 @@
     
     <template id="compTemplate">
       <tr><td>
-        <!--   id="comp-<?= comps[i].id ?>"                            data-id="<?= comps[i].id ?>   -->  
         <table id="" class="compPanel" cellpadding="0" cellspacing="0" data-id="">
           <tr class="compRow">
             <td class="boat">
               <div class="cueNo"></div>
-              <!-- just textContent-->
-              <div class="helm">/div>
+              <div class="helm"></div>
               <div class="boatName"></div>
               <div class="fleet"></div>
               <div class="rating"></div>
               <div class="compId"></div>
-              <!-- -->
             </td>
             <td width="20px">
               <div class="adj">
@@ -213,6 +213,7 @@
             writeResultsDB(db)
             return db;
         };
+        
     
     } // openDatabase
     var dbw = openDatabase('store');
@@ -307,6 +308,7 @@
         }
     }
 
+
     function writeResult(resultObj){
       /*  TODO:
       * try to cursor by race then look for compId instead of using
@@ -329,12 +331,7 @@
         console.log("no resultObj")
       }
     } // 
-    
-    /*
-    *store1obj = {'store':'results','index':'raceId','search':'106'}
-    *store2obj = {}
-    */
-    
+
     async function relate(store1, store2, callback){
       let related = new Array;
       let tx = db.transaction([ store1.store, store2.store ], 'readonly')
@@ -364,9 +361,48 @@
       
     }
     
+  function relateDone(related){
+    related.forEach(function(relatedItems){
+    L(relatedItems)
+    
+      let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
+        let dataKey = item.getAttribute('data-key');
+        if(dataKey == relatedItems.fleet.replace(/ /g,'')){
+          let listItem = document.createElement('li')
+          listItem.setAttribute('key',relatedItems.compId)
+          listItem.textContent = relatedItems.boat
+          item.append(listItem)
+        }
+      })
+      let compPane = document.querySelectorAll('.compRow').forEach(function(item){
+        
+      })
+    })// related.forEach
+    
+  } // relateDone
     
     
-    
+function buildCompsRows(){
+  // get insert point and the template
+  let insert = document.querySelector('.appTable')
+  let template = document.querySelector('#compTemplate')
+  //get comps from db
+  let store = getStore('comps').index('boat').getAll()
+  store.onsuccess = (e)=>{
+    let comps = e.target.result
+    comps.forEach(function(comp){
+      let clone = template.content.cloneNode(true);
+      clone.querySelector('.compPanel').setAttribute('id', comp.id)
+      clone.querySelector('.compPanel').setAttribute('data-id', comp.id)
+      clone.querySelector('.helm').textContent = comp.helm
+      clone.querySelector('.boatName').textContent = comp.boat
+      clone.querySelector('.fleet').textContent = comp.fleet
+      clone.querySelector('.rating').textContent = comp.rating
+      insert.appendChild(clone);
+    }) // forEach
+  } // onsuccess
+
+} // buildCompsRows
 
     
     function getFleets(){
@@ -393,9 +429,9 @@
               title.setAttribute('id', e.id)
               title.setAttribute('data-key', e.name.replace(/ /g,''))
               insertAt.appendChild(clone);
-        });// forEach
-//updateFinishPane()
-    }// makeFinishPane
+        }); // forEach
+
+    } // makeFinishPane
     
     function updateFinishPane(){
       //clear finishPane li's
@@ -410,25 +446,7 @@
       let rel = relate(store1, store2, relateDone)
     }// updateFinishPane
     
-    function relateDone(related){
-    related.forEach(function(relatedItems){
-    L(relatedItems)
-    
-      let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
-        let dataKey = item.getAttribute('data-key');
-        if(dataKey == relatedItems.fleet.replace(/ /g,'')){
-          let listItem = document.createElement('li')
-          listItem.setAttribute('key',relatedItems.compId)
-          listItem.textContent = relatedItems.boat
-          item.append(listItem)
-        }
-      })
-      let compPane = document.querySelectorAll('.compRow').forEach(function(item){
-        
-      })
-    })// related.forEach
-    
-    }
+   
     
     function matchCompToRace(resultsArr){
       L(resultsArr)
@@ -447,13 +465,15 @@
     //Globals
     var cue = [];
     var finished = [];
-    
-    $( document ).ready(function() {
+
+document.addEventListener('DOMContentLoaded', function(){
+   // $( document ).ready(function() {
     
     setTimeout(function(){
       let fleets = getFleets();
+      buildCompsRows()
       //relate('results', 'comps', 'id')
-    }, 3000);
+    }, 1000);
     
     // backUpCsv();
     // function backUpCsv(){
@@ -541,25 +561,29 @@
         };
     }
     
-    
-    $(".boat").on("click", function(event){
-        var compPanel = $(this).closest('.compPanel');
-        var compId = compPanel.attr('id');
-        if(compPanel.hasClass('finished')){return;}
-        if(compPanel.hasClass('selected')){
-            compPanel.removeClass('selected').removeAttr('style').find('.cueNo').text('');
-            compPanel.find('.adj li').removeAttr('style');
-            for(var i=cue.length-1; i>=0;i--){
-                if(cue[i]===compId){
-                   cue.splice(i,1);
-                }
-            }
-        }else{
-            cue.push(compId);
-            compPanel.addClass('selected');
-        }
-        formatRows();
-    });//.boat on click
+    let boat = document.querySelector('.boat')
+    LL('boatName')
+// //    $(".boat").on("click", function(event){
+//     document.querySelector('.boat').addEventListener('click', function(event){
+//         //LL(event)
+//         // var compPanel = "" //$(this).closest('.compPanel');
+//         // var compId = compPanel.attr('id');
+//         // LL(compId)
+//         // if(compPanel.hasClass('finished')){return;}
+//         // if(compPanel.hasClass('selected')){
+//         //     compPanel.removeClass('selected').removeAttr('style').find('.cueNo').text('');
+//         //     compPanel.find('.adj li').removeAttr('style');
+//         //     for(var i=cue.length-1; i>=0;i--){
+//         //         if(cue[i]===compId){
+//         //            cue.splice(i,1);
+//         //         }
+//         //     }
+//         // }else{
+//         //     cue.push(compId);
+//         //     compPanel.addClass('selected');
+//         // }
+//         // formatRows();
+//     }); // .boat click
     
      $('.btn').on('mousedown',function(){ $(this).toggleClass('mousedown'); });
      $('.btn').on('mouseup',function(){ $(this).toggleClass('mousedown'); });
