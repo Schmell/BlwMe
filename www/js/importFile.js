@@ -141,12 +141,22 @@ const Csv = {
                 var regex = new RegExp(`^race`, "g");
                 return item[0].match(regex)&&item[3]==race[3];
             })
+            let raceStarts = []
             resultRows.forEach(function(item){
-                raceObj[item[0]] = item[1];
+                if(item[0] == 'racestart'){
+                    raceStarts.push(item[1])
+                }else{
+                    raceObj[item[0]] = item[1];
+                }
+                
             })
+            for(let i=0; i < raceStarts.length; i++){
+                raceObj.start = raceStarts
+            }
             raceData.push(raceObj);
+            LL(raceObj)
         });
-        //console.log(raceData);
+
         return raceData;
     }, // getRaces
 
