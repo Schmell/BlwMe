@@ -61,7 +61,7 @@
         };
 
     } // openDatabase
-    var dbw = openDatabase('store');
+//  var dbw = openDatabase('store');
 
     function writeCompsDB(db){
         let comps = Csv.getComps()

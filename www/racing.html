@@ -3,12 +3,12 @@
   <link rel="stylesheet" href="css/racing.css"></link>
 </head>
 <body>
-<div id="main">
+  <div id="main">
     <div id="infoPane">
       <div id="raceSelect">
         <!-- raceSelected template -- option only-->
         <select>
-            <option value=""></option>
+            <!-- <option value=""></option> -->
         </select>
       </div>
       <!-- NEEDTO: set value from raceData -->
@@ -16,83 +16,38 @@
         <div id="startSetBtn" class="btn">Set Start</div>
       </div>
       <div id="save" class="btn">save</div>
-        <div id="clock"></div>
-      </div>
+      <div id="clock"></div>
+    </div>
                 
-        <div id="mainPane">
-                <table cellpadding="0" cellspacing="5px" width="100%">
-                <tr><td>
-                
-                <div id="compPane">
-                    <div class="app">
-                    <table class="appTable" cellpadding="0" cellspacing="5px" height="1400px">
-    <!-- 
-    start template
-                    <tr><td>
-                        <table id="comp-" class="compPanel" cellpadding="0" cellspacing="0" data-id="">
-                            <tr class="compRow">
-                                <td class="boat">
-                                    <div class="cueNo"></div>
-                                    <div class="helm"></div>
-                                    <div class="boatName"></div>
-                                    <div class="fleet"></div>
-                                    <div class="rating"></div>
-                                    <div class="compId"></div>
-                                </td>
-                                <td width="20px">
-                                    <div class="adj">
-                                        <ul>
-                                            <li class="plus button">+</li>
-                                            <li class="minus button">-</li>
-                                        </ul>
-                                    </div>
-                                </td>
-                                <td class="time">
-                                    <table class="timeTable" cellpadding="0" cellspacing="0">
-                                    <tr>
-                                        <td class="timeDisplay"></td>
-                                    </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-                    </td></tr>
-    end template 
-    -->
+    <div id="mainPane">
+      <table cellpadding="0" cellspacing="5px" width="100%">
+        <tr><td>
+            <div id="compPane">
+              <div class="app">
+                <table class="appTable" cellpadding="0" cellspacing="5px" height="1400px">
+                  <!-- replaced by compTemplate -->
                 </table>
-            </div><!-- app -->
-        </div><!-- compPane -->
-        </td><!-- compPane cell -->
-        <td width="160px" id="btnPaneCell">
-                
-        <div id="btnPane">
-                    <div id="finishBtn" class="btn"><div class="finishLabel">Finish</div></div>
-                    <div id="codeBtn" class="btn"><div id="codeLabel">Set Code</div></div>
-                    
-                    <div id="codeSelect">
-                        <select>
-                            <option value="DNF">DNF</option>
-                            <option value="OCS">OCS</option>
-                            <option value="DSQ">DSQ</option>
-                            <option value="RAF">RAF</option>
-                        </select>
-                    </div>
-            <div id="finishPane">
-              <!-- 
-              Replaced by finishPaneTemplate
-              <? fleets = getFleetData(); ?>
-              <? for(i=0;i<fleets.length;i++){?>
-              <ul class="finishListTitle"><?= fleets[i] ?>
-                <ol id="<?= fleets[i].replace(/ /g,'') ?>" class="finishList"></ol>
-              </ul>
-              <?}?>
+              </div><!-- app -->
+            </div><!-- compPane -->
+          </td><!-- compPane cell -->
+          <td width="160px" id="btnPaneCell">          
+            <div id="btnPane">
+            <div id="finishBtn" class="btn"><div class="finishLabel">Finish</div></div>
+            <div id="codeBtn" class="btn"><div id="codeLabel">Set Code</div></div>    
+            <div id="codeSelect">
+              <select>
+                  <option value="DNF">DNF</option>
+                  <option value="OCS">OCS</option>
+                  <option value="DSQ">DSQ</option>
+                  <option value="RAF">RAF</option>
+              </select>
             </div>
-                    -->		
-            </div>
-         </td><!-- btn cell -->
-         </tr></table><!-- mainPaneTable -->
+            <div id="finishPane"><!-- Replaced by finishPaneTemplate --></div>
+          </td><!-- btn cell -->
+        </tr>
+      </table><!-- mainPaneTable -->
     </div> <!-- mainPane -->
-    </div><!-- main -->
+  </div><!-- main -->
   </body> 
     
     <!-- Templates -->
@@ -146,14 +101,153 @@
     <!-- colorChanger script -->
     <script src="js/colorChanger.js"></script>
     <script src="js/importFile.js"></script>
-    <script src="js/dbUtility.js"></script>
+    <!-- <script src="js/dbUtility.js" defer></script> -->
     <script src="js/papaparse.min.js"></script>
     
-    <!-- IndexedDB Testing -->
-    <script type="text/javascript">
+<script type="text/javascript">// indexedDB Stuff
+
+    var db;
+    var dbPromise;
+    const dbVersion = 2;
+    function openDatabase(name){
+        if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
+
+        let dbPromise = indexedDB.open(name, dbVersion);
+    
+        dbPromise.onupgradeneeded = function(e) {
+            console.log('onupgradeneeded');
+            db = e.target.result;
+        
+            if (!db.objectStoreNames.contains('races')) {
+                let store = db.createObjectStore('races', {keyPath: 'id'});
+                store.createIndex("name", "name", { unique: true });
+                store.createIndex("date", "date", { unique: false });
+                store.createIndex("time", "time", { unique: false });
+                store.createIndex("sailed", "sailed", { unique: false });
+            }
+        
+            if (!db.objectStoreNames.contains('comps')) {
+                let store = db.createObjectStore('comps', {keyPath: 'id'});
+                store.createIndex("id", "id", { unique: true });
+                store.createIndex("compid", "compid", { unique: false });
+                store.createIndex("boat", "boat", { unique: true });
+                store.createIndex("fleet", "fleet", { unique: false });
+                store.createIndex("helm", "helm", { unique: true });
+                store.createIndex("sailno", "sailno", { unique: false });
+                store.createIndex("class", "class", { unique: false });
+                store.createIndex("rank", "rank", { unique: false });
+                store.createIndex("nett", "nett", { unique: false });
+                store.createIndex("total", "total", { unique: false });
+            }
+        
+            if (!db.objectStoreNames.contains('fleets')) {
+                let store = db.createObjectStore('fleets', {keyPath: 'id'});
+                store.createIndex("name", "name", { unique: false });
+            }
+        
+            if (!db.objectStoreNames.contains('results')) { 
+                let store = db.createObjectStore('results', {keyPath: 'id', autoIncrement:true});
+                store.createIndex("raceid", "raceid", { unique: false });
+                store.createIndex("compid", "compid", { unique: false });
+                store.createIndex("start", "start", { unique: false });
+                store.createIndex("elapsed", "elapsed", { unique: false });
+                store.createIndex("finish", "finish", { unique: false });
+            }
+            return db;
+    
+        }; // onupgradeneeded
+    
+        dbPromise.onerror = function(e) { console.warn("Error", e.target.result); };
+
+        dbPromise.onsuccess = function(e) {
+            db = e.target.result;
+            writeRacesDB(db);
+            writeCompsDB(db);
+            writeFleetsDB(db)
+            writeResultsDB(db)
+            return db;
+        };
+
+    } // openDatabase
+    var dbw = openDatabase('store');
+
+    function writeCompsDB(db){
+      let comps = Csv.getComps()
+      let transaction = db.transaction("comps", "readwrite");
+      let compsData = transaction.objectStore("comps");
+      comps.forEach(function(comps){
+        let comp = {
+            'boat': comps.compboat, 
+            'rating': comps.comprating, 
+            'fleet': comps.compfleet, 
+            'id': comps.compid, 
+            'helm': comps.comphelmname, 
+            'alias':comps.compalias, 
+            'club':comps.compclub, 
+            'exclude':comps.compexclude, 
+            'high':comps.comphigh, 
+            'medicalflag':comps.compmedicalflag, 
+            'nett':comps.compnett, 
+            'rank':comps.comprank, 
+            'total':comps.comptotal
+          }
+        let request = compsData.add(comp);
+        //console.log(comp);
+      });
+    }
+
+    function writeFleetsDB(db){
+         let fleets = Csv.getFleets();
+        let tx = makeTX('fleets', 'readwrite');
+        let store = tx.objectStore('fleets')
+        for (let i = 0; i < fleets.length; i++) {
+          let fleet = {'name':fleets[i],'id':i}
+          let request = store.put(fleet);
+        }
+        store.onerror = function(e){
+          console.warn('onerror',e)
+        }
+    }
+    
+    function writeRacesDB(db){
+        let races = Csv.getRaces();
+        let transaction = makeTX("races", "readwrite");
+        let racesData = transaction.objectStore("races");
+        
+        for (let i = 0; i < races.length; i++) {
+          let race = {
+            'id':races[i].id,
+            'raceid':races[i].raceid,
+            'name':races[i].racename,
+            'date':races[i].racedate, 
+            'notes':races[i].racenotes, 
+            'rank':races[i].racerank, 
+            'sailed': races[i].racesailed, 
+            'start':races[i].racestart, 
+            'time':races[i].racetime
+            }
+          let request = racesData.put(race);
+          //console.log('race',race);
+        }
+    }
+
+    function writeResultsDB(db){
+        let results = Csv.getResults();
+        //LL(results)  
+        let transaction = makeTX("results", "readwrite");
+        let resultsData = transaction.objectStore("results");
+        for (let i = 0; i < results.length; i++) {
+
+            let request = resultsData.put(results[i]);
+            //console.log(results[i]);
+        }
+    }
+</script>
+
+<script type="text/javascript">
     //LazyLog
     var LL = console.log;
-     
+
     function makeTX(storeName,mode){
       //console.log('makeTX',db)
       let tx = db.transaction(storeName, mode);
@@ -167,6 +261,11 @@
       if(mode == 'undefined'){mode = 'readwrite'}
       let tx = makeTX(storeName,mode).objectStore(storeName);
       return tx;
+    }
+
+    function storeAll(storeName,mode){
+      let store = getStore(storeName,mode).getAll()
+      return store;
     }
 
     function writeResult(resultObj){
@@ -234,8 +333,12 @@
     })// related.forEach
     
   } // relateDone
-    
-    
+
+document.addEventListener('DOMContentLoaded', function(){   
+addListeners()
+function addListeners(){
+  document.querySelector('#finishBtn').addEventListener('click',finishButton)
+}
 function buildCompsRows(){
   // get insert point and the template
   let insert = document.querySelector('.appTable')
@@ -254,41 +357,50 @@ function buildCompsRows(){
       clone.querySelector('.rating').textContent = comp.rating
       insert.appendChild(clone);
     }) // forEach
-
     document.querySelectorAll('.boat').forEach((elem)=>{elem.addEventListener('click',boatClick)})
-
   } // onsuccess
 
 } // buildCompsRows
 
-    
-    function getFleets(){
-      let result = [];
-      let store = db.transaction("fleets", "readonly")
-                  .objectStore("fleets")
-                  .getAll().onsuccess = function(e){
-                    //console.log('getFleets:',e.target.result);
-                    let result = e.target.result
-                    makeFinishPane(result)
-                    //L(result)
-                  };
-    
-    }
-    
-    function makeFinishPane(fleets){
-        let template = document.querySelector('#finishPaneTemplate')
-        let insertAt = document.querySelector('#finishPane');
-        fleets.forEach(function(e){
-            let clone = template.content.cloneNode(true);
-            let title = clone.querySelector(".finishListTitle");
-              //L('e',e)
-              title.textContent = e.name;
-              title.setAttribute('id', e.id)
-              title.setAttribute('data-key', e.name.replace(/ /g,''))
-              insertAt.appendChild(clone);
-        }); // forEach
+function buildRaceSelect(){
+  //get selector
+  //get races from db
+  let selector = document.querySelector('#raceSelect select')
+  let races = storeAll('races')
+  races.onsuccess = (e)=>{
+    let result = races.result
+    result.forEach((item)=>{
+      let raceOption = document.createElement('option')
+      raceOption.textContent = item.name
+      raceOption.setAttribute('value', item.id)
+      selector.append(raceOption)
+    })
 
-    } // makeFinishPane
+  }
+}
+
+function getFleets(){
+  let result = [];
+  let fleets = storeAll('fleets')
+  fleets.onsuccess = (e)=>{
+    let result = e.target.result
+    makeFinishPane(result)
+  }
+}
+    
+function makeFinishPane(fleets){
+    let template = document.querySelector('#finishPaneTemplate')
+    let insertAt = document.querySelector('#finishPane');
+    fleets.forEach(function(e){
+        let clone = template.content.cloneNode(true);
+        let title = clone.querySelector(".finishListTitle");
+        title.textContent = e.name;
+        title.setAttribute('id', e.id)
+        title.setAttribute('data-key', e.name.replace(/ /g,''))
+        insertAt.appendChild(clone);
+    }); // forEach
+
+} // makeFinishPane
     
     function updateFinishPane(){
       //clear finishPane li's
@@ -302,9 +414,7 @@ function buildCompsRows(){
       let store2 = {'store':'comps','index':'id','search':''}
       let rel = relate(store1, store2, relateDone)
     }// updateFinishPane
-   
-   
-    
+
     function matchCompToRace(resultsArr){
       L(resultsArr)
       let store = getStore('comps').index('id')
@@ -312,26 +422,21 @@ function buildCompsRows(){
     
       })
     }
-    
-    </script>
-    
-    
-    
-    
-    <script type="text/javascript">
-    //Globals
-    var cue = [];
-    var finished = [];
+
+//Globals
+var cue = [];
+var finished = [];
 
 function boatClick(e){
-  LL(e)
-  var compPanel = e.target.closest('.compPanel');
-  var compId = compPanel.getAttribute('id');
+  let compPanel = e.target.closest('.compPanel');
+  let compId = compPanel.getAttribute('id');
   if(compPanel.classList.contains('finished')){return;}
   if(compPanel.classList.contains('selected')){
-      compPanel.classList.remove('selected').removeAttribute('style').find('.cueNo').text('');
-      compPanel.find('.adj li').removeAttribute('style');
-      for(var i=cue.length-1; i>=0;i--){
+      compPanel.classList.remove('selected')
+      compPanel.removeAttribute('style')
+      compPanel.querySelector('.cueNo').textContent = ''
+      compPanel.querySelector('.adj li').removeAttribute('style');
+      for(let i=cue.length-1; i>=0;i--){
           if(cue[i]===compId){
               cue.splice(i,1);
           }
@@ -344,57 +449,44 @@ function boatClick(e){
 }; // .boat click
 
 function formatRows(){
-        var color = '#000099';
-        var gradColor = '#66FF33';
-        var ratio = '0.20';
-        for (var i=0; i<cue.length; i++) {
-            var newColor = changeColor(color, ratio, false);
-            let qString  = toString('#'+cue[i])
-            let next = document.querySelector(qString)
-            //var next = $('#'+cue[i]);
-            next.css('border-color',color);
-            next.find('.cueNo').text(i+1).css('color',color)
-            next.find('.adj li').css({
-                'border-right-color': color,
-                'border-top-color': color,
-                'border-left-color': color,
-            }).css('color',changeColor(color,'.2',true));
-            next.css('background-color',changeColor(newColor,'.3',false))
-            //next.css(makeGradient(changeColor(newColor,'.2',false)));
-            color = newColor;
-        };
-    } // formatRows
+  let color = '#000099';
+  let gradColor = '#66FF33';
+  let ratio = '0.20';
+  for (let i=0; i<cue.length; i++) {
+      let newColor = changeColor(color, ratio, false);
+      let next = document.querySelector(`[id="${cue[i]}"]`)
+      next.style.borderColor = color
+      next.querySelector('.cueNo').textContent = i+1
+      next.querySelector('.cueNo').style.color = color
+      let styleString = `border-right-color:${color};border-top-color:${color};border-left-color:${color};color:${changeColor(color,'.2',true)}`
+      next.querySelector('.adj li').setAttribute('style',styleString)
+      next.style.backgroundColor = changeColor(newColor,'.3',false)
+      color = newColor;
+  };
+} // formatRows
 
-    function removeFromCue(compId, compPanel){
-        compPanel.removeAttr('style').find('.cueNo').text('');
-        compPanel.find('.adj li').removeAttr('style');
-        for(var i=cue.length-1; i>=0;i--){
-            if(cue[i]===compId){
-               cue.splice(i,1);
-            }
+function removeFromCue(compId, compPanel){
+    compPanel.removeAttribute('style')
+    compPanel.querySelector('.cueNo').textContent = ""
+    compPanel.querySelector('.adj li').removeAttribute('style');
+    for(var i=cue.length-1; i>=0;i--){
+        if(cue[i]===compId){
+            cue.splice(i,1);
         }
     }
+} // removeFromCue
 
-document.addEventListener('DOMContentLoaded', function(){
-   // $( document ).ready(function() {
-    
-    setTimeout(function(){
-      let fleets = getFleets();
-      buildCompsRows()
-      //relate('results', 'comps', 'id')
-    }, 1000);
-    
-    // backUpCsv();
-    // function backUpCsv(){
-    //   let csv = google.script.run.withSuccessHandler(function(csv){
-    //     if(!localStorage.getItem('blw')){
-    //       localStorage.setItem('blw',csv);
-    //     }
-    //   }).getData();
-    // }
-    
+//=============================================================
+setTimeout(function(){
+  //let fleets = getFleets();
+  buildCompsRows()
+  buildRaceSelect()
+  getFleets()
+  //relate('results', 'comps', 'id')
+}, 1000);
+//=============================================================
 
-    
+ //This is the adjust buttons
     $('.button').on('click',function(){
         if ($(this).closest('.compPanel').hasClass('finished')) {
             var timeDisplay = $(this).closest('.compRow').find('.timeDisplay');
@@ -441,13 +533,11 @@ document.addEventListener('DOMContentLoaded', function(){
             formatRows();
         }
     });
-    
-    
-    
- 
-    
-     $('.btn').on('mousedown',function(){ $(this).toggleClass('mousedown'); });
-     $('.btn').on('mouseup',function(){ $(this).toggleClass('mousedown'); });
+
+    document.querySelector('.btn').addEventListener('mousedown',()=>{this.toggleClass('mousedown')})
+    //$('.btn').on('mousedown',function(){ $(this).toggleClass('mousedown'); });
+    document.querySelector('.btn').addEventListener('mouseup',()=>{this.toggleClass('mouseup')})
+    //$('.btn').on('mouseup',function(){ $(this).toggleClass('mousedown'); });
      
     $('#startSetBtn').on('click',function(){
          var date = new Date();
@@ -457,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function(){
         document.querySelector('#startTimeInput').val(hour+":"+min+":"+sec);
     });
     
-    document.querySelector('#finishBtn').addEventListener('click',function(){
+    function finishButton_OLD(){
         var date = new Date();
         var hour = date.getHours();
         var min = date.getMinutes();
@@ -465,13 +555,13 @@ document.addEventListener('DOMContentLoaded', function(){
         if (min<=9){min="0"+min;} 
         if (sec<=9){ sec="0"+sec;}
         
-        var compPanel = $(this).closest('#main').find('#'+cue[0]);
-        var boat = compPanel.find('.boatName').text();
-        //console.log(compPanel.find('.boatName').text());
-        var compId = compPanel.find('.compId').text();
-        //console.log(compId)
-        var fleet = compPanel.find('.fleet').text().replace(/ /g,'')
-        //console.log(fleet)
+        var compPanel = this.closest('#main').querySelector(`[id="${cue[0]}"]`);
+        var boat = compPanel.querySelector('.boatName').textContent = '';
+            //console.log(compPanel.find('.boatName').text());
+        var compId = compPanel.querySelector('.compId').textContent = '';
+            //console.log(compId)
+        var fleet = compPanel.querySelector('.fleet').text().replace(/ /g,'')
+           //console.log(fleet)
         document.querySelector('#raceSelect option:selected')
         var raceId = document.querySelector('#raceSelect option:selected').val();
         var raceName = document.querySelector('#raceSelect option:selected').text();
@@ -497,7 +587,52 @@ document.addEventListener('DOMContentLoaded', function(){
       writeResult(resultObj);
       updateFinishPane();
     
-    });
+    };
+
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+
+function finishButton(e){
+
+  let date = new Date();
+  let hour = date.getHours();
+  let min = date.getMinutes();
+  let sec = date.getSeconds();
+  if (min<=9){min="0"+min;} 
+  if (sec<=9){ sec="0"+sec;}
+  let time = `${hour}:${min}:${sec}`;
+
+  var compPanel = document.querySelector(`[id="${cue[0]}"]`)
+  removeFromCue(cue[0], compPanel)
+  compPanel.classList.remove('selected')
+  compPanel.classList.add('finished')
+  compPanel.querySelector('.timeDisplay').textContent = time
+
+//write to db 
+  // get raceId from selector
+  let raceId = document.querySelector('#raceSelect select').value
+  // get start time for current fleet
+
+let str = "Fleet^White Sail 1^^^^^^^^^^^=^=^=^=^=^=|18:35:00|Finish time|Start 1|||0||0|0|1 5 1 5|10 kts|330|1"
+//get fleet first then match our comp
+//then get start time
+let stringToSplit = str.split("|") 
+LL(stringToSplit[1])
+let fleetStart = stringToSplit[0].split('^')[1] //fleet
+LL(fleetStart)
+
+
+  let fleet = compPanel.querySelector('.fleet').textContent
+ // LL(fleet)
+  //calculate elapsed time
+  //should try to put position for one design later
+  
+
+} // finishButton
+
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+
     
     document.querySelector('#codeBtn').addEventListener('click',function(){
         //get select value
@@ -512,21 +647,8 @@ document.addEventListener('DOMContentLoaded', function(){
         cue.shift();
         formatRows();
       });
-      
-    //  $('#save').on('click',function(){
-    //    google.script.run.setRaceResults(comps,race);
-    //  });
-     
-    // function addToFinished(comp){
-    //     finished.push(comp);
-    //     for(i=0;i>finished.length;i++){
-    //         //$('#finishPane').append('<li>'+finished[i][0]+'</li>')
-    //         console.log("addToFinished",finished[i][0]);
-    //     }
-    
-    // }
-    
-    });// dom ready
+          
+});// dom ready
     
     function showClock(){
         var Digital=new Date();
