@@ -1,22 +1,3 @@
-<<<<<<< HEAD
-<style type="text/css" id="mine"></style>
-<link rel="stylesheet" href="css/racing.css"></link>
-            <div id="main">
-                <div id="infoPane">
-                    <div id="raceSelect">
-                        <!-- raceSelected template -- option only-->
-                        <select>
-                            <option value=""></option>
-                        </select>
-            </div>
-            <!-- NEEDTO: set value from raceData -->
-            <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
-                <div id="startSetBtn" class="btn">Set Start</div>
-            </div>
-            <div id="save" class="btn">save</div>
-                    <div id="clock"></div>
-                </div>
-=======
 <head>
   <style type="text/css" id="mine"></style>
   <link rel="stylesheet" href="css/racing.css"></link>
@@ -37,7 +18,6 @@
       <div id="save" class="btn">save</div>
         <div id="clock"></div>
       </div>
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
                 
         <div id="mainPane">
                 <table cellpadding="0" cellspacing="5px" width="100%">
@@ -173,78 +153,7 @@
     <script type="text/javascript">
     //LazyLog
     var LL = console.log;
-<<<<<<< HEAD
-    var db;
-    var dbPromise;
-    const dbVersion = 1;
-    function openDatabase(name){
-        if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
-
-        let dbPromise = indexedDB.open(name, dbVersion);
-    
-        dbPromise.onupgradeneeded = function(e) {
-            console.log('onupgradeneeded');
-            db = e.target.result;
-        
-            if (!db.objectStoreNames.contains('races')) {
-                let store = db.createObjectStore('races', {keyPath: 'id'});
-                store.createIndex("name", "name", { unique: true });
-                store.createIndex("date", "date", { unique: false });
-                store.createIndex("time", "time", { unique: false });
-                store.createIndex("sailed", "sailed", { unique: false });
-            }
-        
-            if (!db.objectStoreNames.contains('comps')) {
-                let store = db.createObjectStore('comps', {keyPath: 'id'});
-                store.createIndex("id", "id", { unique: true });
-                store.createIndex("compid", "compid", { unique: false });
-                store.createIndex("boat", "boat", { unique: true });
-                store.createIndex("fleet", "fleet", { unique: false });
-                store.createIndex("helm", "helm", { unique: true });
-                store.createIndex("sailno", "sailno", { unique: false });
-                store.createIndex("class", "class", { unique: false });
-                store.createIndex("rank", "rank", { unique: false });
-                store.createIndex("nett", "nett", { unique: false });
-                store.createIndex("total", "total", { unique: false });
-            }
-        
-            if (!db.objectStoreNames.contains('fleets')) {
-                let store = db.createObjectStore('fleets', {keyPath: 'id'});
-                store.createIndex("name", "name", { unique: false });
-            }
-        
-            if (!db.objectStoreNames.contains('results')) { 
-                let store = db.createObjectStore('results', {keyPath: 'id', autoIncrement:true});
-                store.createIndex("raceid", "raceid", { unique: false });
-                store.createIndex("compid", "compid", { unique: false });
-                store.createIndex("start", "start", { unique: false });
-                store.createIndex("elapsed", "elapsed", { unique: false });
-                store.createIndex("finish", "finish", { unique: false });
-            }
-            return db;
-    
-        }; // onupgradeneeded
-    
-        dbPromise.onerror = function(e) { console.warn("Error", e.target.result); };
-
-        dbPromise.onsuccess = function(e) {
-            db = e.target.result;
-            writeRacesDB(db);
-            writeCompsDB(db);
-            writeFleetsDB(db)
-            writeResultsDB(db)
-            return db;
-        };
-    
-    } // openDatabase
-    var dbw = openDatabase('store');
-
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
- 
-=======
      
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
     function makeTX(storeName,mode){
       //console.log('makeTX',db)
       let tx = db.transaction(storeName, mode);
@@ -260,81 +169,6 @@
       return tx;
     }
 
-<<<<<<< HEAD
-    function writeCompsDB(db){
-        let comps = Csv.getComps()
-        let transaction = db.transaction("comps", "readwrite");
-        let compsData = transaction.objectStore("comps");
-        comps.forEach(function(comps){
-          let comp = {
-              'boat': comps.compboat, 
-              'rating': comps.comprating, 
-              'fleet': comps.compfleet, 
-              'id': comps.compid, 
-              'helm': comps.comphelmname, 
-              'alias':comps.compalias, 
-              'club':comps.compclub, 
-              'exclude':comps.compexclude, 
-              'high':comps.comphigh, 
-              'medicalflag':comps.compmedicalflag, 
-              'nett':comps.compnett, 
-              'rank':comps.comprank, 
-              'total':comps.comptotal
-            }
-          let request = compsData.add(comp);
-          //console.log(comp);
-        });
-    }
-
-    function writeFleetsDB(db){
-         let fleets = Csv.getFleets();
-        let tx = makeTX('fleets', 'readwrite');
-        let store = tx.objectStore('fleets')
-        for (let i = 0; i < fleets.length; i++) {
-          let fleet = {'name':fleets[i],'id':i}
-          let request = store.put(fleet);
-        }
-        store.onerror = function(e){
-          console.warn('onerror',e)
-        }
-    }
-    
-    function writeRacesDB(db){
-        let races = Csv.getRaces();
-        let transaction = makeTX("races", "readwrite");
-        let racesData = transaction.objectStore("races");
-        
-        for (let i = 0; i < races.length; i++) {
-          let race = {
-            'id':races[i].id,
-            'raceid':races[i].raceid,
-            'name':races[i].racename,
-            'date':races[i].racedate, 
-            'notes':races[i].racenotes, 
-            'rank':races[i].racerank, 
-            'sailed': races[i].racesailed, 
-            'start':races[i].racestart, 
-            'time':races[i].racetime
-            }
-          let request = racesData.put(race);
-          //console.log('race',race);
-        }
-    }
-
-    function writeResultsDB(db){
-        let results = Csv.getResults();
-        //LL(results)  
-        let transaction = makeTX("results", "readwrite");
-        let resultsData = transaction.objectStore("results");
-        for (let i = 0; i < results.length; i++) {
-
-            let request = resultsData.put(results[i]);
-            //console.log(results[i]);
-        }
-    }
-
-=======
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
     function writeResult(resultObj){
       if(resultObj.compId){
         let tx = getStore("results",'readwrite');
@@ -350,18 +184,8 @@
       }else{
         console.log("no resultObj")
       }
-<<<<<<< HEAD
-    } // writeResult
-    
-    /*
-    *store1obj = {'store':'results','index':'raceId','search':'106'}
-    *store2obj = {}
-    */
-    
-=======
     } // 
 
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
     async function relate(store1, store2, callback){
       let related = new Array;
       let tx = db.transaction([ store1.store, store2.store ], 'readonly')
@@ -391,8 +215,6 @@
       
     }
     
-<<<<<<< HEAD
-=======
   function relateDone(related){
     related.forEach(function(relatedItems){
     L(relatedItems)
@@ -440,7 +262,6 @@ function buildCompsRows(){
 } // buildCompsRows
 
     
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
     function getFleets(){
       let result = [];
       let store = db.transaction("fleets", "readonly")
@@ -465,15 +286,9 @@ function buildCompsRows(){
               title.setAttribute('id', e.id)
               title.setAttribute('data-key', e.name.replace(/ /g,''))
               insertAt.appendChild(clone);
-<<<<<<< HEAD
-        });// forEach
-//updateFinishPane()
-    }// makeFinishPane
-=======
         }); // forEach
 
     } // makeFinishPane
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
     
     function updateFinishPane(){
       //clear finishPane li's
@@ -487,31 +302,8 @@ function buildCompsRows(){
       let store2 = {'store':'comps','index':'id','search':''}
       let rel = relate(store1, store2, relateDone)
     }// updateFinishPane
-<<<<<<< HEAD
-    
-    function relateDone(related){
-    related.forEach(function(relatedItems){
-    //LL(relatedItems)
-    
-      let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
-        let dataKey = item.getAttribute('data-key');
-        if(dataKey == relatedItems.fleet.replace(/ /g,'')){
-          let listItem = document.createElement('li')
-          listItem.setAttribute('key',relatedItems.compId)
-          listItem.textContent = relatedItems.boat
-          item.append(listItem)
-        }
-      }) // list forEach
-      let compPane = document.querySelectorAll('.compRow').forEach(function(item){
-        
-      })
-    })// related.forEach
-    
-    }
-=======
    
    
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
     
     function matchCompToRace(resultsArr){
       L(resultsArr)
@@ -530,10 +322,6 @@ function buildCompsRows(){
     //Globals
     var cue = [];
     var finished = [];
-<<<<<<< HEAD
-    document.addEventListener('DOMContentLoaded', (event) => {
-
-=======
 
 function boatClick(e){
   LL(e)
@@ -590,26 +378,12 @@ function formatRows(){
 document.addEventListener('DOMContentLoaded', function(){
    // $( document ).ready(function() {
     
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
     setTimeout(function(){
       let fleets = getFleets();
       buildCompsRows()
       //relate('results', 'comps', 'id')
     }, 1000);
     
-<<<<<<< HEAD
-    function removeFromCue(compId, compPanel){
-        compPanel.removeAttr('style').find('.cueNo').text('');
-        compPanel.find('.adj li').removeAttr('style');
-        for(var i=cue.length-1; i>=0;i--){
-            if(cue[i]===compId){
-               cue.splice(i,1);
-            }
-        }
-    }
-
-    document.querySelector('.button').addEventListener('click', function(){
-=======
     // backUpCsv();
     // function backUpCsv(){
     //   let csv = google.script.run.withSuccessHandler(function(csv){
@@ -622,7 +396,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
     
     $('.button').on('click',function(){
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
         if ($(this).closest('.compPanel').hasClass('finished')) {
             var timeDisplay = $(this).closest('.compRow').find('.timeDisplay');
             var d = new Date();
@@ -670,33 +443,6 @@ document.addEventListener('DOMContentLoaded', function(){
     });
     
     
-<<<<<<< HEAD
-     
-    document.querySelector('.boat').addEventListener('click', function(event){
-        var compPanel = $(this).closest('.compPanel');
-        var compId = compPanel.attr('id');
-        if(compPanel.hasClass('finished')){return;}
-        if(compPanel.hasClass('selected')){
-            compPanel.removeClass('selected').removeAttr('style').find('.cueNo').text('');
-            compPanel.find('.adj li').removeAttr('style');
-            for(var i=cue.length-1; i>=0;i--){
-                if(cue[i]===compId){
-                   cue.splice(i,1);
-                }
-            }
-        }else{
-            cue.push(compId);
-            compPanel.addClass('selected');
-        }
-        formatRows();
-    });//.boat on click
-
-    document.querySelector('.btn').addEventListener('mousedown',function(){ $(this).toggleClass('mousedown'); });
-    document.querySelector('.btn').addEventListener('mouseup',function(){ $(this).toggleClass('mousedown'); });
- //   document.querySelector('#startSetBtn').addEventListener('click', 
-    document.querySelector('#startSetBtn').addEventListener('click',function(){
-        var date = new Date();
-=======
     
  
     
@@ -705,7 +451,6 @@ document.addEventListener('DOMContentLoaded', function(){
      
     $('#startSetBtn').on('click',function(){
          var date = new Date();
->>>>>>> f798f8c9dc79433e88aa7b0ed505d3b557fd0180
         var hour = date.getHours();
         var min = date.getMinutes();
         var sec = date.getSeconds();
