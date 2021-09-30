@@ -154,7 +154,6 @@ const Csv = {
                 raceObj.start = raceStarts
             }
             raceData.push(raceObj);
-            LL(raceObj)
         });
 
         return raceData;
