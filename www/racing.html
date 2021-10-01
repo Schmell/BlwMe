@@ -593,14 +593,8 @@ setTimeout(function(){
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 function finishButton(e){
+  var time = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
 
-  let date = new Date();
-  let hour = date.getHours();
-  let min = date.getMinutes();
-  let sec = date.getSeconds();
-  if (min<=9){min="0"+min;} 
-  if (sec<=9){ sec="0"+sec;}
-  let time = `${hour}:${min}:${sec}`;
   var compPanel = document.querySelector(`[id="${cue[0]}"]`)
   removeFromCue(cue[0], compPanel)
   compPanel.classList.remove('selected')
@@ -625,13 +619,18 @@ function finishButton(e){
       if(currentFleet == fleetName){
         currentStart = fleetStart
       }
-      
     })
-    let finishTime = new Date().getTime()
-    LL(finishTime)
-    let compTime = new Date().setTime(currentStart)
-    LL(compTime)
-LL(result.date)
+    let myTime = "19:44:44"
+    let sSplit = currentStart.split(':')
+    let sSec = ((sSplit[0]*60)+(sSplit[1]*60)+(sSplit[2]))
+    LL(sSec, currentStart)
+    let fSplit = myTime.split(':')
+    let fSec = ((fSplit[0]*60)+(fSplit[1]*60)+(fSplit[2]))
+    LL(fSec, myTime)
+    let eSec = sSec - fSec
+    LL(eSec)    
+    let elapsed =  secondsToHms(eSec)
+    LL(elapsed)
     let currentResult = {
       'id':parseInt(raceId+compId),
       'compId': compId,
@@ -647,6 +646,18 @@ LL(result.date)
   } // race.onsuccess
  
 } // finishButton
+
+function secondsToHms(d) {
+    d = Number(d);
+    var h = Math.floor(d / 3600);
+    var m = Math.floor(d % 3600 / 60);
+    var s = Math.floor(d % 3600 % 60);
+
+    var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+    var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+    var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+    return hDisplay + mDisplay + sDisplay; 
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
