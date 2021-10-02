@@ -155,7 +155,7 @@
 
     var db;
     var dbPromise;
-    const dbVersion = 2;
+    const dbVersion = 3;
     function openDatabase(name){
         if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
 
@@ -200,6 +200,9 @@
                 store.createIndex("elapsed", "elapsed", { unique: false });
                 store.createIndex("finish", "finish", { unique: false });
             }
+            if (!db.objectStoreNames.contains('series')) { 
+                let store = db.createObjectStore('series', {keyPath: 'id', autoIncrement:false});
+            }
             return db;
     
         }; // onupgradeneeded
@@ -212,12 +215,15 @@
             writeCompsDB(db);
             writeFleetsDB(db)
             writeResultsDB(db)
+            writeSeriesDB(db)
             return db;
         };
 
     } // openDatabase
+    // need to wrap in some kind of if to control the refresh behaviour
+    
     var dbw = openDatabase('store');
-
+    
     function writeCompsDB(db){
       let comps = Csv.getComps()
       let transaction = db.transaction("comps", "readwrite");
@@ -280,14 +286,22 @@
 
     function writeResultsDB(db){
         let results = Csv.getResults();
-        //LL(results)  
         let transaction = makeTX("results", "readwrite");
         let resultsData = transaction.objectStore("results");
         for (let i = 0; i < results.length; i++) {
-
             let request = resultsData.put(results[i]);
             //console.log(results[i]);
         }
+    }
+
+    function writeSeriesDB(db){
+      let results = Csv.getSeries()
+      let tx = makeTX('series', 'readwrite')
+      let resultsData = tx.objectStore("series");
+      for (let i = 0; i < results.length; i++) {
+        let request = resultsData.put(results[i]);
+        //console.log(results[i]);
+      }
     }
 </script>
 
