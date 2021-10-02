@@ -100,9 +100,9 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <!-- colorChanger script -->
     <script src="js/colorChanger.js"></script>
-    <script src="js/importFile.js"></script>
+    <script src="js/importFile.js"></script><!-- change to localStorageManager -->
     <!-- <script src="js/dbUtility.js" defer></script> -->
-    <script src="js/papaparse.min.js"></script>
+    <script src="js/papaparse.min.js"></script><!-- move me to importFile -->
     
 <script type="text/javascript">// indexedDB Stuff
 
@@ -252,7 +252,7 @@
       //console.log('makeTX',db)
       let tx = db.transaction(storeName, mode);
       tx.onerror = (err) => {
-        console.log('makeTX onerror',err.target.error);
+        console.error('makeTX onerror',err.target.error);
       }
       return tx;
     }
@@ -337,7 +337,8 @@
 document.addEventListener('DOMContentLoaded', function(){   
 addListeners()
 function addListeners(){
-  document.querySelector('#finishBtn').addEventListener('click',finishButton)
+  document.querySelector('#finishBtn').addEventListener('click', finishButton)
+  document.querySelector('#startSetBtn').addEventListener('click', setStart)
 }
 function buildCompsRows(){
   // get insert point and the template
@@ -369,10 +370,15 @@ function buildRaceSelect(){
   let races = storeAll('races')
   races.onsuccess = (e)=>{
     let result = races.result
+    
     result.forEach((item)=>{
+      //LL(item.sailed)
       let raceOption = document.createElement('option')
       raceOption.textContent = item.name
       raceOption.setAttribute('value', item.id)
+      if(item.sailed){
+        raceOption.style = 'color:red'
+      }
       selector.append(raceOption)
     })
 
@@ -534,18 +540,18 @@ setTimeout(function(){
         }
     });
 
-    document.querySelector('.btn').addEventListener('mousedown',()=>{this.toggleClass('mousedown')})
-    //$('.btn').on('mousedown',function(){ $(this).toggleClass('mousedown'); });
-    document.querySelector('.btn').addEventListener('mouseup',()=>{this.toggleClass('mouseup')})
-    //$('.btn').on('mouseup',function(){ $(this).toggleClass('mousedown'); });
+// document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
+// document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
      
-    $('#startSetBtn').on('click',function(){
-         var date = new Date();
-        var hour = date.getHours();
-        var min = date.getMinutes();
-        var sec = date.getSeconds();
-        document.querySelector('#startTimeInput').val(hour+":"+min+":"+sec);
-    });
+
+function setStart(e){
+  var date = new Date();
+  var hour = date.getHours();
+  var min = date.getMinutes();
+  var sec = date.getSeconds();
+  document.querySelector('#startTimeInput').value = hour+":"+min+":"+sec
+  //.value(hour+":"+min+":"+sec);
+};
     
     function finishButton_OLD(){
         var date = new Date();
@@ -593,13 +599,13 @@ setTimeout(function(){
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 function finishButton(e){
-  var time = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+  var finishTime = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
 
   var compPanel = document.querySelector(`[id="${cue[0]}"]`)
   removeFromCue(cue[0], compPanel)
   compPanel.classList.remove('selected')
   compPanel.classList.add('finished')
-  compPanel.querySelector('.timeDisplay').textContent = time
+  compPanel.querySelector('.timeDisplay').textContent = finishTime
 
 //write to db 
   // get raceId from selector
@@ -620,24 +626,16 @@ function finishButton(e){
         currentStart = fleetStart
       }
     })
-    let myTime = "19:44:44"
-    let sSplit = currentStart.split(':')
-    let sSec = ((sSplit[0]*60)+(sSplit[1]*60)+(sSplit[2]))
-    LL(sSec, currentStart)
-    let fSplit = myTime.split(':')
-    let fSec = ((fSplit[0]*60)+(fSplit[1]*60)+(fSplit[2]))
-    LL(fSec, myTime)
-    let eSec = sSec - fSec
-    LL(eSec)    
-    let elapsed =  secondsToHms(eSec)
-    LL(elapsed)
+    let elapsed = getElapsedTime(currentStart,result.date,finishTime)
     let currentResult = {
       'id':parseInt(raceId+compId),
       'compId': compId,
       'raceId': raceId,
-      'finish': time,
+      'elapsed': elapsed,
+      'finish': finishTime,
       'start': currentStart
     }
+//LL(currentResult)
     let resultStore = getStore('results','readwrite')
 //?????????????????????????????????????
 //this will fail if result is already there
@@ -647,7 +645,19 @@ function finishButton(e){
  
 } // finishButton
 
+//This is still not correct ??????????????????????????????
+function getElapsedTime(currentStart, date, finishTime){
+  LL(date, currentStart, finishTime)
+  let startDate = new Date(date+' '+currentStart)
+  let finishDate = new Date(date+' '+finishTime);
+  let elapsed = startDate - finishDate
+  elapsed =  new Date(elapsed).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+  LL(elapsed)
+  return elapsed
+}
+
 function secondsToHms(d) {
+  //??????? not sure if this is correct
     d = Number(d);
     var h = Math.floor(d / 3600);
     var m = Math.floor(d % 3600 / 60);
