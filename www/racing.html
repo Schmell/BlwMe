@@ -49,9 +49,7 @@
     <div id="infoPane">
       <div id="raceSelect">
         <!-- raceSelected template -- option only-->
-        <select>
-            <!-- <option value=""></option> -->
-        </select>
+        <select id="raceSelector" defaultraceid="0"></select>
       </div>
       <!-- NEEDTO: set value from raceData -->
       <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
@@ -145,14 +143,14 @@
     </template>
     
     <!-- Load the jQuery and jQuery UI libraries. -->
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script> -->
     <!-- colorChanger script -->
     <script src="js/colorChanger.js"></script>
     <script src="js/importFile.js"></script><!-- change to localStorageManager -->
     <!-- <script src="js/dbUtility.js" defer></script> -->
     <script src="js/papaparse.min.js"></script><!-- move me to importFile -->
     
-<script type="text/javascript">// indexedDB Stuff
+<script nmae="indexedDB_stuff" type="text/javascript">
 
     var db;
     var dbPromise;
@@ -309,91 +307,91 @@
     //LazyLog
     var LL = console.log;
 
-    function makeTX(storeName,mode){
-      //console.log('makeTX',db)
-      let tx = db.transaction(storeName, mode);
-      tx.onerror = (err) => {
-        console.error('makeTX onerror',err.target.error);
-      }
-      return tx;
-    }
-    
-    function getStore(storeName,mode){
-      if(mode == 'undefined'){mode = 'readwrite'}
-      let tx = makeTX(storeName,mode).objectStore(storeName);
-      return tx;
-    }
+function makeTX(storeName,mode){
+  //console.log('makeTX',db)
+  let tx = db.transaction(storeName, mode);
+  tx.onerror = (err) => {
+    console.error('makeTX onerror',err.target.error);
+  }
+  return tx;
+}
 
-    function storeAll(storeName,mode){
-      let store = getStore(storeName,mode).getAll()
-      return store;
-    }
+function getStore(storeName,mode){
+  if(mode == 'undefined'){mode = 'readwrite'}
+  let tx = makeTX(storeName,mode).objectStore(storeName);
+  return tx;
+}
 
-    function writeResult(resultObj){
-      if(resultObj.compId){
-        let tx = getStore("results",'readwrite');
-        tx.openCursor(resultObj.id).onsuccess = function(e){
-          var cursor = e.target.result;
-          if (cursor){
-            console.log('result already entered');
-          }else{
-            tx.add(resultObj)
-            console.log('add result:', resultObj.boat);
-          }
-        } 
+function storeAll(storeName,mode){
+  let store = getStore(storeName,mode).getAll()
+  return store;
+}
+
+function writeResult(resultObj){
+  if(resultObj.compId){
+    let tx = getStore("results",'readwrite');
+    tx.openCursor(resultObj.id).onsuccess = function(e){
+      var cursor = e.target.result;
+      if (cursor){
+        console.log('result already entered');
       }else{
-        console.log("no resultObj")
+        tx.add(resultObj)
+        console.log('add result:', resultObj.boat);
       }
-    } // 
+    } 
+  }else{
+    console.log("no resultObj")
+  }
+} // 
 
-    async function relate(store1, store2, callback){
-      let related = new Array;
-      let tx = db.transaction([ store1.store, store2.store ], 'readonly')
-      tx.oncomplete = function(){
-        let txcomplete = 1
-        callback(related)
-      }
-      let results = tx.objectStore(store1.store).index(store1.index)
-      let result = results.openCursor(store1.search)
-      result.onsuccess = function(e){
-        let cursor = event.target.result
-        if (cursor){
-          let comps = tx.objectStore(store2.store).index(store2.index)
-          let comp = comps.get(cursor.value.compId)
-          comp.onsuccess = function(e){
-            let first = e.target.result
-            let second = cursor.value
-            //let merged = Object.assign(related, first, second)
-            let merged = {...first, ...second}
-            //console.log('merged results',merged)
-            related.push(merged)
-            
-          }
-        cursor.continue(); 
-        }// if cursor
-      }// onsuccess
-      
-    }
-    
-  function relateDone(related){
-    related.forEach(function(relatedItems){
-    L(relatedItems)
-    
-      let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
-        let dataKey = item.getAttribute('data-key');
-        if(dataKey == relatedItems.fleet.replace(/ /g,'')){
-          let listItem = document.createElement('li')
-          listItem.setAttribute('key',relatedItems.compId)
-          listItem.textContent = relatedItems.boat
-          item.append(listItem)
-        }
-      })
-      let compPane = document.querySelectorAll('.compRow').forEach(function(item){
+async function relate(store1, store2, callback){
+  let related = new Array;
+  let tx = db.transaction([ store1.store, store2.store ], 'readonly')
+  tx.oncomplete = function(){
+    let txcomplete = 1
+    callback(related)
+  }
+  let results = tx.objectStore(store1.store).index(store1.index)
+  let result = results.openCursor(store1.search)
+  result.onsuccess = function(e){
+    let cursor = event.target.result
+    if (cursor){
+      let comps = tx.objectStore(store2.store).index(store2.index)
+      let comp = comps.get(cursor.value.compId)
+      comp.onsuccess = function(e){
+        let first = e.target.result
+        let second = cursor.value
+        //let merged = Object.assign(related, first, second)
+        let merged = {...first, ...second}
+        //console.log('merged results',merged)
+        related.push(merged)
         
-      })
-    })// related.forEach
-    
-  } // relateDone
+      }
+    cursor.continue(); 
+    }// if cursor
+  }// onsuccess
+  
+}
+
+function relateDone(related){
+  related.forEach(function(relatedItems){
+  L(relatedItems)
+  
+    let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
+      let dataKey = item.getAttribute('data-key');
+      if(dataKey == relatedItems.fleet.replace(/ /g,'')){
+        let listItem = document.createElement('li')
+        listItem.setAttribute('key',relatedItems.compId)
+        listItem.textContent = relatedItems.boat
+        item.append(listItem)
+      }
+    })
+    let compPane = document.querySelectorAll('.compRow').forEach(function(item){
+      
+    })
+  })// related.forEach
+  
+} // relateDone
 
 function buildCompsRows(){
   return new Promise(function(resolve, reject){
@@ -417,21 +415,24 @@ function buildCompsRows(){
     }) // forEach
     document.querySelectorAll('.boat').forEach((elem)=>{elem.addEventListener('click',boatClick)})
     document.querySelectorAll('.button').forEach((elem)=>{elem.addEventListener('click',adjustButton)})
+
   } // onsuccess
   resolve()
 }) // buildCompsRows
 }
 
 function buildRaceSelect(){
+  return new Promise(function(resolve, reject){
   /**
    * need to change dropdown from select/options to html/css
   */
   //get selector
-  let selector = document.querySelector('#raceSelect select')
+  let selector = document.querySelector('#raceSelector')
   //get races from db
   let races = storeAll('races')
   races.onsuccess = (e)=>{
     let result = races.result
+    selector.setAttribute('defaultRaceId',result[0].id)
     result.forEach((item)=>{
       let raceOption = document.createElement('option')
       raceOption.textContent = item.name
@@ -441,19 +442,45 @@ function buildRaceSelect(){
     })
 
   }
+  resolve()
+})
 } // buildRaceSelect
 
 
 document.addEventListener('DOMContentLoaded', function(){   
-addListeners()
-function addListeners(){
-  document.querySelector('#finishBtn').addEventListener('click', finishButton)
-  document.querySelector('#startSetBtn').addEventListener('click', setStart)
-  
-  //.addEventListener('click', adjustButton)
-}
+  addListeners()
+  function addListeners(){
+    document.querySelector('#finishBtn').addEventListener('click', finishButton)
+    document.querySelector('#startSetBtn').addEventListener('click', setStart)
+    document.querySelector('#codeBtn').addEventListener('click', codeBtn)
+    document.querySelector('#raceSelect select').addEventListener('change', raceSelectChange)
+    document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
+    document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
+  }
 });// dom ready
 
+//=============================================================
+setTimeout(function(){
+  buildCompsRows()
+  buildRaceSelect().then(getResultsDb())
+  getFleets()
+}, 1000);
+//=============================================================
+function getResultsDb(raceId){
+  if(raceId){
+    LL(raceId)
+  }else{
+    let selectedRace = document.querySelector('#raceSelector').getAttribute('defaultraceid')
+    LL(selectedRace)
+  }
+  
+
+}
+
+function raceSelectChange(){
+  getResultsDb(this.value)
+  LL(this)
+}
 
 function getFleets(){
   let result = [];
@@ -478,26 +505,26 @@ function makeFinishPane(fleets){
 
 } // makeFinishPane
     
-    function updateFinishPane(){
-      //clear finishPane li's
-      document.querySelectorAll('.finishListTitle li').forEach(function(item){
-        item.remove();
-      })
-      //get Current race
-      let raceSelect = document.querySelector('#raceSelect select')
-      let raceSelected = raceSelect.options[raceSelect.selectedIndex].value
-      let store1 = {'store':'results','index':'raceId','search':'106'}
-      let store2 = {'store':'comps','index':'id','search':''}
-      let rel = relate(store1, store2, relateDone)
-    }// updateFinishPane
+function updateFinishPane(){
+  //clear finishPane li's
+  document.querySelectorAll('.finishListTitle li').forEach(function(item){
+    item.remove();
+  })
+  //get Current race
+  let raceSelect = document.querySelector('#raceSelect select')
+  let raceSelected = raceSelect.options[raceSelect.selectedIndex].value
+  let store1 = {'store':'results','index':'raceId','search':'106'}
+  let store2 = {'store':'comps','index':'id','search':''}
+  let rel = relate(store1, store2, relateDone)
+}// updateFinishPane
 
-    function matchCompToRace(resultsArr){
-      L(resultsArr)
-      let store = getStore('comps').index('id')
-      resultsArr.forEach(function(item){
-    
-      })
-    }
+function matchCompToRace(resultsArr){
+  LL(resultsArr)
+  let store = getStore('comps').index('id')
+  resultsArr.forEach(function(item){
+
+  })
+}
 
 //Globals
 var cue = [];
@@ -552,17 +579,8 @@ function removeFromCue(compId, compPanel){
     }
 } // removeFromCue
 
-//=============================================================
-setTimeout(function(){
-  buildCompsRows()
-  buildRaceSelect()
-  getFleets()
-}, 1000);
-//=============================================================
+function adjustButton(){
 
-//This is the adjust buttons
-function adjustButton(e){
-  //if finished
   if (this.closest('.compPanel').classList.contains('finished') ) {
       var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
       var d = new Date();
@@ -608,10 +626,7 @@ function adjustButton(e){
       formatRows();
   }
 } // adjustButton
-
-// document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
-// document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
-     
+    
 function setStart(e){
   var date = new Date();
   var hour = date.getHours();
@@ -620,48 +635,6 @@ function setStart(e){
   document.querySelector('#startTimeInput').value = hour+":"+min+":"+sec
   //.value(hour+":"+min+":"+sec);
 };
-    
-    function finishButton_OLD(){
-        var date = new Date();
-        var hour = date.getHours();
-        var min = date.getMinutes();
-        var sec = date.getSeconds();
-        if (min<=9){min="0"+min;} 
-        if (sec<=9){ sec="0"+sec;}
-        
-        var compPanel = this.closest('#main').querySelector(`[id="${cue[0]}"]`);
-        var boat = compPanel.querySelector('.boatName').textContent = '';
-            //console.log(compPanel.find('.boatName').text());
-        var compId = compPanel.querySelector('.compId').textContent = '';
-            //console.log(compId)
-        var fleet = compPanel.querySelector('.fleet').text().replace(/ /g,'')
-           //console.log(fleet)
-        document.querySelector('#raceSelect option:selected')
-        var raceId = document.querySelector('#raceSelect option:selected').val();
-        var raceName = document.querySelector('#raceSelect option:selected').text();
-        //console.log(raceId);
-        if(compPanel.find('.boatName').text() != ''){
-        //document.querySelector('#'+fleet)
-        //var btnPaneList = $('#'+fleet).append('<li>'+compPanel.find('.boatName').text()+'</li>');
-        var btnPaneList = document.querySelector('#'+fleet).append('<li>'+compPanel.find('.boatName').text()+'</li>');
-      }
-      //TODO: need to write results to DB and then update html from data
-      //this will require that we keep track of the race we have selected.
-         compPanel.find('.timeDisplay').text(hour+':'+min+':'+sec);
-      var resultTime = hour+':'+min+':'+sec;
-        compPanel.removeClass('selected').removeAttr('style').addClass('finished').find('.cueNo').text('');
-        compPanel.find('.adj li').removeAttr('style');
-      cue.shift();
-        formatRows();
-      //write result to database after each click
-      //neeed to extend this functionality to the adjust buttons
-      //"rft","19:37:23","26","106"
-      var resultObj = {'id':parseInt(raceId+compId), 'boat':boat, 'compId':compId, 'raceId':raceId, 'raceName':raceName,      'resultTime':resultTime, 'timeStamp':Date.now()};
-      //console.log(resultObj);
-      writeResult(resultObj);
-      updateFinishPane();
-    
-    };
 
 function finishButton(e){
   var finishTime = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
@@ -710,60 +683,54 @@ function finishButton(e){
  
 } // finishButton
 
-//This is still not correct ??????????????????????????????
 function getElapsedTime(currentStart, date, finishTime){
   LL(date, currentStart, finishTime)
+  // let today = new Date().toLocaleDateString()
   let startDate = new Date(date+' '+currentStart)
-  let finishDate = new Date(date+' '+finishTime);
-  let elapsed = startDate - finishDate
-  elapsed =  new Date(elapsed).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-  LL(elapsed)
+  // let startDate = new Date(today+' '+'12:00:00')
+  let finishDate = new Date(date+' '+finishTime)
+  // let finishDate = new Date(today+' '+finishTime)
+  let elapsed = convertHMS((finishDate - startDate)/1000)
+  console.log(elapsed)
   return elapsed
 }
 
-function secondsToHms(d) {
-  //??????? not sure if this is correct
-    d = Number(d);
-    var h = Math.floor(d / 3600);
-    var m = Math.floor(d % 3600 / 60);
-    var s = Math.floor(d % 3600 % 60);
-
-    var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-    var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-    var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
-    return hDisplay + mDisplay + sDisplay; 
+function convertHMS(value) {
+  const sec = parseInt(value, 10);
+  let hours   = Math.floor(sec / 3600);
+  let minutes = Math.floor((sec - (hours * 3600)) / 60);
+  let seconds = sec - (hours * 3600) - (minutes * 60);
+  if (hours   < 10) {hours   = "0"+hours;}
+  if (minutes < 10) {minutes = "0"+minutes;}
+  if (seconds < 10) {seconds = "0"+seconds;}
+  return hours+':'+minutes+':'+seconds;
 }
-    
-    document.querySelector('#codeBtn').addEventListener('click',function(){
-        //get select value
-        var code = document.querySelector('#codeSelect select').val();
-        //write value to timeDisplay
-///////////////////////????? for $(this)
-         var compPanel = $(this).closest('#main').find('#'+cue[0]);
-         compPanel.find('.timeDisplay').text(code);
-        compPanel.removeClass('selected').removeAttr('style').addClass('finished').find('.cueNo').text('');
-        compPanel.find('.adj li').removeAttr('style');
-        //addToFinished(cue);
-        cue.shift();
-        formatRows();
-      });
-          
 
-    
-    function showClock(){
-        var Digital=new Date();
-        var hours=Digital.getHours();
-        var minutes=Digital.getMinutes();
-        var seconds=Digital.getSeconds();
-        
-        if (minutes<=9){
-            minutes="0"+minutes;
-        } 
-        if (seconds <= 9) {
-            seconds = "0" + seconds;
-        }
-        $('#clock').text(hours+":"+minutes+":"+seconds);
-        setTimeout(showClock,1000);
-    } // showClock
-    showClock();
-    </script>
+function codeBtn(){
+  //get select value
+  var code = document.querySelector('#codeSelect select').value;
+  var compPanel = this.closest('#main').querySelector(`[id="${cue[0]}"]`);
+  compPanel.querySelector('.timeDisplay').textContent = code;
+  compPanel.classList.remove('selected')
+  compPanel.removeAttribute('style')
+  compPanel.classList.add('finished')
+  compPanel.querySelector('.cueNo').textContent = '';
+  compPanel.querySelector('.adj li').removeAttribute('style');
+  compPanel.querySelectorAll('.button').forEach( item => item.removeEventListener('click', adjustButton));
+  cue.shift();
+  formatRows();
+};
+
+function showClock(){
+  var digital=new Date();
+  var hours=digital.getHours();
+  var minutes=digital.getMinutes();
+  var seconds=digital.getSeconds();
+  if (minutes<=9){ minutes="0"+minutes; } 
+  if (seconds <= 9) { seconds = "0" + seconds; }
+  document.querySelector('#clock').textContent = hours+":"+minutes+":"+seconds
+  setTimeout(showClock,1000);
+} // showClock
+showClock();
+
+</script>
