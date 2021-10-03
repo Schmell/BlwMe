@@ -90,6 +90,7 @@
       </table><!-- mainPaneTable -->
     </div> <!-- mainPane -->
   </div><!-- main -->
+
   </body> 
     
     <!-- Templates -->
@@ -126,8 +127,8 @@
             <td width="20px">
               <div class="adj">
                 <ul>
-                  <li class="plus button">+</li>
-                  <li class="minus button">-</li>
+                  <li class="button plus">+</li>
+                  <li class="button minus">-</li>
                 </ul>
               </div>
             </td>
@@ -221,7 +222,6 @@
 
     } // openDatabase
     // need to wrap in some kind of if to control the refresh behaviour
-    
     var dbw = openDatabase('store');
     
     function writeCompsDB(db){
@@ -299,7 +299,7 @@
       let tx = makeTX('series', 'readwrite')
       let resultsData = tx.objectStore("series");
       for (let i = 0; i < results.length; i++) {
-        let request = resultsData.put(results[i]);
+        let request = resultsData.add(results[i]);
         //console.log(results[i]);
       }
     }
@@ -395,15 +395,11 @@
     
   } // relateDone
 
-document.addEventListener('DOMContentLoaded', function(){   
-addListeners()
-function addListeners(){
-  document.querySelector('#finishBtn').addEventListener('click', finishButton)
-  document.querySelector('#startSetBtn').addEventListener('click', setStart)
-}
 function buildCompsRows(){
+  return new Promise(function(resolve, reject){
   // get insert point and the template
   let insert = document.querySelector('.appTable')
+  insert.innerHTML = ''
   let template = document.querySelector('#compTemplate')
   //get comps from db
   let store = getStore('comps').index('boat').getAll()
@@ -420,20 +416,23 @@ function buildCompsRows(){
       insert.appendChild(clone);
     }) // forEach
     document.querySelectorAll('.boat').forEach((elem)=>{elem.addEventListener('click',boatClick)})
+    document.querySelectorAll('.button').forEach((elem)=>{elem.addEventListener('click',adjustButton)})
   } // onsuccess
-
-} // buildCompsRows
+  resolve()
+}) // buildCompsRows
+}
 
 function buildRaceSelect(){
+  /**
+   * need to change dropdown from select/options to html/css
+  */
   //get selector
-  //get races from db
   let selector = document.querySelector('#raceSelect select')
+  //get races from db
   let races = storeAll('races')
   races.onsuccess = (e)=>{
     let result = races.result
-    
     result.forEach((item)=>{
-      //LL(item.sailed)
       let raceOption = document.createElement('option')
       raceOption.textContent = item.name
       raceOption.setAttribute('value', item.id)
@@ -444,6 +443,16 @@ function buildRaceSelect(){
   }
 } // buildRaceSelect
 
+
+document.addEventListener('DOMContentLoaded', function(){   
+addListeners()
+function addListeners(){
+  document.querySelector('#finishBtn').addEventListener('click', finishButton)
+  document.querySelector('#startSetBtn').addEventListener('click', setStart)
+  
+  //.addEventListener('click', adjustButton)
+}
+});// dom ready
 
 
 function getFleets(){
@@ -545,66 +554,64 @@ function removeFromCue(compId, compPanel){
 
 //=============================================================
 setTimeout(function(){
-  //let fleets = getFleets();
   buildCompsRows()
   buildRaceSelect()
   getFleets()
-  //relate('results', 'comps', 'id')
 }, 1000);
 //=============================================================
 
- //This is the adjust buttons
-    $('.button').on('click',function(){
-        if ($(this).closest('.compPanel').hasClass('finished')) {
-            var timeDisplay = $(this).closest('.compRow').find('.timeDisplay');
-            var d = new Date();
-            if ($(this).hasClass('minus')) {
-                //subtract 10ths
-                var timeText= timeDisplay.text().split(':');
-                var t = new Date();
-                var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
-                t.setTime(t.getTime()-1000);
-                var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
-                //add 0 where needed
-                if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
-                console.log(ta);
-                //timeText[3] = new Number(timeText[3])-1;
-                timeDisplay.text(ta.join(':'))
-            }
-            else if($(this).hasClass('plus')) {
-                //add 10ths
-                var timeText= timeDisplay.text().split(':');
-                var t = new Date();
-                var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
-                t.setTime(t.getTime()+1000);
-                var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
-                //add 0 where needed
-                if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
-                console.log(ta);
-                //timeText[3] = new Number(timeText[3])-1;
-                timeDisplay.text(ta.join(':'))
-            }
-        }
-        else if($(this).closest('.compPanel').hasClass('selected')){
-            var compPanel = $(this).closest('.compPanel');
-            var cueNo = $(this).closest('.compRow').find('.cueNo').text();
-            var compId = compPanel.attr('id');
-            removeFromCue(compId, compPanel);
-            if ($(this).hasClass('minus')) {
-                cue.splice(new Number(cueNo), 0, compId);
-            }
-            else if($(this).hasClass('plus')) {
-                cue.splice(new Number(cueNo) - 2, 0, compId);
-            }
-            console.log('adjust(cue to finish):',cue);
-            formatRows();
-        }
-    });
+//This is the adjust buttons
+function adjustButton(e){
+  //if finished
+  if (this.closest('.compPanel').classList.contains('finished') ) {
+      var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
+      var d = new Date();
+      if (this.classList.contains('minus')) {
+          //subtract 10ths
+          var timeText= timeDisplay.textContent.split(':');
+          var t = new Date();
+          var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
+          t.setTime(t.getTime()-1000);
+          var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
+          //add 0 where needed
+          if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
+          console.log(ta);
+          //timeText[3] = new Number(timeText[3])-1;
+          timeDisplay.textContent = ta.join(':')
+      }
+      else if(this.classList.contains('plus')) {
+          //add 10ths
+          var timeText= timeDisplay.textContent.split(':');
+          var t = new Date();
+          var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
+          t.setTime(t.getTime()+1000);
+          var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
+          //add 0 where needed
+          if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
+          console.log(ta);
+          //timeText[3] = new Number(timeText[3])-1;
+          timeDisplay.textContent = ta.join(':')
+      }
+  }
+  else if(this.closest('.compPanel').classList.contains('selected')){
+      var compPanel = this.closest('.compPanel');
+      var cueNo = this.closest('.compRow').querySelector('.cueNo').textContent;
+      var compId = compPanel.getAttribute('id');
+      removeFromCue(compId, compPanel);
+      if (this.classList.contains('minus')) {
+          cue.splice(new Number(cueNo), 0, compId);
+      }
+      else if(this.classList.contains('plus')) {
+          cue.splice(new Number(cueNo) - 2, 0, compId);
+      }
+      console.log('adjust(cue to finish):',cue);
+      formatRows();
+  }
+} // adjustButton
 
 // document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
 // document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
      
-
 function setStart(e){
   var date = new Date();
   var hour = date.getHours();
@@ -655,9 +662,6 @@ function setStart(e){
       updateFinishPane();
     
     };
-
-///////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////
 
 function finishButton(e){
   var finishTime = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
@@ -729,10 +733,6 @@ function secondsToHms(d) {
     var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
     return hDisplay + mDisplay + sDisplay; 
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////
-
     
     document.querySelector('#codeBtn').addEventListener('click',function(){
         //get select value
@@ -748,7 +748,7 @@ function secondsToHms(d) {
         formatRows();
       });
           
-});// dom ready
+
     
     function showClock(){
         var Digital=new Date();
