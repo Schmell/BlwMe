@@ -53,10 +53,11 @@
       </div>
       <!-- NEEDTO: set value from raceData -->
       <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
-        <div id="startSetBtn" class="btn">Set Start</div>
+       <br/> <div id="startSetBtn" class="btn">Set Start</div>
       </div>
       <div id="save" class="btn">save</div>
       <div id="clock"></div>
+      <div id="raceInfo"></div>
     </div>
                 
     <div id="mainPane">
@@ -142,15 +143,12 @@
       </td></tr>
     </template>
     
-    <!-- Load the jQuery and jQuery UI libraries. -->
-    <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script> -->
-    <!-- colorChanger script -->
     <script src="js/colorChanger.js"></script>
     <script src="js/importFile.js"></script><!-- change to localStorageManager -->
     <!-- <script src="js/dbUtility.js" defer></script> -->
-    <script src="js/papaparse.min.js"></script><!-- move me to importFile -->
+    <script src="js/papaparse.min.js"></script>
     
-<script nmae="indexedDB_stuff" type="text/javascript">
+<script name="indexedDB_stuff" type="text/javascript">
 
     var db;
     var dbPromise;
@@ -207,7 +205,7 @@
         }; // onupgradeneeded
     
         dbPromise.onerror = function(e) { console.warn("Error", e.target.result); };
-
+        dbPromise.onblocked = function(e) { console.warn("onblocked", e.target.result); }
         dbPromise.onsuccess = function(e) {
             db = e.target.result;
             writeRacesDB(db);
@@ -304,12 +302,13 @@
 </script>
 
 <script type="text/javascript">
-    //LazyLog
-    var LL = console.log;
+//LazyLog
+var LL = console.log;
 
 function makeTX(storeName,mode){
   //console.log('makeTX',db)
   let tx = db.transaction(storeName, mode);
+  //LL(tx)
   tx.onerror = (err) => {
     console.error('makeTX onerror',err.target.error);
   }
@@ -421,6 +420,7 @@ function buildCompsRows(){
 }) // buildCompsRows
 }
 
+
 function buildRaceSelect(){
   return new Promise(function(resolve, reject){
   /**
@@ -455,6 +455,7 @@ document.addEventListener('DOMContentLoaded', function(){
     document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
     document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
   }
+
 });// dom ready
 
 //=============================================================
@@ -466,8 +467,20 @@ setTimeout(function(){
 //=============================================================
 function getResultsDb(raceId){
   if(raceId){
-    LL(raceId)
+
+    let store = getStore('results').index('raceid').getAll(raceId)
+    store.onsuccess = (e)=>{
+      let races = e.target.result
+      let appTable = document.querySelector('.appTable')
+      races.forEach( (item) => {
+        let compPanel = document.querySelector(`[id="${item.compid}"]`)
+        compPanel.classList.add('finished')
+        compPanel.querySelector('.timeDisplay').textContent = item.finish
+       
+      })
+    }
   }else{
+    //cant figureout how to get default
     let selectedRace = document.querySelector('#raceSelector').getAttribute('defaultraceid')
     LL(selectedRace)
   }
@@ -477,7 +490,21 @@ function getResultsDb(raceId){
 
 function raceSelectChange(){
   getResultsDb(this.value)
-  LL(this)
+  let store = getStore('races').get(parseInt(this.value))
+  store.onsuccess = (e) => {
+    let result = e.target.result
+    let raceInfo = document.querySelector('#raceInfo')
+    raceInfo.innerHTML = ""
+    let name = document.createElement('h3')
+    name.textContent = result.name
+    let date = document.createElement('p')
+    date.textContent = result.date
+    let sailed = document.createElement('p')
+    sailed.textContent = result.sailed
+    raceInfo.appendChild(name)
+    raceInfo.appendChild(date)
+    raceInfo.appendChild(sailed)
+  }
 }
 
 function getFleets(){

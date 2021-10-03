@@ -1,4 +1,7 @@
 
+    body{
+        font-family: Arial, sans-serif;
+    }
     input{
         font-family: Arial;
         font-size: 12px;
@@ -26,6 +29,7 @@
         left: 0px;
         top: 0px;
         width: 100%; 
+        margin-top: 10px;
         background-color:#f2f2f2;}
         
     #mainPane {
@@ -370,19 +374,20 @@
         }
     #startSetBtn{
         position:absolute;
-        padding-top:2px;
+        padding-top:5px;
         font-size:11px;
-        top:2px;
-        height:17px;
+        top:0px;
+        height:25px;
         width:65px;
-        left:91px;
+        left:202px;
         vertical-align:middle;
         }
     
     #raceSelect{
         position:absolute;
-        top:0px;
+        top: 20px;px;
         left:5px;
+        width: 200px;
         }	
         
     #codeBtn{
@@ -422,10 +427,15 @@
         }
     #startTime{
       position:absolute;
-        top:22px;
+        top:44px;
         left:5px;
         width:130px;
         }
+  input[type=text]{
+      width: 200px;
+      height: 30px;
+      background-color:#E6FFE6;
+  }
     #finishPane{
         position:absolute;
         top:250px;
@@ -443,10 +453,17 @@
      }
      #save{
         position:absolute;
-        top:50px;
+        top:80px;
         left:5px;
-        width:156px;
+        width:200px;
      }
+     #raceInfo{
+         position: relative;
+        left: 300px;
+     }
+     /* #raceSelect{
+         top: 5px;
+     } */
     template{
         display: none;
     }
