@@ -5,11 +5,13 @@
 <script type="text/javascript">
 //LazyLog
 var LL = console.log;
-
 </script>
 <style>
     * {
       box-sizing: border-box;
+    }
+    a{
+        text-decoration: none;
     }
     
     body {
@@ -57,6 +59,12 @@ var LL = console.log;
       padding-left: 20px;
     }
 
+    #submitUrl {
+        background-color: beige;
+        font-size: 15px;
+        padding: 5px;
+    }
+
 </style>
 </head>
 <body>
@@ -72,6 +80,11 @@ var LL = console.log;
         <h2>File management</h2>
         <p>Select .blw file from your files</p>
         <p><input id="fileSelect" type="file" name="myFiles" /></p>
+        <p>input URL for .blw file</p>
+    <div id="urlFile">
+        <p><input id="urlSelect" type="text" name="url" /></p>
+        <a id="submitUrl" href="#" >Submit Url - - - - - - - - - - -</a>
+    </div>
         <div id="displayData"></div>
       </div>
 
@@ -81,11 +94,14 @@ var LL = console.log;
 const Utils = {
     init: function(){
         document.getElementById("fileSelect").addEventListener("change", Csv.fromInput, false)
+        document.getElementById('submitUrl').addEventListener('click', Csv.fromInput, false)
+
         document.getElementById('getComps').addEventListener('click', Utils.showData, false)
         document.getElementById('getResults').addEventListener('click', Utils.showData, false)
         document.getElementById('getFleets').addEventListener('click', Utils.showData, false)
         document.getElementById('getRaces').addEventListener('click', Utils.showData, false)
         document.getElementById('getSeries').addEventListener('click', Utils.showData, false)
+        
     }, // init
 
     /** UTIL

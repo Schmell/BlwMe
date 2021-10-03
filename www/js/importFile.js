@@ -3,7 +3,26 @@ const Csv = {
      * 
      */
     fromInput: function(e){
-        let file = e.target.files[0];
+        var file;
+        // may need to make fromFile and fromUrl functions to return a file.object to keep track of versions
+        if(e.target.files){
+            file = e.target.files[0];
+        }else{
+
+            LL('fromUrl')
+            Papa.parse(e, {
+                download: true,
+                complete: function(results) {
+                    LL(results)
+                    //let unParsed = Papa.unparse(results.data);
+                   //console.log(results.data);
+                    // let fileArr = { "name":file.name, "lastModified":file.lastModified, "lastModifiedDate":file.lastModifiedDate,"size":file.size }
+                    // localStorage.setItem('using',JSON.stringify(fileArr));
+                    // localStorage.setItem('currentFile', unParsed);
+                }
+            });
+        }
+        //let file = e.target.files[0];
         let last = JSON.parse(localStorage.getItem('using'));
         if(!last){
             LL('no last');
@@ -36,7 +55,9 @@ const Csv = {
             console.log('using:', JSON.parse(localStorage.getItem('using')));
         }
     }, // fromInput
-
+    fromUrl: function(e){
+        let url = document.querySelector('#urlSelect').value
+    },
     /**
      * 
      */
