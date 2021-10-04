@@ -85,6 +85,12 @@ var LL = console.log;
         <p><input id="urlSelect" type="text" name="url" /></p>
         <a id="submitUrl" href="#" >Submit Url - - - - - - - - - - -</a>
     </div>
+    <div id="backUpFile">
+        <p>Back up current File</p>
+        <a href="#" id="backUpButton">Back up</a>
+    </div>
+
+    </div>
         <div id="displayData"></div>
       </div>
 
@@ -95,7 +101,7 @@ const Utils = {
     init: function(){
         document.getElementById("fileSelect").addEventListener("change", Csv.fromInput, false)
         document.getElementById('submitUrl').addEventListener('click', Csv.fromInput, false)
-
+        document.getElementById('backUpButton').addEventListener('click', Csv.backUpCurrent, false)
         document.getElementById('getComps').addEventListener('click', Utils.showData, false)
         document.getElementById('getResults').addEventListener('click', Utils.showData, false)
         document.getElementById('getFleets').addEventListener('click', Utils.showData, false)

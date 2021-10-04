@@ -60,6 +60,11 @@ const Csv = {
     fromUrl: function(e){
         let url = document.querySelector('#urlSelect').value
     },
+    backUpCurrent: function(){
+        let file = localStorage.getItem('currentFile');
+        LL(file)
+        var fs = require('fs');
+    },
     /**
      * 
      */

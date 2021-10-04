@@ -510,12 +510,11 @@ async function buildRaceSelect(){
     dropDown.append(span)
     dropDown.append(content)
     LL(fragment)
-    let raceSelect = document.querySelector('#raceSelect')
-    raceSelect.innerHTML = ''
+    //let raceSelect = document.querySelector('#raceSelect')
+    //raceSelect.innerHTML = ''
     raceSelect.append(fragment)
   }
 }
-
 
 document.addEventListener('DOMContentLoaded', function(){   
   addListeners()
@@ -523,6 +522,7 @@ document.addEventListener('DOMContentLoaded', function(){
     document.querySelector('#finishBtn').addEventListener('click', finishButton)
     document.querySelector('#startSetBtn').addEventListener('click', setStart)
     document.querySelector('#codeBtn').addEventListener('click', codeBtn)
+    //document.querySelector('.timeDisplay').addEventListener('dblclick', editTime)
     //document.querySelector('#raceSelect select').addEventListener('change', raceSelectChange)
     // document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
     // document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
@@ -536,7 +536,9 @@ setTimeout(function(){
   getFleets()
 }, 1000);
 //=============================================================
-
+function editTime(){
+  LL(this)
+}
 function getResultsDb(raceId){
   if(raceId){
     let store = getStore('results').index('raceid').getAll(raceId)
@@ -559,7 +561,7 @@ function getResultsDb(raceId){
     }
   }else{
     //cant figureout how to get default
-    let selectedRace = document.querySelector('#raceSelector')
+    //let selectedRace = document.querySelector('#raceSelector')
     //selectedRace.children[0]
     //console.dir(selectedRace.children.item(0))
   }
@@ -694,7 +696,8 @@ function removeFromCue(compId, compPanel){
 function adjustButton(){
   if (this.closest('.compPanel').classList.contains('finished') ) {
       let compid = this.closest('.compPanel').getAttribute('id')
-      let raceid = document.querySelector('#raceSelector').value
+      //let raceid = document.querySelector('#raceSelector').value
+      let raceId = raceSelected
       let start = document.querySelector('.start').textContent
       let date = document.querySelector('.date').textContent
       var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
@@ -834,7 +837,8 @@ function codeBtn(){
   var code = document.querySelector('#codeSelect select').value;
   var compPanel = this.closest('#main').querySelector(`[id="${cue[0]}"]`);
   let compid = compPanel.getAttribute('id')
-  let raceid = document.querySelector('#raceSelector').value
+  //let raceid = document.querySelector('#raceSelector').value
+  let raceId = raceSelected
   updateResult({compid,raceid,code})
   compPanel.querySelector('.timeDisplay').textContent = code;
   compPanel.classList.remove('selected')
