@@ -6,24 +6,31 @@
     .dropbtn {
       background-color: #4CAF50;
       color: white;
-      padding: 16px;
+      padding: 5px;
       font-size: 16px;
       border: none;
       cursor: pointer;
+      width: 200px;
     }
     
     .dropdown {
       position: relative;
       display: inline-block;
+      width: 200px;
     }
-    
+    .dropDown span{
+      width: 200px;
+    }
+
     .dropdown-content {
       display: none;
-      position: absolute;
+      position: fixed;
       background-color: #f9f9f9;
       min-width: 160px;
       box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-      z-index: 1;
+      position: fixed;
+      z-index: 999;
+
     }
     
     .dropdown-content a {
@@ -151,11 +158,14 @@
     <script src="js/papaparse.min.js"></script>
     
 <script name="indexedDB_stuff" type="text/javascript">
-
+    // Globals
+    var LL = console.log; //LazyLog
+    var raceSelected
     var db;
     var dbPromise;
     var updateDB = false
     const dbVersion = 6;
+    
     function openDatabase(name){
         if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
 
@@ -331,8 +341,6 @@
 </script>
 
 <script type="text/javascript">
-//LazyLog
-var LL = console.log;
 
 function makeTX(storeName,mode){
   //console.log('makeTX',db)
@@ -450,7 +458,7 @@ function buildCompsRows(){
 }) // buildCompsRows
 }
 
-function buildRaceSelect(){
+function _buildRaceSelect(){
   return new Promise(function(resolve, reject){
   /**
    * need to change dropdown from select/options to html/css
@@ -473,6 +481,41 @@ function buildRaceSelect(){
 })
 } // buildRaceSelect
 
+async function buildRaceSelect(){
+  let selector = document.querySelector('#raceSelect')
+  selector.innerHTML = ''
+  //get races from db
+  let races = storeAll('races')
+  races.onsuccess = (e)=>{
+    let result = races.result
+    selector.setAttribute('defaultRaceId',result[0].id)
+    let fragment = document.createDocumentFragment();
+    let dropDown = document.createElement('div')
+    dropDown.classList.add('dropdown')
+    let span = document.createElement('span')
+    span.classList.add('dropbtn')
+    span.textContent = 'Select Race'
+    let content = document.createElement('div')
+    content.classList.add('dropdown-content')
+    result.forEach((item)=>{
+      let row = document.createElement('a')
+      row.textContent = item.name
+      row.setAttribute('id',item.id)
+      row.setAttribute('href','#')
+      row.classList.add('dropdow-row')
+      content.append(row)
+      row.addEventListener('click',raceSelectChange)
+    })
+    fragment.append(dropDown)
+    dropDown.append(span)
+    dropDown.append(content)
+    LL(fragment)
+    let raceSelect = document.querySelector('#raceSelect')
+    raceSelect.innerHTML = ''
+    raceSelect.append(fragment)
+  }
+}
+
 
 document.addEventListener('DOMContentLoaded', function(){   
   addListeners()
@@ -480,17 +523,16 @@ document.addEventListener('DOMContentLoaded', function(){
     document.querySelector('#finishBtn').addEventListener('click', finishButton)
     document.querySelector('#startSetBtn').addEventListener('click', setStart)
     document.querySelector('#codeBtn').addEventListener('click', codeBtn)
-    document.querySelector('#raceSelect select').addEventListener('change', raceSelectChange)
-    document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
-    document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
+    //document.querySelector('#raceSelect select').addEventListener('change', raceSelectChange)
+    // document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
+    // document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
   }
 
 });// dom ready
 
 //=============================================================
 setTimeout(function(){
-  buildCompsRows()
-  buildRaceSelect().then(getResultsDb())
+  buildCompsRows().then(getResultsDb()).then(buildRaceSelect())
   getFleets()
 }, 1000);
 //=============================================================
@@ -500,30 +542,42 @@ function getResultsDb(raceId){
     let store = getStore('results').index('raceid').getAll(raceId)
     store.onsuccess = (e)=>{
       let races = e.target.result
-      let appTable = document.querySelector('.appTable')
+      clearCompRows()
       races.forEach( (item) => {
         let compPanel = document.querySelector(`[id="${item.compid}"]`)
-        compPanel.classList.add('finished')
-        if(item.finish){
+        if(item.finish && !item.code){
+          compPanel.classList.add('finished')
           compPanel.querySelector('.timeDisplay').textContent = item.finish
-        }else{
+        }else if(item.code){
+          compPanel.classList.add('finished')
           compPanel.querySelector('.timeDisplay').textContent = item.code
+        }else{
+          compPanel.classList.remove('finished')
+          compPanel.querySelector('.timeDisplay').textContent = ""
         }
       })
     }
   }else{
     //cant figureout how to get default
     let selectedRace = document.querySelector('#raceSelector')
-    selectedRace.children[0]
+    //selectedRace.children[0]
     //console.dir(selectedRace.children.item(0))
   }
-  
 
+} // getResultsDb
+
+function clearCompRows(){
+  document.querySelectorAll('.compPanel').forEach((item)=>{
+    item.classList.remove('finished')
+    item.querySelector('.timeDisplay').textContent = ''
+  })
 }
 
 function raceSelectChange(){
-  getResultsDb(this.value)
-  let store = getStore('races').get(parseInt(this.value))
+  //LL(this.getAttribute('id'))
+  raceSelected = this.getAttribute('id')
+  getResultsDb(this.getAttribute('id'))
+  let store = getStore('races').get(parseInt(this.getAttribute('id')))
   store.onsuccess = (e) => {
     let result = e.target.result
     let raceInfo = document.querySelector('#raceInfo')
@@ -711,9 +765,11 @@ function finishButton(e){
   compPanel.classList.add('finished')
   compPanel.querySelector('.timeDisplay').textContent = finishTime
 
-//write to db 
+  //write to db 
   // get raceId from selector
-  let raceId = document.querySelector('#raceSelect select').value
+  //let raceId = document.querySelector('#raceSelect select').value
+  let raceId = raceSelected
+  LL(raceId)
   let compId = compPanel.getAttribute('id')
   // get start time for current fleet
   let currentFleet = compPanel.querySelector('.fleet').textContent
@@ -794,7 +850,7 @@ function codeBtn(){
 
 function updateResult(event){
   /**
-   * takes an object using deconstruction
+   * takes an object using destructuring
    */
   var merged = {}
   let store = getStore('results').get(parseInt(event.raceid+event.compid))
