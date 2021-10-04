@@ -49,7 +49,7 @@
     <div id="infoPane">
       <div id="raceSelect">
         <!-- raceSelected template -- option only-->
-        <select id="raceSelector" defaultraceid="0"></select>
+        <select id="raceSelector" defaultraceid=""></select>
       </div>
       <!-- NEEDTO: set value from raceData -->
       <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
@@ -122,6 +122,8 @@
               <div class="fleet"></div>
               <div class="rating"></div>
               <div class="compId"></div>
+              <div class="start hidden"></div>
+              <div class="date hidden"></div>
             </td>
             <td width="20px">
               <div class="adj">
@@ -152,7 +154,8 @@
 
     var db;
     var dbPromise;
-    const dbVersion = 3;
+    var updateDB = false
+    const dbVersion = 6;
     function openDatabase(name){
         if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
 
@@ -198,8 +201,12 @@
                 store.createIndex("finish", "finish", { unique: false });
             }
             if (!db.objectStoreNames.contains('series')) { 
-                let store = db.createObjectStore('series', {keyPath: 'id', autoIncrement:false});
+                let store = db.createObjectStore('series', {keyPath: 'id'});
             }
+            if (!db.objectStoreNames.contains('using')) { 
+                let store = db.createObjectStore('using', {keyPath: 'id'});
+            }
+
             return db;
     
         }; // onupgradeneeded
@@ -208,18 +215,13 @@
         dbPromise.onblocked = function(e) { console.warn("onblocked", e.target.result); }
         dbPromise.onsuccess = function(e) {
             db = e.target.result;
-            writeRacesDB(db);
-            writeCompsDB(db);
-            writeFleetsDB(db)
-            writeResultsDB(db)
-            writeSeriesDB(db)
+            writeAllDB(db)
             return db;
         };
 
     } // openDatabase
-    // need to wrap in some kind of if to control the refresh behaviour
     var dbw = openDatabase('store');
-    
+
     function writeCompsDB(db){
       let comps = Csv.getComps()
       let transaction = db.transaction("comps", "readwrite");
@@ -244,7 +246,6 @@
         //console.log(comp);
       });
     }
-
     function writeFleetsDB(db){
          let fleets = Csv.getFleets();
         let tx = makeTX('fleets', 'readwrite');
@@ -256,8 +257,7 @@
         store.onerror = function(e){
           console.warn('onerror',e)
         }
-    }
-    
+    } 
     function writeRacesDB(db){
         let races = Csv.getRaces();
         let transaction = makeTX("races", "readwrite");
@@ -279,7 +279,6 @@
           //console.log('race',race);
         }
     }
-
     function writeResultsDB(db){
         let results = Csv.getResults();
         let transaction = makeTX("results", "readwrite");
@@ -289,16 +288,46 @@
             //console.log(results[i]);
         }
     }
-
     function writeSeriesDB(db){
       let results = Csv.getSeries()
       let tx = makeTX('series', 'readwrite')
       let resultsData = tx.objectStore("series");
       for (let i = 0; i < results.length; i++) {
+        results[i].id = 1
         let request = resultsData.add(results[i]);
         //console.log(results[i]);
       }
     }
+    function writeUsingDB(db){
+      let using = localStorage.getItem('using')
+      //LL(JSON.parse(using))
+      let jsoned = JSON.parse(using)
+      jsoned.id = 1
+      let tx = makeTX('using', 'readwrite')
+      let store = tx.objectStore("using");
+      store.add(jsoned)
+
+    }
+    function writeAllDB(db){
+      let using = JSON.parse(localStorage.getItem('using')).lastModifiedDate
+      let tx = makeTX('using', 'readwrite')
+      let store = tx.objectStore("using").get(1)
+      store.onsuccess = (e)=>{
+        let dbv = e.target.result
+        if(using == dbv.lastModifiedDate && !updateDB){
+          console.log('File matches DB no update required')
+        }else{
+          console.log('File does not match DB, updating')
+            writeRacesDB(db);
+            writeCompsDB(db);
+            writeFleetsDB(db)
+            writeResultsDB(db)
+            writeSeriesDB(db)
+            writeUsingDB(db)
+        }
+      }
+    }
+    
 </script>
 
 <script type="text/javascript">
@@ -406,6 +435,7 @@ function buildCompsRows(){
       let clone = template.content.cloneNode(true);
       clone.querySelector('.compPanel').setAttribute('id', comp.id)
       clone.querySelector('.compPanel').setAttribute('data-id', comp.id)
+      clone.querySelector('.compId').textContent = comp.id
       clone.querySelector('.helm').textContent = comp.helm
       clone.querySelector('.boatName').textContent = comp.boat
       clone.querySelector('.fleet').textContent = comp.fleet
@@ -419,7 +449,6 @@ function buildCompsRows(){
   resolve()
 }) // buildCompsRows
 }
-
 
 function buildRaceSelect(){
   return new Promise(function(resolve, reject){
@@ -465,9 +494,9 @@ setTimeout(function(){
   getFleets()
 }, 1000);
 //=============================================================
+
 function getResultsDb(raceId){
   if(raceId){
-
     let store = getStore('results').index('raceid').getAll(raceId)
     store.onsuccess = (e)=>{
       let races = e.target.result
@@ -475,14 +504,18 @@ function getResultsDb(raceId){
       races.forEach( (item) => {
         let compPanel = document.querySelector(`[id="${item.compid}"]`)
         compPanel.classList.add('finished')
-        compPanel.querySelector('.timeDisplay').textContent = item.finish
-       
+        if(item.finish){
+          compPanel.querySelector('.timeDisplay').textContent = item.finish
+        }else{
+          compPanel.querySelector('.timeDisplay').textContent = item.code
+        }
       })
     }
   }else{
     //cant figureout how to get default
-    let selectedRace = document.querySelector('#raceSelector').getAttribute('defaultraceid')
-    LL(selectedRace)
+    let selectedRace = document.querySelector('#raceSelector')
+    selectedRace.children[0]
+    //console.dir(selectedRace.children.item(0))
   }
   
 
@@ -605,8 +638,11 @@ function removeFromCue(compId, compPanel){
 } // removeFromCue
 
 function adjustButton(){
-
   if (this.closest('.compPanel').classList.contains('finished') ) {
+      let compid = this.closest('.compPanel').getAttribute('id')
+      let raceid = document.querySelector('#raceSelector').value
+      let start = document.querySelector('.start').textContent
+      let date = document.querySelector('.date').textContent
       var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
       var d = new Date();
       if (this.classList.contains('minus')) {
@@ -618,9 +654,11 @@ function adjustButton(){
           var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
           //add 0 where needed
           if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
-          console.log(ta);
           //timeText[3] = new Number(timeText[3])-1;
-          timeDisplay.textContent = ta.join(':')
+          let finish = ta.join(':')
+          timeDisplay.textContent = finish
+          let elapsed = getElapsedTime(start,date,finish)
+          updateResult({start,finish,elapsed,raceid,compid})
       }
       else if(this.classList.contains('plus')) {
           //add 10ths
@@ -631,9 +669,12 @@ function adjustButton(){
           var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
           //add 0 where needed
           if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
-          console.log(ta);
+          //console.log(ta);
           //timeText[3] = new Number(timeText[3])-1;
-          timeDisplay.textContent = ta.join(':')
+          let finish = ta.join(':')
+          timeDisplay.textContent = finish
+          let elapsed = getElapsedTime(start,date,finish)
+          updateResult({start,finish,elapsed,raceid,compid})
       }
   }
   else if(this.closest('.compPanel').classList.contains('selected')){
@@ -689,6 +730,8 @@ function finishButton(e){
         currentStart = fleetStart
       }
     })
+    compPanel.querySelector('.start').textContent = currentStart
+    compPanel.querySelector('.date').textContent = result.date
     let elapsed = getElapsedTime(currentStart,result.date,finishTime)
     let currentResult = {
       'id':parseInt(raceId+compId),
@@ -708,15 +751,14 @@ function finishButton(e){
  
 } // finishButton
 
-function getElapsedTime(currentStart, date, finishTime){
-  LL(date, currentStart, finishTime)
+function getElapsedTime(start, date, finish){
   // let today = new Date().toLocaleDateString()
-  let startDate = new Date(date+' '+currentStart)
+  let startDate = new Date(date+' '+start)
   // let startDate = new Date(today+' '+'12:00:00')
-  let finishDate = new Date(date+' '+finishTime)
+  let finishDate = new Date(date+' '+finish)
   // let finishDate = new Date(today+' '+finishTime)
   let elapsed = convertHMS((finishDate - startDate)/1000)
-  console.log(elapsed)
+  //console.log(elapsed)
   return elapsed
 }
 
@@ -735,6 +777,9 @@ function codeBtn(){
   //get select value
   var code = document.querySelector('#codeSelect select').value;
   var compPanel = this.closest('#main').querySelector(`[id="${cue[0]}"]`);
+  let compid = compPanel.getAttribute('id')
+  let raceid = document.querySelector('#raceSelector').value
+  updateResult({compid,raceid,code})
   compPanel.querySelector('.timeDisplay').textContent = code;
   compPanel.classList.remove('selected')
   compPanel.removeAttribute('style')
@@ -744,7 +789,21 @@ function codeBtn(){
   compPanel.querySelectorAll('.button').forEach( item => item.removeEventListener('click', adjustButton));
   cue.shift();
   formatRows();
+
 };
+
+function updateResult(event){
+  /**
+   * takes an object using deconstruction
+   */
+  var merged = {}
+  let store = getStore('results').get(parseInt(event.raceid+event.compid))
+  store.onsuccess = (e)=>{
+    let result = e.target.result
+    merged = {...result, ...event}
+    let write = getStore('results','readwrite').put(merged)
+  }
+}
 
 function showClock(){
   var digital=new Date();
