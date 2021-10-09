@@ -156,7 +156,8 @@
     <script src="js/importFile.js"></script><!-- change to localStorageManager -->
     <!-- <script src="js/dbUtility.js" defer></script> -->
     <script src="js/papaparse.min.js"></script>
-    
+    <!-- <script src="js/app.js"></script> -->
+
 <script name="indexedDB_stuff" type="text/javascript">
     // Globals
     var LL = console.log; //LazyLog
@@ -324,7 +325,7 @@
       let store = tx.objectStore("using").get(1)
       store.onsuccess = (e)=>{
         let dbv = e.target.result
-        if(using == dbv.lastModifiedDate && !updateDB){
+        if(dbv && using == dbv.lastModifiedDate && !updateDB){
           console.log('File matches DB no update required')
         }else{
           console.log('File does not match DB, updating')
@@ -536,16 +537,19 @@ setTimeout(function(){
   getFleets()
 }, 1000);
 //=============================================================
-function editTime(){
-  LL(this)
+function useSwDb(){
+
+
 }
 function getResultsDb(raceId){
   if(raceId){
     let store = getStore('results').index('raceid').getAll(raceId)
     store.onsuccess = (e)=>{
       let races = e.target.result
+      LL(races)
       clearCompRows()
       races.forEach( (item) => {
+       // LL(item.compid)
         let compPanel = document.querySelector(`[id="${item.compid}"]`)
         if(item.finish && !item.code){
           compPanel.classList.add('finished')
@@ -558,6 +562,9 @@ function getResultsDb(raceId){
           compPanel.querySelector('.timeDisplay').textContent = ""
         }
       })
+    }
+    store.onerror = (err) => {
+      console.log('err', err)
     }
   }else{
     //cant figureout how to get default
@@ -579,6 +586,7 @@ function raceSelectChange(){
   //LL(this.getAttribute('id'))
   raceSelected = this.getAttribute('id')
   getResultsDb(this.getAttribute('id'))
+  LL(this.getAttribute('id'))
   let store = getStore('races').get(parseInt(this.getAttribute('id')))
   store.onsuccess = (e) => {
     let result = e.target.result
@@ -794,17 +802,21 @@ function finishButton(e){
     let elapsed = getElapsedTime(currentStart,result.date,finishTime)
     let currentResult = {
       'id':parseInt(raceId+compId),
-      'compId': compId,
-      'raceId': raceId,
+      'compid': compId,
+      'raceid': raceId,
       'elapsed': elapsed,
       'finish': finishTime,
       'start': currentStart
     }
-//LL(currentResult)
-    let resultStore = getStore('results','readwrite')
+
+LL(currentResult)
+//APP.sendMessage(currentResult)
+
+    
 //?????????????????????????????????????
 //this will fail if result is already there
 //need to figure out
+  let resultStore = getStore('results','readwrite')
     resultStore.add(currentResult)
   } // race.onsuccess
  
@@ -838,7 +850,7 @@ function codeBtn(){
   var compPanel = this.closest('#main').querySelector(`[id="${cue[0]}"]`);
   let compid = compPanel.getAttribute('id')
   //let raceid = document.querySelector('#raceSelector').value
-  let raceId = raceSelected
+  let raceid = raceSelected
   updateResult({compid,raceid,code})
   compPanel.querySelector('.timeDisplay').textContent = code;
   compPanel.classList.remove('selected')
@@ -856,10 +868,12 @@ function updateResult(event){
   /**
    * takes an object using destructuring
    */
+  LL(event)
   var merged = {}
   let store = getStore('results').get(parseInt(event.raceid+event.compid))
   store.onsuccess = (e)=>{
     let result = e.target.result
+    
     merged = {...result, ...event}
     let write = getStore('results','readwrite').put(merged)
   }

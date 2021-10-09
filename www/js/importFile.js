@@ -1,9 +1,6 @@
 
 const Csv = {
-    /**
-     * 
-     */
-    
+
     fromInput: function(e){
         var file;
         // may need to make fromFile and fromUrl functions to return a file.object to keep track of versions

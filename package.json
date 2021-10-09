@@ -4,7 +4,8 @@
   "description": "test for blwme app",
   "main": "index.js",
   "scripts": {
-    "test": "runTest"
+    "test": "runTest",
+    "start": "http-server -a localhost -o ./www -p 5500"
   },
   "repository": {
     "type": "git",
