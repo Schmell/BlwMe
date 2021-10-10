@@ -12,7 +12,7 @@
         font-family: Arial;
         font-size: 40px;
         font-weight: bold;
-        right: 2px;
+        right: 20px;
         vertical-align: middle; }
     
     #main {
@@ -92,7 +92,7 @@
         }
         #finishBtn .finishLabel {
             font-family:"Arial Black","DroidSans","Georgia","sans";
-            font-size:x-large;
+            font-size: 40px;
             color:#999;
             top:40px;
             width:100%;
@@ -360,14 +360,27 @@
       }
       
     .timeTable td { 
-        padding: 0px; }
+        padding: 0px; 
+        }
     
     .timeDisplay {
         height: 25px;
         text-align: center;
         font-size:45px;
-         }
-        
+        }
+    .timeDisplay > input {
+        visibility: hidden;
+        }
+    .timeDisplay.show-input {
+        -webkit-text-stroke: 1px black;
+        -webkit-text-fill-color: rgb(177, 171, 171);
+        font-size: 40px
+        }
+    .timeDisplay.show-input > input {
+        visibility: visible;
+        -webkit-text-fill-color: black;
+        z-index: 10;
+        }
     .btn{
         font-family:"Arial Black","DroidSans","Georgia","sans";
         background-color:#EAEAEA;
@@ -404,9 +417,9 @@
         position:absolute;
         font-family:"Arial Black","DroidSans","Georgia","sans";
         font-size:12px;
-        top:165px;
-        width:87px;
-        height:87px;
+        top:195px;
+        width:147px;
+        height:147px;
         background-color:#EAEAEA;
         border:1px solid #CCCCCC;
         margin-left:auto;
@@ -423,6 +436,7 @@
         position:absolute;
         width:100%;
         text-align:center;
+        font-size: 55px;
         color:#999;
         -moz-user-select: none;  
         -khtml-user-select: none; 
@@ -432,9 +446,15 @@
     
     #codeSelect{
         position:absolute;
-        top:163px;
-        left:93px;
+        top:157px;
+        
         }
+    #codeSelect > select{
+        width: 147px;
+        height: 30px;
+        font-weight: bold;
+        font-size: 25px;
+    }
     #startTime{
       position:absolute;
         top:44px;
@@ -449,7 +469,7 @@
     }
     #finishPane{
         position:absolute;
-        top:250px;
+        top:335px;
         font-family:"Arial Black","DroidSans","Georgia","sans";
         font-size:14px;
      }
@@ -481,4 +501,57 @@
     .hidden{
         display: none;
     }
+    .dropbtn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 5px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        width: 200px;
+      }
+      
+      .dropdown {
+        position: relative;
+        display: inline-block;
+        width: 200px;
+      }
+      .dropDown span{
+        width: 200px;
+      }
+  
+      .dropdown-content {
+        display: none;
+        position: fixed;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        position: fixed;
+        z-index: 999;
+  
+      }
+      .dropdown-content .disabled {
+        background-color: rgb(116, 114, 114);
+      }
+      
+      .dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+      }
+      
+      /* .dropdown-content a:hover {background-color: #f1f1f1} */
+      .dropdown-content .disabled:hover {
+        background-color: #333;
+        
+      }
+      
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+      
+      .dropdown:hover .dropbtn {
+        background-color: #3e8e41;
+      }
     

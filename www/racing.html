@@ -3,52 +3,7 @@
   <link rel="stylesheet" href="css/racing.css"></link>
   <!-- dropdown styling -->
   <style> 
-    .dropbtn {
-      background-color: #4CAF50;
-      color: white;
-      padding: 5px;
-      font-size: 16px;
-      border: none;
-      cursor: pointer;
-      width: 200px;
-    }
     
-    .dropdown {
-      position: relative;
-      display: inline-block;
-      width: 200px;
-    }
-    .dropDown span{
-      width: 200px;
-    }
-
-    .dropdown-content {
-      display: none;
-      position: fixed;
-      background-color: #f9f9f9;
-      min-width: 160px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-      position: fixed;
-      z-index: 999;
-
-    }
-    
-    .dropdown-content a {
-      color: black;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-    }
-    
-    .dropdown-content a:hover {background-color: #f1f1f1}
-    
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
-    
-    .dropdown:hover .dropbtn {
-      background-color: #3e8e41;
-    }
   </style>
 </head>
 <body>
@@ -81,7 +36,7 @@
           <td width="160px" id="btnPaneCell">          
             <div id="btnPane">
             <div id="finishBtn" class="btn"><div class="finishLabel">Finish</div></div>
-            <div id="codeBtn" class="btn"><div id="codeLabel">Set Code</div></div>    
+            <div id="codeBtn" class="btn"><div id="codeLabel">DNF</div></div>    
             <div id="codeSelect">
               <select>
                   <option value="DNF">DNF</option>
@@ -160,13 +115,18 @@
 
 <script name="indexedDB_stuff" type="text/javascript">
     // Globals
+    var logging = false;
     var LL = console.log; //LazyLog
-    var raceSelected
+    var raceSelected;
     var db;
     var dbPromise;
-    var updateDB = false
+    var updateDB = false;
     const dbVersion = 6;
-    
+
+function log(e,eObj){
+  if(logging){console.log(e,eObj)}
+}   
+log('HEY',logging)
     function openDatabase(name){
         if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
 
@@ -441,6 +401,9 @@ function buildCompsRows(){
   store.onsuccess = (e)=>{
     let comps = e.target.result
     comps.forEach(function(comp){
+
+      //let raceId = 
+      //let start = getStartDateTime(comp.id)
       let clone = template.content.cloneNode(true);
       clone.querySelector('.compPanel').setAttribute('id', comp.id)
       clone.querySelector('.compPanel').setAttribute('data-id', comp.id)
@@ -453,34 +416,11 @@ function buildCompsRows(){
     }) // forEach
     document.querySelectorAll('.boat').forEach((elem)=>{elem.addEventListener('click',boatClick)})
     document.querySelectorAll('.button').forEach((elem)=>{elem.addEventListener('click',adjustButton)})
-
+    document.querySelectorAll('.timeDisplay').forEach((elem)=>{elem.addEventListener('dblclick',adjustTime)})
   } // onsuccess
   resolve()
 }) // buildCompsRows
 }
-
-function _buildRaceSelect(){
-  return new Promise(function(resolve, reject){
-  /**
-   * need to change dropdown from select/options to html/css
-  */
-  //get selector
-  let selector = document.querySelector('#raceSelector')
-  //get races from db
-  let races = storeAll('races')
-  races.onsuccess = (e)=>{
-    let result = races.result
-    selector.setAttribute('defaultRaceId',result[0].id)
-    result.forEach((item)=>{
-      let raceOption = document.createElement('option')
-      raceOption.textContent = item.name
-      raceOption.setAttribute('value', item.id)
-      selector.append(raceOption)
-    })
-  }
-  resolve()
-})
-} // buildRaceSelect
 
 async function buildRaceSelect(){
   let selector = document.querySelector('#raceSelect')
@@ -499,20 +439,19 @@ async function buildRaceSelect(){
     let content = document.createElement('div')
     content.classList.add('dropdown-content')
     result.forEach((item)=>{
+      //LL(item)
       let row = document.createElement('a')
       row.textContent = item.name
       row.setAttribute('id',item.id)
       row.setAttribute('href','#')
       row.classList.add('dropdow-row')
+      if(item.sailed == "1"){row.classList.add('disabled')}
       content.append(row)
       row.addEventListener('click',raceSelectChange)
     })
     fragment.append(dropDown)
     dropDown.append(span)
     dropDown.append(content)
-    LL(fragment)
-    //let raceSelect = document.querySelector('#raceSelect')
-    //raceSelect.innerHTML = ''
     raceSelect.append(fragment)
   }
 }
@@ -523,6 +462,7 @@ document.addEventListener('DOMContentLoaded', function(){
     document.querySelector('#finishBtn').addEventListener('click', finishButton)
     document.querySelector('#startSetBtn').addEventListener('click', setStart)
     document.querySelector('#codeBtn').addEventListener('click', codeBtn)
+    document.querySelector('#codeSelect select').addEventListener('change',changeCode)
     //document.querySelector('.timeDisplay').addEventListener('dblclick', editTime)
     //document.querySelector('#raceSelect select').addEventListener('change', raceSelectChange)
     // document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
@@ -537,16 +477,12 @@ setTimeout(function(){
   getFleets()
 }, 1000);
 //=============================================================
-function useSwDb(){
 
-
-}
 function getResultsDb(raceId){
   if(raceId){
     let store = getStore('results').index('raceid').getAll(raceId)
     store.onsuccess = (e)=>{
       let races = e.target.result
-      LL(races)
       clearCompRows()
       races.forEach( (item) => {
        // LL(item.compid)
@@ -586,18 +522,19 @@ function raceSelectChange(){
   //LL(this.getAttribute('id'))
   raceSelected = this.getAttribute('id')
   getResultsDb(this.getAttribute('id'))
-  LL(this.getAttribute('id'))
+  //LL(this.getAttribute('id'))
   let store = getStore('races').get(parseInt(this.getAttribute('id')))
   store.onsuccess = (e) => {
     let result = e.target.result
     let raceInfo = document.querySelector('#raceInfo')
     raceInfo.innerHTML = ""
+    raceInfo.setAttribute('raceId',result.raceid)
     let name = document.createElement('h3')
     name.textContent = result.name
     let date = document.createElement('p')
     date.textContent = result.date
     let sailed = document.createElement('p')
-    sailed.textContent = result.sailed
+    sailed.textContent = `Race sailed: ${result.sailed} Race Id: ${result.raceid}`
     raceInfo.appendChild(name)
     raceInfo.appendChild(date)
     raceInfo.appendChild(sailed)
@@ -705,7 +642,7 @@ function adjustButton(){
   if (this.closest('.compPanel').classList.contains('finished') ) {
       let compid = this.closest('.compPanel').getAttribute('id')
       //let raceid = document.querySelector('#raceSelector').value
-      let raceId = raceSelected
+      let raceid = raceSelected
       let start = document.querySelector('.start').textContent
       let date = document.querySelector('.date').textContent
       var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
@@ -757,7 +694,46 @@ function adjustButton(){
       formatRows();
   }
 } // adjustButton
-    
+
+function adjustTime(){
+  
+  this.classList.add('show-input')
+  let inText = document.createElement('input')
+  inText.setAttribute('type','text')
+  inText.classList.add('time-input')
+  inText.value = this.textContent
+  inText.focus()
+  this.addEventListener("keyup", function(event) {
+ 
+    if (event.keyCode === 13) {
+        sendTime(event)
+    }
+});
+  this.append(inText)
+}
+
+function sendTime(e){
+  let compid = e.target.closest('.compPanel').querySelector('.compId').textContent
+  LL(compid)
+  let raceid = document.querySelector('#raceInfo').getAttribute('raceid')
+  LL(raceid)
+  let newValue = e.target.value
+  let timeDisplay = e.target.parentNode
+  timeDisplay.innerHTML = ""
+  timeDisplay.textContent = ""
+  timeDisplay.classList.remove('show-input')
+  timeDisplay.textContent = e.target.value
+  if(newValue.includes(':')){
+    let finish = newValue
+    updateResult({raceid,compid,finish})
+  }else{
+    let code = newValue
+    updateResult({raceid,compid,code})
+  }
+  //
+  
+}
+
 function setStart(e){
   var date = new Date();
   var hour = date.getHours();
@@ -844,39 +820,92 @@ function convertHMS(value) {
   return hours+':'+minutes+':'+seconds;
 }
 
-function codeBtn(){
-  //get select value
+async function codeBtn(){
   var code = document.querySelector('#codeSelect select').value;
   var compPanel = this.closest('#main').querySelector(`[id="${cue[0]}"]`);
   let compid = compPanel.getAttribute('id')
-  //let raceid = document.querySelector('#raceSelector').value
   let raceid = raceSelected
-  updateResult({compid,raceid,code})
-  compPanel.querySelector('.timeDisplay').textContent = code;
-  compPanel.classList.remove('selected')
-  compPanel.removeAttribute('style')
-  compPanel.classList.add('finished')
-  compPanel.querySelector('.cueNo').textContent = '';
-  compPanel.querySelector('.adj li').removeAttribute('style');
-  compPanel.querySelectorAll('.button').forEach( item => item.removeEventListener('click', adjustButton));
-  cue.shift();
-  formatRows();
+  var currentStart
+  let currentFleet = compPanel.querySelector('.fleet').textContent
+  let races = getStore('races')
+  let race = races.get(parseInt(raceid))
+  race.onsuccess = (e)=>{
+    let result = e.target.result
+    let date = result.date
+    result.start.forEach((item)=>{
+      let stringToSplit = item.split("|")
+      let fleetStart = stringToSplit[1]
+      let fleetName = stringToSplit[0].split('^')[1]
+      if(currentFleet == fleetName){
+        currentStart = fleetStart
+      }
+    })
+    compPanel.querySelector('.timeDisplay').textContent = code;
+    compPanel.classList.remove('selected')
+    compPanel.removeAttribute('style')
+    compPanel.classList.add('finished')
+    compPanel.querySelector('.cueNo').textContent = '';
+    compPanel.querySelector('.adj li').removeAttribute('style');
+    compPanel.querySelectorAll('.button').forEach( item => item.removeEventListener('click', adjustButton));
+    cue.shift();
+    formatRows();
+    let start = currentStart
+   // LL({compid,raceid,code,start,date})
+    updateResult({compid,raceid,code,start,date})
+  }
+  //
+
 
 };
+
+async function getCompStart(compPanel,raceId){
+  var currentStart
+  let currentFleet = compPanel.querySelector('.fleet').textContent
+  let races = getStore('races')
+  let race = races.get(parseInt(raceId))
+  race.onsuccess = (e)=>{
+    let result = e.target.result
+
+    result.start.forEach((item)=>{
+      let stringToSplit = item.split("|")
+      let fleetStart = stringToSplit[1]
+      let fleetName = stringToSplit[0].split('^')[1]
+      if(currentFleet == fleetName){
+        currentStart = fleetStart
+      }
+    })
+      LL(currentStart)
+      return currentStart
+    
+  }
+
+}
+
+function changeCode(){
+  document.querySelector('#codeLabel').textContent = this.value
+}
 
 function updateResult(event){
   /**
    * takes an object using destructuring
    */
-  LL(event)
   var merged = {}
   let store = getStore('results').get(parseInt(event.raceid+event.compid))
   store.onsuccess = (e)=>{
     let result = e.target.result
-    
+    if(event.code){
+      event.elapsed = ''
+    }
+    if(event.finish){
+      let elapsed = getElapsedTime(event.start,event.date,event.finish)
+      event.elapsed = elapsed
+      event.code = ''
+    }
+    event.id = parseInt(event.raceid+event.compid)
     merged = {...result, ...event}
+    console.log(merged)
     let write = getStore('results','readwrite').put(merged)
-  }
+  } // onsuccess
 }
 
 function showClock(){

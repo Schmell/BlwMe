@@ -62,9 +62,12 @@ const Csv = {
         LL(file)
         var fs = require('fs');
     },
-    /**
-     * 
-     */
+    getStarts: function(){
+    let file = localStorage.getItem('currentFile');
+    let parsed = Papa.parse(file);
+    let data = parsed.data;
+    let startData = []
+    },
     getComps: function(){
     let file = localStorage.getItem('currentFile');
     let parsed = Papa.parse(file);
