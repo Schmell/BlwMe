@@ -121,7 +121,7 @@
     var db;
     var dbPromise;
     var updateDB = false;
-    const dbVersion = 6;
+    const dbVersion = 2;
 
 function log(e,eObj){
   if(logging){console.log(e,eObj)}
@@ -151,11 +151,11 @@ log('HEY',logging)
                 store.createIndex("boat", "boat", { unique: true });
                 store.createIndex("fleet", "fleet", { unique: false });
                 store.createIndex("helm", "helm", { unique: true });
-                store.createIndex("sailno", "sailno", { unique: false });
-                store.createIndex("class", "class", { unique: false });
-                store.createIndex("rank", "rank", { unique: false });
-                store.createIndex("nett", "nett", { unique: false });
-                store.createIndex("total", "total", { unique: false });
+                //store.createIndex("sailno", "sailno", { unique: false });
+                //store.createIndex("class", "class", { unique: false });
+                //store.createIndex("rank", "rank", { unique: false });
+                //store.createIndex("nett", "nett", { unique: false });
+                //store.createIndex("total", "total", { unique: false });
             }
         
             if (!db.objectStoreNames.contains('fleets')) {
@@ -182,7 +182,7 @@ log('HEY',logging)
     
         }; // onupgradeneeded
     
-        dbPromise.onerror = function(e) { console.warn("Error", e.target.result); };
+        dbPromise.onerror = function(e) { console.warn("Error", e.target.error); };
         dbPromise.onblocked = function(e) { console.warn("onblocked", e.target.result); }
         dbPromise.onsuccess = function(e) {
             db = e.target.result;
@@ -194,15 +194,19 @@ log('HEY',logging)
     var dbw = openDatabase('store');
 
     function writeCompsDB(db){
+      
       let comps = Csv.getComps()
-      let transaction = db.transaction("comps", "readwrite");
-      let compsData = transaction.objectStore("comps");
+      let tx = db.transaction("comps", "readwrite");
+      let compsData = tx.objectStore("comps");
+      
+     compsData.onsuccess = (e) => {
       comps.forEach(function(comps){
         let comp = {
+            'id': parseInt(comps.compid), 
+            'compid': comps.compid, 
             'boat': comps.compboat, 
             'rating': comps.comprating, 
             'fleet': comps.compfleet, 
-            'id': comps.compid, 
             'helm': comps.comphelmname, 
             'alias':comps.compalias, 
             'club':comps.compclub, 
@@ -213,9 +217,13 @@ log('HEY',logging)
             'rank':comps.comprank, 
             'total':comps.comptotal
           }
-        let request = compsData.add(comp);
-        //console.log(comp);
-      });
+        let request = compsData.put(comp);
+        
+      })// forEach
+       } // onsuccess
+      compsData.onerror = (err)=>{
+        console.log('getComps data error', err)
+      }
     }
     function writeFleetsDB(db){
          let fleets = Csv.getFleets();
@@ -276,7 +284,7 @@ log('HEY',logging)
       jsoned.id = 1
       let tx = makeTX('using', 'readwrite')
       let store = tx.objectStore("using");
-      store.add(jsoned)
+      store.put(jsoned)
 
     }
     function writeAllDB(db){
@@ -289,15 +297,21 @@ log('HEY',logging)
           console.log('File matches DB no update required')
         }else{
           console.log('File does not match DB, updating')
+           
+            writeCompsDB(db)
             writeRacesDB(db);
-            writeCompsDB(db);
             writeFleetsDB(db)
             writeResultsDB(db)
             writeSeriesDB(db)
             writeUsingDB(db)
         }
       }
+    } // writeAllDB
+
+    function myTest(){
+      let tx = 
     }
+
     
 </script>
 
@@ -429,7 +443,7 @@ async function buildRaceSelect(){
   let races = storeAll('races')
   races.onsuccess = (e)=>{
     let result = races.result
-    selector.setAttribute('defaultRaceId',result[0].id)
+    // selector.setAttribute('defaultRaceId',result[0].id)
     let fragment = document.createDocumentFragment();
     let dropDown = document.createElement('div')
     dropDown.classList.add('dropdown')

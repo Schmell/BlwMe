@@ -112,8 +112,8 @@ const Csv = {
         let parsed = Papa.parse(file);
         let data = parsed.data;
         let resultsArr = [];
-        let results = data.filter(function(item){return item[0] == "rft"});
-        // LL('results', results)
+        let results = data.filter(function(item){return item[0] == "rele"});
+         //LL('results', results)
         results.forEach(function(result){
             let resultRow = {
                 id: parseInt(result[3]+result[2]),
@@ -133,14 +133,21 @@ const Csv = {
                 rrset: Csv.resultHelp("rrset",data,result)
             }
             resultsArr.push(resultRow);
+            
         });// forEach
         //console.log(resultsArr);
         return resultsArr;
     }, // getResults
 
     resultHelp: function(resultTag,data,result){
-        let res = data.filter(function(item){return item[0] == resultTag && item[2] == result[2] && item[3] == result[3] });
-        return res[0][1];
+        
+        let res = data.filter(function(item){
+            return item[0] == resultTag && item[2] == result[2] && item[3] == result[3] 
+        });
+        if(res[0]){
+            return res[0][1];
+        }else{
+        }
     }, // resultsHelp
 
     getFleets: function(){
@@ -159,7 +166,7 @@ const Csv = {
         let data = parsed.data;
         var raceData = [];
         //races =[0-racename,1-NAME,2-space,3-ID]
-        var races = data.filter(function(item){return item[0] == 'racename';});
+        var races = data.filter(function(item){return item[0] == 'racerank';});
         races.forEach(function(race){
             //console.log('race',race)
             var raceObj = {};
