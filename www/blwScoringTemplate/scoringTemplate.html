@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./scoringTemplate.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+
+    <title>Document</title>
+</head>
+<body>
+    <div class="scoring-main">
+
+        <div class="edit-panel show-edit">
+            edit-panel this will be a drawer
+        </div>
+        
+        <div class="comp-panel">
+
+            <div class="comp-row">
+                <div class="comp-info">
+                    <div class="detail-1">Ashe</div>
+                    <div class="detail-2">73356</div>
+                    <div class="detail-3">Spinnaker</div>
+                    <div class="detail-4">Jen, Zimmerman</div>
+                </div>
+                <div class="finish-record">
+                    <div class="finish-info">19:40:45</div>
+                    <div class="adjust-button plus">+</div>
+                    <div class="adjust-button minus">-</div>
+                </div>
+            </div>
+
+            <div class="comp-row">
+                <div class="comp-info">
+                    <div class="detail-1">California Girl</div>
+                    <div class="detail-2">73356</div>
+                    <div class="detail-3">White Sail 1s</div>
+                    <div class="detail-4">Jen, Zimmerman</div>
+                </div>
+                <div class="finish-record">
+                    <div class="adjust-button plus">+</div>
+                    <div class="adjust-button minus">-</div>
+                    <div class="finish-info">19:40:45</div>
+                </div>
+            </div>
+
+            <div class="comp-row">
+                <div class="comp-info">
+                    <div class="detail-1">Ashe</div>
+                    <div class="detail-2">73356</div>
+                    <div class="detail-3">Spinnaker</div>
+                    <div class="detail-4">Jen, Zimmerman</div>
+                </div>
+                <div class="finish-record">
+                    <div class="finish-info">19:40:45</div>
+                    <div class="adjust-button plus">+</div>
+                    <div class="adjust-button minus">-</div>
+                </div>
+            </div>
+
+            <div class="comp-row">
+                <div class="comp-info">
+                    <div class="detail-1">Awxomea</div>
+                    <div class="detail-2">345777</div>
+                    <div class="detail-3">White Sail 2</div>
+                    <div class="detail-4">Dean Brown</div>
+                </div>
+                <div class="finish-record">
+                    <div class="finish-info">20:30:45</div>
+                    <div class="adjust-button plus">+</div>
+                    <div class="adjust-button minus">-</div>
+                </div>
+            </div>
+
+            <div class="comp-row">
+                <div class="comp-info">
+                    <div class="detail-1">Better Still</div>
+                    <div class="detail-2">4444</div>
+                    <div class="detail-3">Spinnaker</div>
+                    <div class="detail-4">Dave Courtney</div>
+                </div>
+                <div class="finish-record">
+                    <div class="finish-info">22:22:22</div>
+                    <div class="adjust-button plus">+</div>
+                    <div class="adjust-button minus">-</div>
+                </div>
+            </div>
+
+        </div><!--  comp-panel -->
+    <div class="action-panel">
+            <div class="finish-button">
+                <button>finish-button</button>>
+            </div>
+            <div class="code-action">
+                <div class="code-select">
+                    <div class="dropup">
+                        <button class="dropbtn">Dropup</button>
+                        <div class="dropup-content">
+                          <a href="#">Link 1</a>
+                          <a href="#">Link 2</a>
+                          <a href="#">Link 3</a>
+                        </div>
+                      </div>
+                <div class="code-button">
+                    code-button
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('.comp-row').forEach((item)=>{
+                item.addEventListener('click', compRowClick)
+            })
+            // console.log('DOM fully loaded and parsed');
+        });
+            
+
+
+        const compRowClick = (e)=>{
+            console.log(e.target)
+        }
+        
+    </script>
+</body>
+</html>
