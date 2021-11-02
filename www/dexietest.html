@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
+  <script>
+
+    var db = new Dexie("FriendDatabase");
+
+
+
+    db.version(2).stores({
+    friends: `
+        id,
+        name,
+        age`,
+    enimies: `
+        id,
+        name,
+        age
+        `,
+    });
+db.enimies.bulkPut([
+    {id: 1, name: "Enemy 1", age: 1},
+    {id: 2, name: "Enemy 2", age: 2},
+    {id: 3, name: "Enemy 3", age: 3},
+])
+    // Now add some values.
+    db.friends.bulkPut([
+      { id: 1, name: "Josephine", age: 21 },
+      { id: 2, name: "Per", age: 75 },
+      { id: 3, name: "Simon", age: 5 },
+      { id: 4, name: "Sara", age: 50, notIndexedProperty: 'foo' }
+    ]).then(() => {
+
+      return db.friends.where("age").between(0, 25).toArray();
+
+    }).then(friends => {
+
+      alert("Found young friends: " +
+        friends.map(friend => friend.name));
+
+      return db.friends
+        .orderBy("age")
+        .reverse()
+        .toArray();
+
+    }).then(friends => {
+
+      alert("Friends in reverse age order: " +
+        friends.map(friend => `${friend.name} ${friend.age}`));
+
+      return db.friends.where('name').startsWith("S").keys();
+
+    }).then(friendNames => {
+
+      alert("Friends on 'S': " + friendNames);
+
+    }).catch(err => {
+
+      alert("Ouch... " + err);
+
+    });
+
+  </script>
+</head>
+</html>

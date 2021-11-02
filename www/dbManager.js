@@ -26,8 +26,7 @@ self.addEventListener("message", (e) => {
 
   if ("getRaces" in data) {
     gimmeDb(data, clientId, getRaces);
-  } // get races
-
+  } 
   if ("getRace" in data) {
     gimmeDb(data, clientId, getRace);
   }
@@ -42,6 +41,15 @@ self.addEventListener("message", (e) => {
   }
   if ("getComp" in data) {
     gimmeDb(data, clientId, getComp);
+  }
+  if ("getFleets" in data) {
+    gimmeDb(data, clientId, getFleets);
+  }
+  if ("getSeries" in data) {
+    gimmeDb(data, clientId, getSeries);
+  }
+  if ("getCompRaces" in data) {
+    gimmeDb(data, clientId, getCompRaces);
   }
 }); // message
 
@@ -59,20 +67,18 @@ function gimmeDb(data, clientId, callback) {
 function getRaces(data, clientId) {
   let store = getStore("races").getAll();
   store.onsuccess = () => {
-    //LL("store result: ", store.result);
     sendMessage({ message: { racesReturned: store.result } }, clientId);
   };
 }
 
 function getRace(data, clientId) {
-  let store = getStore("races").get(data.getRace)
+  let store = getStore("races").get(parseInt(data.getRace))
   store.onsuccess = ()=>{
     log(store.result)
     sendMessage({ message: { racesReturned: store.result } }, clientId);
 
   }
 }
-
 function getResults(data, clientId) {
   let store = getStore("results").getAll()
   store.onsuccess = ()=>{
@@ -81,9 +87,8 @@ function getResults(data, clientId) {
 
   }
 }
-
 function getResult(data, clientId) {
-  let store = getStore("results").get(data.getResult)
+  let store = getStore("results").get(parseInt(`${data.getResult[1]}${data.getResult[0]}`))
   store.onsuccess = ()=>{
     log(store.result)
     sendMessage({ message: { resultsReturned: store.result } }, clientId);
@@ -99,19 +104,60 @@ function getComps(data, clientId) {
   }
 }
 function getComp(data, clientId) {
-  LL(data.getComp)
-  let store = getStore("comps").get(data.getComp)
-  store.onsuccess = ()=>{
+  if(!data.getComp){
+    return null;
+  }
+  let store = getStore("comps").get(parseInt(data.getComp))
+  store.onsuccess = (e) => {
     log(store.result)
     sendMessage({ message: { compsReturned: store.result } }, clientId);
 
   }
 }
+function getFleets(data, clientId) {
+  LL(data.getComp)
+  let store = getStore("fleets").getAll()
+  store.onsuccess = ()=>{
+    log(store.result)
+    sendMessage({ message: { fleetsReturned: store.result } }, clientId);
+
+  }
+}
+function getSeries(data, clientId) {
+  let store = getStore("series").get(1)
+  store.onsuccess = ()=>{
+    log(store.result)
+    sendMessage({ message: { seriesReturned: store.result } }, clientId);
+  }
+} 
+function getCompRaces(data, clientId) {
+  let resultArray = [];
+  if (!data.getCompRaces){
+    return null;
+  }
+
+  let tx = db.transaction(['comps','results'], 'readonly');
+  let store = tx.objectStore('comps').get(parseInt(data.getCompRaces));
+  store.onsuccess = ()=>{
+    let resultsStore = tx.objectStore('results').index('compid').openCursor();
+    resultsStore.onsuccess = () => {
+      let cursor = resultsStore.result;
+      if(cursor){
+        if(cursor.value.compid == store.result.id){
+          resultArray.push(cursor.value)
+        }
+        cursor.continue();
+      }else{
+        let compWithResults = { ...store.result, results: resultArray }
+        sendMessage({ message: { compRacesReturned: compWithResults } }, clientId);
+      }
+    };
+  }
+} // getCompRaces 
 
 const sendMessage = async (msg, clientId) => {
   let allClients = [];
   if (clientId) {
-    //LL('got cient id',msg)
     let client = await clients.get(clientId);
     allClients.push(client);
   } else {
@@ -124,7 +170,7 @@ const sendMessage = async (msg, clientId) => {
       return client.postMessage(msg);
     })
   );
-};
+}; // sendMessage
 function makeTx(storeName, mode) {
   if (mode == "undefined") {
     mode = "readwrite";
@@ -134,11 +180,11 @@ function makeTx(storeName, mode) {
     console.error("makeTX onerror", err.target.error);
   };
   return tx;
-}
+};
 function getStore(storeName, mode) {
   let store = makeTx(storeName, mode).objectStore(storeName);
   return store;
-}
+};
 const openDatabase = function (callback) {
   // if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
   const dbVersion = 10;
@@ -215,4 +261,4 @@ function log(e, eObj) {
   if (logging) {
     console.log(e, eObj);
   }
-}
+};
