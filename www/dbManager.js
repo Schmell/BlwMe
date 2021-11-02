@@ -16,11 +16,9 @@ self.addEventListener("fetch", (e) => {
   // manage fetching for cache or not
   //log('dbManager: fetch',e)
 });
-
 self.addEventListener("message", (e) => {
   // manage messages from browser
   log("dbManager: message", e);
-
   let data = e.data;
   let clientId = e.source.id;
 
@@ -51,6 +49,9 @@ self.addEventListener("message", (e) => {
   if ("getCompRaces" in data) {
     gimmeDb(data, clientId, getCompRaces);
   }
+  if ("updateResult" in data) {
+    gimmeDb(data, clientId, updateResult);
+  }
 }); // message
 
 function gimmeDb(data, clientId, callback) {
@@ -63,14 +64,12 @@ function gimmeDb(data, clientId, callback) {
     });
   }
 }
-
 function getRaces(data, clientId) {
   let store = getStore("races").getAll();
   store.onsuccess = () => {
     sendMessage({ message: { racesReturned: store.result } }, clientId);
   };
 }
-
 function getRace(data, clientId) {
   let store = getStore("races").get(parseInt(data.getRace))
   store.onsuccess = ()=>{
@@ -153,7 +152,20 @@ function getCompRaces(data, clientId) {
       }
     };
   }
-} // getCompRaces 
+} // getCompRaces
+function updateResult(data, clientId) {
+  let newData = {finish: '19:22:22', elapsed: '52:22'}
+  if(!data.updateResult[0] || !data.updateResult[1]){
+    return null;
+  }
+  let store = getStore("results").get(parseInt(`${data.updateResult[1]}${data.updateResult[0]}`))
+  store.onsuccess = ()=>{
+    LL(store)
+    let s = getStore("results","readwrite").put({...store.result, ...newData})
+    //store.put({...store.result, ...newData})
+    // sendMessage({ message: { resultsReturned: store.result } }, clientId);
+  }
+}
 
 const sendMessage = async (msg, clientId) => {
   let allClients = [];

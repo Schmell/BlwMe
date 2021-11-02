@@ -56,8 +56,8 @@
         <li id="getCompRaces" class="nav-item mb-2">
             <span><a class="nav-link" href="#">getCompRaces</a></span><span><input class="mx-2" id="compId" type="text" placeholder="compid"></span>
         </li>
-        <li id="addResult" class="nav-item mb-2">
-            <a class="nav-link" href="#">addResult</a>
+        <li id="updateResult" class="nav-item mb-2">
+            <span ><a class="nav-link" href="#">updateResult</a></span><span><input class="mx-2" id="updateResultCompId" type="text" placeholder="compid"></span><span><input id="updateResultRaceId" type="text" placeholder="raceid"></span>
         </li>
     </ul>
 </div>
@@ -82,6 +82,7 @@ const DBM = {
         document.getElementById('getFleets').addEventListener('click',this.getFleets)
         document.getElementById('getSeries').addEventListener('click',this.getSeries)
         document.getElementById('getCompRaces').addEventListener('click',this.getCompRaces)
+        document.getElementById('updateResult').addEventListener('click',this.updateResult)
     },
 
     registerDbManager() {
@@ -157,6 +158,10 @@ const DBM = {
     getCompRaces(){
         // console.log(compId.value)
         DBM.sendMessage({'getCompRaces': compId.value})
+    },
+    updateResult(){
+        // console.log(compId.value)
+        DBM.sendMessage({'updateResult': [updateResultCompId.value,updateResultRaceId.value]})
     },
 
     sendMessage(msg) {
