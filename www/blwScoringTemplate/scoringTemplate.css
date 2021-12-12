@@ -61,6 +61,9 @@
     border-top-left-radius: 50px 20px;
     border-bottom-right-radius: 50px 20px;
 }
+.comp-row .selected{
+  border-color: reds;
+}
 
 .comp-info {
 
@@ -77,6 +80,12 @@
     ;
     /* margin: 10px 10px; */
 }
+.comp-info > .comp-row .selected{
+  color: reds;
+}
+
+
+
 
 .detail-1 {
     display: block;
