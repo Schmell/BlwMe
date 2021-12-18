@@ -413,7 +413,6 @@ function buildCompsRows(){
   store.onsuccess = (e)=>{
     let comps = e.target.result
     comps.forEach(function(comp){
-
       //let raceId = 
       //let start = getStartDateTime(comp.id)
       let clone = template.content.cloneNode(true);
@@ -487,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function(){
 setTimeout(function(){
   buildCompsRows().then(getResultsDb()).then(buildRaceSelect())
   getFleets()
-}, 1000);
+}, 2000);
 //=============================================================
 
 function getResultsDb(raceId){
@@ -632,8 +631,12 @@ function formatRows(){
       next.style.borderColor = color
       next.querySelector('.cueNo').textContent = i+1
       next.querySelector('.cueNo').style.color = color
-      let styleString = `border-right-color:${color};border-top-color:${color};border-left-color:${color};color:${changeColor(color,'.2',true)}`
-      next.querySelector('.adj li').setAttribute('style',styleString)
+      // let 
+       = `border-right-color:${color};border-top-color:${color};border-left-color:${color};color:${changeColor(color,'.2',true)}`
+      next.querySelectorAll('.adj li').forEach((adj)=>{
+        adj.style.borderColor  = color
+        adj.style.color = changeColor(color,'.2',true)
+      })
       next.style.backgroundColor = changeColor(newColor,'.3',false)
       color = newColor;
   };
@@ -642,7 +645,9 @@ function formatRows(){
 function removeFromCue(compId, compPanel){
     compPanel.removeAttribute('style')
     compPanel.querySelector('.cueNo').textContent = ""
-    compPanel.querySelector('.adj li').removeAttribute('style');
+    compPanel.querySelectorAll('.adj li').forEach((adj)=>{
+      adj.removeAttribute('style');         
+    })
     for(var i=cue.length-1; i>=0;i--){
         if(cue[i]===compId){
             cue.splice(i,1);
@@ -656,7 +661,7 @@ function adjustButton(){
       //let raceid = document.querySelector('#raceSelector').value
       let raceid = raceSelected
       let start = document.querySelector('.start').textContent
-      let date = document.querySelector('.date').textContent
+      const date = document.querySelector('.date').textContent
       var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
       var d = new Date();
       if (this.classList.contains('minus')) {
@@ -672,7 +677,7 @@ function adjustButton(){
           let finish = ta.join(':')
           timeDisplay.textContent = finish
           let elapsed = getElapsedTime(start,date,finish)
-          updateResult({start,finish,elapsed,raceid,compid})
+          updateResult({start,finish,elapsed,date,raceid,compid})
       }
       else if(this.classList.contains('plus')) {
           //add 10ths
@@ -682,13 +687,16 @@ function adjustButton(){
           t.setTime(t.getTime()+1000);
           var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
           //add 0 where needed
-          if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
+          if(ta[0]<=9){ta[0]="0"+ta[0]}; 
+          if(ta[1]<=9){ta[1]="0"+ta[1]}; 
+          if(ta[2]<=9){ta[2]="0"+ta[2]}
           //console.log(ta);
           //timeText[3] = new Number(timeText[3])-1;
           let finish = ta.join(':')
           timeDisplay.textContent = finish
+          LL("PLUS: ", start, "date:", date, "finish:",finish)
           let elapsed = getElapsedTime(start,date,finish)
-          updateResult({start,finish,elapsed,raceid,compid})
+          updateResult({start,finish,elapsed,date,raceid,compid})
       }
   }
   else if(this.closest('.compPanel').classList.contains('selected')){
@@ -812,6 +820,9 @@ LL(currentResult)
 
 function getElapsedTime(start, date, finish){
   // let today = new Date().toLocaleDateString()
+  LL("start: ", start)
+  LL("date: ", date)
+  LL("finish", finish)
   let startDate = new Date(date+' '+start)
   // let startDate = new Date(today+' '+'12:00:00')
   let finishDate = new Date(date+' '+finish)
@@ -897,10 +908,12 @@ function changeCode(){
   document.querySelector('#codeLabel').textContent = this.value
 }
 
-function updateResult(event){
+function 
+updateResult(event){
   /**
    * takes an object using destructuring
    */
+  LL(event)
   var merged = {}
   let store = getStore('results').get(parseInt(event.raceid+event.compid))
   store.onsuccess = (e)=>{
@@ -909,6 +922,7 @@ function updateResult(event){
       event.elapsed = ''
     }
     if(event.finish){
+
       let elapsed = getElapsedTime(event.start,event.date,event.finish)
       event.elapsed = elapsed
       event.code = ''
