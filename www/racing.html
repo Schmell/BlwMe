@@ -121,16 +121,16 @@
     var db;
     var dbPromise;
     var updateDB = false;
-    const dbVersion = 2;
+    const dbVersion = 17;
 
-function log(e,eObj){
-  if(logging){console.log(e,eObj)}
-}   
-log('HEY',logging)
+    function log(e,eObj){
+      if(logging){console.log(e,eObj)}
+    }   
+
     function openDatabase(name){
         if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
 
-        let dbPromise = indexedDB.open(name, dbVersion);
+        let dbPromise = indexedDB.open(name, 15);
     
         dbPromise.onupgradeneeded = function(e) {
             console.log('onupgradeneeded');
@@ -191,39 +191,44 @@ log('HEY',logging)
         };
 
     } // openDatabase
-    var dbw = openDatabase('store');
+    const dbw = openDatabase('store');
 
     function writeCompsDB(db){
       
       let comps = Csv.getComps()
-      let tx = db.transaction("comps", "readwrite");
-      let compsData = tx.objectStore("comps");
+      let tx = makeTX('comps', 'readwrite'); 
+      // let compsData = tx.objectStore("comps");
+      let compsData = getStore("comps", "readwrite")
+      LL("writeCompsDB")
       
-     compsData.onsuccess = (e) => {
+  
       comps.forEach(function(comps){
-        let comp = {
-            'id': parseInt(comps.compid), 
-            'compid': comps.compid, 
-            'boat': comps.compboat, 
-            'rating': comps.comprating, 
-            'fleet': comps.compfleet, 
-            'helm': comps.comphelmname, 
-            'alias':comps.compalias, 
-            'club':comps.compclub, 
-            'exclude':comps.compexclude, 
-            'high':comps.comphigh, 
-            'medicalflag':comps.compmedicalflag, 
-            'nett':comps.compnett, 
-            'rank':comps.comprank, 
-            'total':comps.comptotal
-          }
-        let request = compsData.put(comp);
-        
-      })// forEach
-       } // onsuccess
-      compsData.onerror = (err)=>{
-        console.log('getComps data error', err)
-      }
+      let comp = {
+          'id': parseInt(comps.compid), 
+          'compid': comps.compid, 
+          'boat': comps.compboat, 
+          'rating': comps.comprating, 
+          'fleet': comps.compfleet, 
+          'helm': comps.comphelmname, 
+          'alias':comps.compalias, 
+          'club':comps.compclub, 
+          'exclude':comps.compexclude, 
+          'high':comps.comphigh, 
+          'medicalflag':comps.compmedicalflag, 
+          'nett':comps.compnett, 
+          'rank':comps.comprank, 
+          'total':comps.comptotal
+        }
+        // LL(comp)
+      let request = compsData.add(comp);
+      LL(comps)
+    })// forEach
+      // compsData.onsuccess = (e) => {
+
+      //  } // onsuccess
+      // compsData.onerror = (err)=>{
+      //   console.log('getComps data error', err)
+      // }
     }
     function writeFleetsDB(db){
          let fleets = Csv.getFleets();
@@ -316,9 +321,9 @@ log('HEY',logging)
 <script type="text/javascript">
 
 function makeTX(storeName,mode){
-  //console.log('makeTX',db)
+  // console.log('makeTX',db)
   let tx = db.transaction(storeName, mode);
-  //LL(tx)
+  // LL(tx)
   tx.onerror = (err) => {
     console.error('makeTX onerror',err.target.error);
   }
@@ -384,7 +389,7 @@ async function relate(store1, store2, callback){
 
 function relateDone(related){
   related.forEach(function(relatedItems){
-  L(relatedItems)
+  // L(relatedItems)
   
     let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
       let dataKey = item.getAttribute('data-key');
