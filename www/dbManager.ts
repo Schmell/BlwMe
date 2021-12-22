@@ -1,4 +1,4 @@
-const version = 15;
+const version = 5;
 const defaultStore = "stores";
 var db;
 const logging = false;
@@ -217,7 +217,7 @@ function getStore(storeName, mode) {
 
 const openDatabase = function (callback) {
   // if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
-  const dbVersion = 15;
+  const dbVersion = 10;
   //if(!name){name = defaultStore}
   let dbOpen = indexedDB.open("store", dbVersion);
 

@@ -669,15 +669,22 @@ function adjustButton(){
       const date = document.querySelector('.date').textContent
       var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
       var d = new Date();
+
       if (this.classList.contains('minus')) {
           //subtract 10ths
           var timeText= timeDisplay.textContent.split(':');
+          if(timeText.length <= 1){
+            // LL("time text = true")
+            return null
+          }
           var t = new Date();
           var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
           t.setTime(t.getTime()-1000);
           var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
           //add 0 where needed
-          if(ta[0]<=9){ta[0]="0"+ta[0]}; if(ta[1]<=9){ta[1]="0"+ta[1]}; if(ta[2]<=9){ta[2]="0"+ta[2]}
+          if(ta[0]<=9){ta[0]="0"+ta[0]}; 
+          if(ta[1]<=9){ta[1]="0"+ta[1]}; 
+          if(ta[2]<=9){ta[2]="0"+ta[2]};
           //timeText[3] = new Number(timeText[3])-1;
           let finish = ta.join(':')
           timeDisplay.textContent = finish
@@ -687,19 +694,22 @@ function adjustButton(){
       else if(this.classList.contains('plus')) {
           //add 10ths
           var timeText= timeDisplay.textContent.split(':');
+          if(timeText.length <= 1){
+            // LL("time text = true")
+            return null
+          }
           var t = new Date();
           var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
           t.setTime(t.getTime()+1000);
+          // LL("t.getDate: ",t.getDate())
           var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
           //add 0 where needed
           if(ta[0]<=9){ta[0]="0"+ta[0]}; 
           if(ta[1]<=9){ta[1]="0"+ta[1]}; 
-          if(ta[2]<=9){ta[2]="0"+ta[2]}
-          //console.log(ta);
-          //timeText[3] = new Number(timeText[3])-1;
+          if(ta[2]<=9){ta[2]="0"+ta[2]};
           let finish = ta.join(':')
           timeDisplay.textContent = finish
-          LL("PLUS: ", start, "date:", date, "finish:",finish)
+          // LL("PLUS: ", start, "date:", date, "finish:",finish)
           let elapsed = getElapsedTime(start,date,finish)
           updateResult({start,finish,elapsed,date,raceid,compid})
       }
@@ -781,7 +791,7 @@ function finishButton(e){
   // get raceId from selector
   //let raceId = document.querySelector('#raceSelect select').value
   let raceId = raceSelected
-  LL(raceId)
+  // LL(raceId)
   let compId = compPanel.getAttribute('id')
   // get start time for current fleet
   let currentFleet = compPanel.querySelector('.fleet').textContent
@@ -810,7 +820,7 @@ function finishButton(e){
       'start': currentStart
     }
 
-LL(currentResult)
+// LL(currentResult)
 //APP.sendMessage(currentResult)
 
     
@@ -825,15 +835,17 @@ LL(currentResult)
 
 function getElapsedTime(start, date, finish){
   // let today = new Date().toLocaleDateString()
-  LL("start: ", start)
-  LL("date: ", date)
-  LL("finish", finish)
-  let startDate = new Date(date+' '+start)
+  // LL("start: ", start)
+  let startTimeInput = document.getElementById('startTimeInput').value
+  LL("startTimeInput: ",startTimeInput)
+  let startDate = new Date(date+' '+startTimeInput)
+  LL("startDate: ", startDate)
   // let startDate = new Date(today+' '+'12:00:00')
   let finishDate = new Date(date+' '+finish)
+  LL("finishDate: ", finishDate)
   // let finishDate = new Date(today+' '+finishTime)
   let elapsed = convertHMS((finishDate - startDate)/1000)
-  //console.log(elapsed)
+  console.log(elapsed)
   return elapsed
 }
 
@@ -918,7 +930,7 @@ updateResult(event){
   /**
    * takes an object using destructuring
    */
-  LL(event)
+  // LL(event)
   var merged = {}
   let store = getStore('results').get(parseInt(event.raceid+event.compid))
   store.onsuccess = (e)=>{
