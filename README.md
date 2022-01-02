@@ -1,7 +1,7 @@
 # BlwMe
 <br/>
 ## Usage:
-First open the *localManager.html* and select the one 1 of the WedSummer---.blw or MyNewTest.blw (empty races) files from the repos blw folder (the others don't always work)
+First open the **localManager.html** and select the one 1 of the WedSummer---.blw or MyNewTest.blw (empty races) files from the repos blw folder (the others don't always work)
 
 Then go to **Racing.html** and that should populte the indexedDB (you may have to refresh). You can use chrome dev tools under the application tab to see the database and localStorage items
 
