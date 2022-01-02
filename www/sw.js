@@ -8,10 +8,16 @@ let options = {
   ignoreVary: false,
 };
 //starter html and css and js files
-let assets = ["/", "/www/index.html",  "/www/localStorage.html",
-              "/www/css/racing.css", "/www/css/index.css", 
-              "/www/js/papaparse.min.js", "/www/js/importFile.js"];
-// "/www/racing.html", "/www/js/app.js", 
+let assets = [
+  "/",
+  "/www/index.html",
+  "/www/localStorage.html",
+  "/www/css/racing.css",
+  "/www/css/index.css",
+  "/www/js/papaparse.min.js",
+  "/www/js/importFile.js",
+];
+// "/www/racing.html", "/www/js/app.js",
 //starter images
 let imageAssets = [];
 
@@ -23,8 +29,11 @@ self.addEventListener("install", (ev) => {
   console.log(`Version ${version} installed`);
   // build a cache
   ev.waitUntil(
-    caches.open(staticName).then((cache) => {
-        cache.addAll(assets).then( () => {
+    caches
+      .open(staticName)
+      .then((cache) => {
+        cache.addAll(assets).then(
+          () => {
             //addAll == fetch() + put()
             // console.log(`${staticName} has been updated.`);
           },
@@ -56,7 +65,8 @@ self.addEventListener("activate", (ev) => {
   ev.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => {
+        keys
+          .filter((key) => {
             if (key != staticName && key != imageName) {
               return true;
             }
@@ -88,8 +98,8 @@ self.addEventListener("fetch", (ev) => {
             opts.mode = "cors";
             opts.credentials = "omit";
           }
-          return fetch(ev.request.url, opts)
-            .then((fetchResponse) => {
+          return fetch(ev.request.url, opts).then(
+            (fetchResponse) => {
               //we got a response from the server.
               if (fetchResponse.ok) {
                 return handleFetchResponse(fetchResponse, ev.request);
@@ -127,7 +137,7 @@ self.addEventListener("fetch", (ev) => {
   ); //end of respondWith
 }); //end of fetch listener
 
-const handleFetchResponse = (fetchResponse, request) => {
+const handleFetchResponse = async (fetchResponse, request) => {
   let type = fetchResponse.headers.get("content-type");
   // console.log('handle request for', type, request.url);
   if (type && type.match(/^image\//i)) {

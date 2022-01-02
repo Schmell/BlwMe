@@ -1,11 +1,8 @@
 <head>
   <style type="text/css" id="mine"></style>
   <link rel="stylesheet" href="css/racing.css"></link>
-  <!-- dropdown styling -->
-  <style> 
-    
-  </style>
 </head>
+
 <body>
   <div id="main">
     <div id="infoPane">
@@ -13,11 +10,12 @@
         <!-- raceSelected template -- option only-->
         <select id="raceSelector" defaultraceid=""></select>
       </div>
-      <!-- NEEDTO: set value from raceData -->
+      <!-- Todo: set value from raceData -->
       <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
        <br/> <div id="startSetBtn" class="btn">Set Start</div>
       </div>
       <div id="save" class="btn">save</div>
+      
       <div id="clock"></div>
       <div id="raceInfo"></div>
     </div>
@@ -49,10 +47,11 @@
           </td><!-- btn cell -->
         </tr>
       </table><!-- mainPaneTable -->
+      <div id="export" class="btn">export</div>
     </div> <!-- mainPane -->
   </div><!-- main -->
 
-  </body> 
+</body> 
     
     <!-- Templates -->
     <template id="raceSelectItems">
@@ -109,9 +108,7 @@
     
     <script src="js/colorChanger.js"></script>
     <script src="js/importFile.js"></script><!-- change to localStorageManager -->
-    <!-- <script src="js/dbUtility.js" defer></script> -->
     <script src="js/papaparse.min.js"></script>
-    <!-- <script src="js/app.js"></script> -->
 
 <script name="indexedDB_stuff" type="text/javascript">
     // Globals
@@ -151,11 +148,7 @@
                 store.createIndex("boat", "boat", { unique: true });
                 store.createIndex("fleet", "fleet", { unique: false });
                 store.createIndex("helm", "helm", { unique: true });
-                //store.createIndex("sailno", "sailno", { unique: false });
-                //store.createIndex("class", "class", { unique: false });
-                //store.createIndex("rank", "rank", { unique: false });
-                //store.createIndex("nett", "nett", { unique: false });
-                //store.createIndex("total", "total", { unique: false });
+         
             }
         
             if (!db.objectStoreNames.contains('fleets')) {
@@ -191,17 +184,14 @@
         };
 
     } // openDatabase
+
     const dbw = openDatabase('store');
 
     function writeCompsDB(db){
-      
       let comps = Csv.getComps()
-      let tx = makeTX('comps', 'readwrite'); 
-      // let compsData = tx.objectStore("comps");
+      // let tx = makeTX('comps', 'readwrite'); 
       let compsData = getStore("comps", "readwrite")
-      LL("writeCompsDB")
       
-  
       comps.forEach(function(comps){
       let comp = {
           'id': parseInt(comps.compid), 
@@ -219,17 +209,11 @@
           'rank':comps.comprank, 
           'total':comps.comptotal
         }
-        // LL(comp)
       let request = compsData.add(comp);
-      LL(comps)
+      // LL(comps)
     })// forEach
-      // compsData.onsuccess = (e) => {
-
-      //  } // onsuccess
-      // compsData.onerror = (err)=>{
-      //   console.log('getComps data error', err)
-      // }
     }
+
     function writeFleetsDB(db){
          let fleets = Csv.getFleets();
         let tx = makeTX('fleets', 'readwrite');
@@ -241,7 +225,8 @@
         store.onerror = function(e){
           console.warn('onerror',e)
         }
-    } 
+    }
+
     function writeRacesDB(db){
         let races = Csv.getRaces();
         let transaction = makeTX("races", "readwrite");
@@ -260,9 +245,9 @@
             'time':races[i].racetime
             }
           let request = racesData.put(race);
-          //console.log('race',race);
         }
     }
+
     function writeResultsDB(db){
         let results = Csv.getResults();
         let transaction = makeTX("results", "readwrite");
@@ -272,6 +257,7 @@
             //console.log(results[i]);
         }
     }
+
     function writeSeriesDB(db){
       let results = Csv.getSeries()
       let tx = makeTX('series', 'readwrite')
@@ -282,6 +268,7 @@
         //console.log(results[i]);
       }
     }
+
     function writeUsingDB(db){
       let using = localStorage.getItem('using')
       //LL(JSON.parse(using))
@@ -290,8 +277,8 @@
       let tx = makeTX('using', 'readwrite')
       let store = tx.objectStore("using");
       store.put(jsoned)
-
     }
+
     function writeAllDB(db){
       let using = JSON.parse(localStorage.getItem('using')).lastModifiedDate
       let tx = makeTX('using', 'readwrite')
@@ -302,20 +289,16 @@
           console.log('File matches DB no update required')
         }else{
           console.log('File does not match DB, updating')
-           
-            writeCompsDB(db)
-            writeRacesDB(db);
-            writeFleetsDB(db)
-            writeResultsDB(db)
-            writeSeriesDB(db)
-            writeUsingDB(db)
+          writeCompsDB(db)
+          writeRacesDB(db);
+          writeFleetsDB(db)
+          writeResultsDB(db)
+          writeSeriesDB(db)
+          writeUsingDB(db)
         }
       }
     } // writeAllDB
 
-
-
-    
 </script>
 
 <script type="text/javascript">
@@ -336,27 +319,131 @@ function getStore(storeName,mode){
   return tx;
 }
 
-function storeAll(storeName,mode){
+function getStoreAll(storeName,mode){
   let store = getStore(storeName,mode).getAll()
   return store;
 }
 
-function writeResult(resultObj){
-  if(resultObj.compId){
-    let tx = getStore("results",'readwrite');
-    tx.openCursor(resultObj.id).onsuccess = function(e){
-      var cursor = e.target.result;
-      if (cursor){
-        console.log('result already entered');
-      }else{
-        tx.add(resultObj)
-        console.log('add result:', resultObj.boat);
-      }
-    } 
-  }else{
-    console.log("no resultObj")
+function saveResults(){
+  // check for race sailed
+  let sailed = document.getElementById('raceInfo').getAttribute('sailed')
+  if(parseInt(sailed)){
+    // I want to change the save button to update button when race is sailed
+    console.log('race already marked sailed')
+    return null
   }
-} // 
+  
+  // get raceId
+  let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
+
+  // mark race as sailed
+  let races = getStore('races', 'readwrite')
+  let race = races.get(parseInt(raceId))
+  race.onsuccess = (e)=>{
+    // LL(race.result.sailed)
+    race.result.sailed = "1"
+    races.put(race.result)
+
+  }
+  
+  // get currentFile from localstorage
+  let file = localStorage.getItem("currentFile");
+  let parsed = Papa.parse(file);
+  let data = parsed.data;
+  // get results
+  let store = getStore("results").index("raceid").getAll(raceId)
+  store.onsuccess = ()=>{
+    store.result.forEach((result)=>{
+      // filter rdisc for index
+      // insert rele! rft strt 
+      let lineNum = data.findIndex((item, index, array)=>{
+        if (item[0] == 'rdisc' && item[2] == result.compid && item[3] == raceId && index){
+          return index
+        }
+      })
+        
+      if(lineNum){
+        // set rrestyp to 4 // i think this is result type? and 4 is for recording finish times
+        data[lineNum +1][1] = result.rrestyp // should set this value when setting result
+        // LL(result.rrestyp)
+        if(result.finish){
+          data.splice(lineNum, 0, ['rft', result.finish, result.compid, result.raceid]);
+          data.splice(lineNum, 0, ['rst', result.start, result.compid, result.raceid]);
+          data.splice(lineNum, 0, ['rele', result.elapsed, result.compid, result.raceid]); // might not matter if just finish times
+        }else{
+          data.splice(lineNum, 0, ['rcod', result.code, result.compid, result.raceid]);
+        }
+      }
+      let unparsed = Papa.unparse(data,{quotes:true, skipEmptyLines: true})
+      localStorage.setItem('savedFile', unparsed)
+    })
+    let saveButton = document.querySelector("#save")
+    saveButton.removeEventListener('click', saveResults)
+    saveButton.addEventListener("click", downloadFile)
+    saveButton.textContent = "download"
+  }
+}
+
+function downloadURL(url, name) {
+  var link = document.createElement("a");
+  link.download = name;
+  link.href = url;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  delete link;
+}
+
+function downloadFile() {
+  var data = localStorage.getItem('savedFile')
+  var blob = new Blob([data], {type: 'text/txt'});
+  var url  = window.URL.createObjectURL(blob);
+  var using = JSON.parse(localStorage.getItem("using"))
+  // LL(using)
+  downloadURL(url, using.name);
+}
+
+function downloadExport(data, raceName){
+  var blob = new Blob([data], {type: 'text/txt'});
+  var url  = window.URL.createObjectURL(blob);
+  downloadURL(url, raceName);
+}
+
+function exportResults(){
+    // get raceId / name
+    let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
+    let raceName = document.querySelector('#raceInfo h3').textContent
+    LL(raceName)
+
+    let columns = [["RaceNo","Boat","Finish","Code"]]
+    // let store = getStore("results").index("raceid").getAll(raceId)
+    let tx = db.transaction(["comps", "results"])
+    let results = tx.objectStore('results').index('raceid').openCursor()
+
+    results.onsuccess = ()=>{
+      let item = results.result
+      // LL(item)
+      if(item){
+        let comps = tx.objectStore('comps').get(parseInt(item.value.compid))
+        comps.onsuccess = ()=>{
+          columns.push([raceName, comps.result.boat, (item.value.finish ? item.value.finish : null), (item.value.code ? item.value.code : null) ])
+          item.continue()
+        }
+
+        
+        // LL(item)
+        // columns.push([`${raceName},"${item.compid}","${item.finish ? item.finish : ""}", "${item.code ? item.code : ""}"`])
+      }else{
+      let unparsed = Papa.unparse(columns, {quotes: true})
+      LL(unparsed)
+      raceName = raceName.replace(/\s/g, '');
+      downloadExport(unparsed, raceName+".result.csv")
+      }
+    }
+    results.oncomplete = ()=>{
+
+    }
+}
 
 async function relate(store1, store2, callback){
   let related = new Array;
@@ -371,26 +458,21 @@ async function relate(store1, store2, callback){
     let cursor = event.target.result
     if (cursor){
       let comps = tx.objectStore(store2.store).index(store2.index)
-      let comp = comps.get(cursor.value.compId)
+      let comp = comps.get(cursor.value.compid)
       comp.onsuccess = function(e){
         let first = e.target.result
         let second = cursor.value
-        //let merged = Object.assign(related, first, second)
         let merged = {...first, ...second}
-        //console.log('merged results',merged)
+        // console.log('merged results',merged)
         related.push(merged)
-        
       }
     cursor.continue(); 
-    }// if cursor
-  }// onsuccess
-  
+    }
+  }
 }
 
 function relateDone(related){
   related.forEach(function(relatedItems){
-  // L(relatedItems)
-  
     let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
       let dataKey = item.getAttribute('data-key');
       if(dataKey == relatedItems.fleet.replace(/ /g,'')){
@@ -401,10 +483,8 @@ function relateDone(related){
       }
     })
     let compPane = document.querySelectorAll('.compRow').forEach(function(item){
-      
     })
-  })// related.forEach
-  
+  })
 } // relateDone
 
 function buildCompsRows(){
@@ -442,7 +522,7 @@ async function buildRaceSelect(){
   let selector = document.querySelector('#raceSelect')
   selector.innerHTML = ''
   //get races from db
-  let races = storeAll('races')
+  let races = getStoreAll('races')
   races.onsuccess = (e)=>{
     let result = races.result
     // selector.setAttribute('defaultRaceId',result[0].id)
@@ -479,10 +559,12 @@ document.addEventListener('DOMContentLoaded', function(){
     document.querySelector('#startSetBtn').addEventListener('click', setStart)
     document.querySelector('#codeBtn').addEventListener('click', codeBtn)
     document.querySelector('#codeSelect select').addEventListener('change',changeCode)
+    document.querySelector('#save').addEventListener('click', saveResults)
+    document.querySelector('#export').addEventListener('click', exportResults)
     //document.querySelector('.timeDisplay').addEventListener('dblclick', editTime)
     //document.querySelector('#raceSelect select').addEventListener('change', raceSelectChange)
-    // document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
-    // document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
+    //document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
+    //document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
   }
 
 });// dom ready
@@ -545,21 +627,25 @@ function raceSelectChange(){
     let raceInfo = document.querySelector('#raceInfo')
     raceInfo.innerHTML = ""
     raceInfo.setAttribute('raceId',result.raceid)
+    raceInfo.setAttribute("sailed",result.sailed)
     let name = document.createElement('h3')
     name.textContent = result.name
     let date = document.createElement('p')
+    date.setAttribute('id', "date")
     date.textContent = result.date
     let sailed = document.createElement('p')
     sailed.textContent = `Race sailed: ${result.sailed} Race Id: ${result.raceid}`
+    
     raceInfo.appendChild(name)
     raceInfo.appendChild(date)
     raceInfo.appendChild(sailed)
+    updateFinishPane()
   }
 }
 
 function getFleets(){
   let result = [];
-  let fleets = storeAll('fleets')
+  let fleets = getStoreAll('fleets')
   fleets.onsuccess = (e)=>{
     let result = e.target.result
     makeFinishPane(result)
@@ -585,21 +671,12 @@ function updateFinishPane(){
   document.querySelectorAll('.finishListTitle li').forEach(function(item){
     item.remove();
   })
-  //get Current race
-  let raceSelect = document.querySelector('#raceSelect select')
-  let raceSelected = raceSelect.options[raceSelect.selectedIndex].value
-  let store1 = {'store':'results','index':'raceId','search':'106'}
-  let store2 = {'store':'comps','index':'id','search':''}
+  //get current race
+  let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
+  let store1 = {'store':'results','index':'raceid','search':raceId}
+  let store2 = {'store':'comps','index':'compid','search':''}
   let rel = relate(store1, store2, relateDone)
 }// updateFinishPane
-
-function matchCompToRace(resultsArr){
-  LL(resultsArr)
-  let store = getStore('comps').index('id')
-  resultsArr.forEach(function(item){
-
-  })
-}
 
 //Globals
 var cue = [];
@@ -624,7 +701,7 @@ function boatClick(e){
       compPanel.classList.add('selected');
   }
   formatRows();
-}; // .boat click
+}; // boatClick
 
 function formatRows(){
   let color = '#000099';
@@ -663,10 +740,9 @@ function removeFromCue(compId, compPanel){
 function adjustButton(){
   if (this.closest('.compPanel').classList.contains('finished') ) {
       let compid = this.closest('.compPanel').getAttribute('id')
-      //let raceid = document.querySelector('#raceSelector').value
       let raceid = raceSelected
-      let start = document.querySelector('.start').textContent
-      const date = document.querySelector('.date').textContent
+      let start = document.querySelector('#startTimeInput').value
+      const date = document.querySelector('#date').textContent
       var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
       var d = new Date();
 
@@ -685,7 +761,6 @@ function adjustButton(){
           if(ta[0]<=9){ta[0]="0"+ta[0]}; 
           if(ta[1]<=9){ta[1]="0"+ta[1]}; 
           if(ta[2]<=9){ta[2]="0"+ta[2]};
-          //timeText[3] = new Number(timeText[3])-1;
           let finish = ta.join(':')
           timeDisplay.textContent = finish
           let elapsed = getElapsedTime(start,date,finish)
@@ -731,7 +806,6 @@ function adjustButton(){
 } // adjustButton
 
 function adjustTime(){
-  
   this.classList.add('show-input')
   let inText = document.createElement('input')
   inText.setAttribute('type','text')
@@ -739,34 +813,30 @@ function adjustTime(){
   inText.value = this.textContent
   inText.focus()
   this.addEventListener("keyup", function(event) {
- 
     if (event.keyCode === 13) {
         sendTime(event)
     }
-});
+  })
   this.append(inText)
 }
 
 function sendTime(e){
   let compid = e.target.closest('.compPanel').querySelector('.compId').textContent
-  LL(compid)
   let raceid = document.querySelector('#raceInfo').getAttribute('raceid')
-  LL(raceid)
   let newValue = e.target.value
   let timeDisplay = e.target.parentNode
   timeDisplay.innerHTML = ""
   timeDisplay.textContent = ""
   timeDisplay.classList.remove('show-input')
   timeDisplay.textContent = e.target.value
+  let date = document.querySelector("#date").textContent
   if(newValue.includes(':')){
     let finish = newValue
-    updateResult({raceid,compid,finish})
+    updateResult({raceid,compid,finish,date})
   }else{
     let code = newValue
     updateResult({raceid,compid,code})
   }
-  //
-  
 }
 
 function setStart(e){
@@ -775,23 +845,16 @@ function setStart(e){
   var min = date.getMinutes();
   var sec = date.getSeconds();
   document.querySelector('#startTimeInput').value = hour+":"+min+":"+sec
-  //.value(hour+":"+min+":"+sec);
 };
 
 function finishButton(e){
   var finishTime = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-
   var compPanel = document.querySelector(`[id="${cue[0]}"]`)
   removeFromCue(cue[0], compPanel)
   compPanel.classList.remove('selected')
   compPanel.classList.add('finished')
   compPanel.querySelector('.timeDisplay').textContent = finishTime
-
-  //write to db 
-  // get raceId from selector
-  //let raceId = document.querySelector('#raceSelect select').value
   let raceId = raceSelected
-  // LL(raceId)
   let compId = compPanel.getAttribute('id')
   // get start time for current fleet
   let currentFleet = compPanel.querySelector('.fleet').textContent
@@ -817,33 +880,25 @@ function finishButton(e){
       'raceid': raceId,
       'elapsed': elapsed,
       'finish': finishTime,
-      'start': currentStart
+      'start': currentStart,
+      'rrestyp': "4" // race result type - 4 is for finishtime
     }
 
-// LL(currentResult)
-//APP.sendMessage(currentResult)
-
-    
-//?????????????????????????????????????
-//this will fail if result is already there
-//need to figure out
-  let resultStore = getStore('results','readwrite')
+    //this will fail if result is already there
+    let resultStore = getStore('results','readwrite')
     resultStore.add(currentResult)
+    updateFinishPane()
   } // race.onsuccess
  
 } // finishButton
 
 function getElapsedTime(start, date, finish){
-  // let today = new Date().toLocaleDateString()
-  // LL("start: ", start)
   let startTimeInput = document.getElementById('startTimeInput').value
   LL("startTimeInput: ",startTimeInput)
   let startDate = new Date(date+' '+startTimeInput)
   LL("startDate: ", startDate)
-  // let startDate = new Date(today+' '+'12:00:00')
   let finishDate = new Date(date+' '+finish)
   LL("finishDate: ", finishDate)
-  // let finishDate = new Date(today+' '+finishTime)
   let elapsed = convertHMS((finishDate - startDate)/1000)
   console.log(elapsed)
   return elapsed
@@ -890,13 +945,9 @@ async function codeBtn(){
     cue.shift();
     formatRows();
     let start = currentStart
-   // LL({compid,raceid,code,start,date})
     updateResult({compid,raceid,code,start,date})
   }
-  //
-
-
-};
+}; // codeBtn
 
 async function getCompStart(compPanel,raceId){
   var currentStart
@@ -905,7 +956,6 @@ async function getCompStart(compPanel,raceId){
   let race = races.get(parseInt(raceId))
   race.onsuccess = (e)=>{
     let result = e.target.result
-
     result.start.forEach((item)=>{
       let stringToSplit = item.split("|")
       let fleetStart = stringToSplit[1]
@@ -914,42 +964,41 @@ async function getCompStart(compPanel,raceId){
         currentStart = fleetStart
       }
     })
-      LL(currentStart)
       return currentStart
-    
   }
-
-}
+} // getCompStart
 
 function changeCode(){
   document.querySelector('#codeLabel').textContent = this.value
 }
 
-function 
-updateResult(event){
+function updateResult(event){
   /**
    * takes an object using destructuring
    */
-  // LL(event)
+  LL("updateResult event: ", event)
   var merged = {}
   let store = getStore('results').get(parseInt(event.raceid+event.compid))
   store.onsuccess = (e)=>{
     let result = e.target.result
     if(event.code){
       event.elapsed = ''
+      event.rrestyp = '3'
     }
-    if(event.finish){
 
+    if(event.finish){
       let elapsed = getElapsedTime(event.start,event.date,event.finish)
       event.elapsed = elapsed
       event.code = ''
     }
+
     event.id = parseInt(event.raceid+event.compid)
     merged = {...result, ...event}
-    console.log(merged)
+    console.log("updateResult merged: ", merged)
     let write = getStore('results','readwrite').put(merged)
-  } // onsuccess
-}
+    // updateFinishPane()
+  }
+} // updateResult
 
 function showClock(){
   var digital=new Date();
