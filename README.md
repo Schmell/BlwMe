@@ -8,6 +8,16 @@ This app will work off line bd the informtion is stored, plus you can download a
 
 Currently this works on your phone, but is not a very responsive design and things are a little small.  
 <br/>
+## History
+
+This project was started in 2010/2011 and originally was a google apps script thing that connected with google drive as the source file and using Jquery for html and Underscore for CSV files. At the time i could not figure out how to persist data and be offline as this app will be on the water and probably not have any internet at all and there was no real "easy" technology t the time and i abandoned it.
+
+So 10 years later i get an email from google saying they are changing something with apps script, so i went to take look at it. It didnt work, but i fixed it and then thought i would check out whats new in the world of javascript and it looked like this was now possible with PWA's and indexedDB.
+
+The last few months i have slowly stripped out all of the JQuery parts and built a CSV system with Papaparse and IndexedDB for persistance and here we are. Of course i did not change musch of the original UI code and have been doing crazy patch work fixes ever since. 
+
+
+
 
 ## Usage:
 
