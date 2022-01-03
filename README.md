@@ -1,8 +1,9 @@
 # BlwMe
 
 <br/>
-This is a third party app for the popular Sailwave sailboat scoring application.  
+This is a third party app for the popular **Sailwave sailboat scoring** application.  
 The idea is that you would import your *.blw sailwave file and that will automaticlly set up your races and competitors.  
+
 When on the water you can simply select and cue competitors as they approach the finish and press a single button as they finish.  
 This app will work off line bd the informtion is stored, plus you can download an entire updated original *.blw that all you hve to is open and press score series. Or download the results.csv and imoprt into sailwave series  
 
@@ -16,9 +17,12 @@ First open the **localStorage.html** and select the one 1 of the WedSummer---.bl
 Then go to **Racing.html** and that should populte the indexedDB (you may have to refresh). You can use chrome dev tools under the application tab to see the database and localStorage items
 
 <hr/>
-Select a race to begin editing (Dark colored are races that have been sailed). I recommend using Race 3 to start  
+Select a race to begin editing (Dark colored are races that have been sailed). I recommend using Race 3 to start
+
 The idea is that you cue multiple competitors as you see the boats approach the finish line.  
+
 While the competitor is cued you can click to un-cue or use adjustment button to change cue order  
+
 When the boats cross the line use the finish button to add a finish time to competitor
 
 When the boat is finished you can now use the adjustment buttons to add or subtract seconds from the finish time. You can also double click the finish time to bring up a full text edit
@@ -27,6 +31,7 @@ When the boat is finished you can now use the adjustment buttons to add or subtr
 
 Once the race is complete, pressing save will save the whole .blw file with the added results for that current race in it to localStorage of the browser.
 The button should change to download and that will download file with .blw extension.
+
 If this file is opened with sailwave the results will already be in there and all that would be needed is to press score series button and it should work.
 
 <br/>
