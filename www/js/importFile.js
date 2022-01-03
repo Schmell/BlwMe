@@ -83,7 +83,7 @@ const Csv = {
 
     var compData = [];
     var compBoats = data.filter(function (item) {
-      return item[0] == "compboat";
+      return item[0] == "comphigh";
     });
     var sortedBoats = compBoats.sort();
     sortedBoats.forEach(function (compBoat) {

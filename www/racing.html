@@ -1,6 +1,8 @@
 <head>
   <link rel="stylesheet" href="css/racing.css"></link>
+  <link rel="manifest" href="manifest.webmanifest">
 </head>
+
 
 <body>
   <div id="main">
@@ -144,7 +146,7 @@
                 let store = db.createObjectStore('comps', {keyPath: 'id'});
                 store.createIndex("id", "id", { unique: true });
                 store.createIndex("compid", "compid", { unique: false });
-                store.createIndex("boat", "boat", { unique: true });
+                store.createIndex("boat", "boat", { unique: false });
                 store.createIndex("fleet", "fleet", { unique: false });
                 store.createIndex("helm", "helm", { unique: true });
          
@@ -191,24 +193,25 @@
       // let tx = makeTX('comps', 'readwrite'); 
       let compsData = getStore("comps", "readwrite")
       
-      comps.forEach(function(comps){
-      let comp = {
-          'id': parseInt(comps.compid), 
-          'compid': comps.compid, 
-          'boat': comps.compboat, 
-          'rating': comps.comprating, 
-          'fleet': comps.compfleet, 
-          'helm': comps.comphelmname, 
-          'alias':comps.compalias, 
-          'club':comps.compclub, 
-          'exclude':comps.compexclude, 
-          'high':comps.comphigh, 
-          'medicalflag':comps.compmedicalflag, 
-          'nett':comps.compnett, 
-          'rank':comps.comprank, 
-          'total':comps.comptotal
+      comps.forEach(function(comp){
+      let competitor = {
+          'id': parseInt(comp.compid), 
+          'compid': comp.compid, 
+          'boat': comp.compboat, 
+          'sailno': comp.compsailno,
+          'rating': comp.comprating, 
+          'fleet': comp.compfleet, 
+          'helm': comp.comphelmname, 
+          'alias':comp.compalias, 
+          'club':comp.compclub, 
+          'exclude':comp.compexclude, 
+          'high':comp.comphigh, 
+          'medicalflag':comp.compmedicalflag, 
+          'nett':comp.compnett, 
+          'rank':comp.comprank, 
+          'total':comp.comptotal
         }
-      let request = compsData.add(comp);
+      let request = compsData.add(competitor);
       // LL(comps)
     })// forEach
     }
@@ -288,6 +291,11 @@
           console.log('File matches DB no update required')
         }else{
           console.log('File does not match DB, updating')
+          // purge data from db
+          // var request = indexedDB.deleteDatabase(name);
+          // request.onsucess = ()=>{
+          //   const dbw = openDatabase('store');
+          // }
           writeCompsDB(db)
           writeRacesDB(db);
           writeFleetsDB(db)
@@ -299,11 +307,10 @@
     } // writeAllDB
 
 </script>
-
 <script type="text/javascript">
-
-function makeTX(storeName,mode){
-  // console.log('makeTX',db)
+  
+  function makeTX(storeName,mode){
+    // console.log('makeTX',db)
   let tx = db.transaction(storeName, mode);
   // LL(tx)
   tx.onerror = (err) => {
@@ -342,7 +349,7 @@ function saveResults(){
     // LL(race.result.sailed)
     race.result.sailed = "1"
     races.put(race.result)
-
+    
   }
   
   // get currentFile from localstorage
@@ -360,7 +367,7 @@ function saveResults(){
           return index
         }
       })
-        
+      
       if(lineNum){
         // set rrestyp to 4 // i think this is result type? and 4 is for recording finish times
         data[lineNum +1][1] = result.rrestyp // should set this value when setting result
@@ -415,10 +422,10 @@ function exportResults(){
   let columns = [["RaceNo","Boat","Finish","Code"]]
   let tx = db.transaction(["comps", "results"])
   let results = tx.objectStore('results').index('raceid').openCursor()
-
+  
   results.onsuccess = ()=>{
     let item = results.result
-    // LL(item)
+    LL(item.value)
     if(item){
       let comps = tx.objectStore('comps').get(parseInt(item.value.compid))
       comps.onsuccess = ()=>{
@@ -432,7 +439,7 @@ function exportResults(){
       raceName = raceName.replace(/\s/g, '');
       downloadExport(unparsed, raceName+".result.csv")
     }
-    }
+  }
 
 }
 
@@ -457,7 +464,7 @@ async function relate(store1, store2, callback){
         // console.log('merged results',merged)
         related.push(merged)
       }
-    cursor.continue(); 
+      cursor.continue(); 
     }
   }
 }
@@ -485,18 +492,22 @@ function buildCompsRows(){
   insert.innerHTML = ''
   let template = document.querySelector('#compTemplate')
   //get comps from db
-  let store = getStore('comps').index('boat').getAll()
+  let store = getStore('comps').getAll()
   store.onsuccess = (e)=>{
     let comps = e.target.result
+    if(comps[0].sailno){
+      comps.sort((a,b)=>{return a.sailno - b.sailno})
+    }
+    if(comps[0].boat){
+      comps.sort((a,b)=>{return a.boat - b.boat})
+    }
     comps.forEach(function(comp){
-      //let raceId = 
-      //let start = getStartDateTime(comp.id)
       let clone = template.content.cloneNode(true);
       clone.querySelector('.compPanel').setAttribute('id', comp.id)
       clone.querySelector('.compPanel').setAttribute('data-id', comp.id)
       clone.querySelector('.compId').textContent = comp.id
       clone.querySelector('.helm').textContent = comp.helm
-      clone.querySelector('.boatName').textContent = comp.boat
+      clone.querySelector('.boatName').textContent = (comp.boat ? comp.boat : comp.sailno)
       clone.querySelector('.fleet').textContent = comp.fleet
       clone.querySelector('.rating').textContent = comp.rating
       insert.appendChild(clone);
@@ -525,10 +536,13 @@ async function buildRaceSelect(){
     span.textContent = 'Select Race'
     let content = document.createElement('div')
     content.classList.add('dropdown-content')
-    result.forEach((item)=>{
-      //LL(item)
+    result.forEach((item, idx)=>{
       let row = document.createElement('a')
-      row.textContent = item.name
+      if(item.name){
+        row.textContent = item.name
+      }else{
+        row.textContent = `R${idx+1}`
+      }
       row.setAttribute('id',item.id)
       row.setAttribute('href','#')
       row.classList.add('dropdow-row')
@@ -574,11 +588,13 @@ function getResultsDb(raceId){
       let races = e.target.result
       clearCompRows()
       races.forEach( (item) => {
-       // LL(item.compid)
-        let compPanel = document.querySelector(`[id="${item.compid}"]`)
+       let compPanel = document.querySelector(`[id="${item.compid}"]`)
         if(item.finish && !item.code){
           compPanel.classList.add('finished')
           compPanel.querySelector('.timeDisplay').textContent = item.finish
+        }else if(item.elapsed){
+          compPanel.classList.add('finished')
+          compPanel.querySelector('.timeDisplay').textContent = item.elapsed
         }else if(item.code){
           compPanel.classList.add('finished')
           compPanel.querySelector('.timeDisplay').textContent = item.code
@@ -597,7 +613,7 @@ function getResultsDb(raceId){
     //selectedRace.children[0]
     //console.dir(selectedRace.children.item(0))
   }
-
+  
 } // getResultsDb
 
 function clearCompRows(){
@@ -631,6 +647,13 @@ function raceSelectChange(){
     raceInfo.appendChild(date)
     raceInfo.appendChild(sailed)
     updateFinishPane()
+
+    // need to clear cue
+    let cued = document.querySelectorAll('.cueNo')
+    cued.forEach((item)=>{
+      item.closest(".compPanel").removeAttribute('style')
+      item.textContent = ""
+    })
   }
 }
 
@@ -642,26 +665,26 @@ function getFleets(){
     makeFinishPane(result)
   }
 }
-    
+
 function makeFinishPane(fleets){
-    let template = document.querySelector('#finishPaneTemplate')
+  let template = document.querySelector('#finishPaneTemplate')
     let insertAt = document.querySelector('#finishPane');
     fleets.forEach(function(e){
-        let clone = template.content.cloneNode(true);
-        let title = clone.querySelector(".finishListTitle");
+      let clone = template.content.cloneNode(true);
+      let title = clone.querySelector(".finishListTitle");
         title.textContent = e.name;
         title.setAttribute('id', e.id)
         title.setAttribute('data-key', e.name.replace(/ /g,''))
         insertAt.appendChild(clone);
-    }); // forEach
-
-} // makeFinishPane
+      }); // forEach
+      
+    } // makeFinishPane
     
 function updateFinishPane(){
-  //clear finishPane li's
-  document.querySelectorAll('.finishListTitle li').forEach(function(item){
-    item.remove();
-  })
+      //clear finishPane li's
+      document.querySelectorAll('.finishListTitle li').forEach(function(item){
+        item.remove();
+      })
   //get current race
   let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
   let store1 = {'store':'results','index':'raceid','search':raceId}
@@ -678,18 +701,18 @@ function boatClick(e){
   let compId = compPanel.getAttribute('id');
   if(compPanel.classList.contains('finished')){return;}
   if(compPanel.classList.contains('selected')){
-      compPanel.classList.remove('selected')
+    compPanel.classList.remove('selected')
       compPanel.removeAttribute('style')
       compPanel.querySelector('.cueNo').textContent = ''
       compPanel.querySelector('.adj li').removeAttribute('style');
       for(let i=cue.length-1; i>=0;i--){
-          if(cue[i]===compId){
-              cue.splice(i,1);
+        if(cue[i]===compId){
+          cue.splice(i,1);
           }
-      }
+        }
   }else{
-      cue.push(compId);
-      compPanel.classList.add('selected');
+    cue.push(compId);
+    compPanel.classList.add('selected');
   }
   formatRows();
 }; // boatClick
@@ -699,13 +722,13 @@ function formatRows(){
   let gradColor = '#66FF33';
   let ratio = '0.20';
   for (let i=0; i<cue.length; i++) {
-      let newColor = changeColor(color, ratio, false);
-      let next = document.querySelector(`[id="${cue[i]}"]`)
+    let newColor = changeColor(color, ratio, false);
+    let next = document.querySelector(`[id="${cue[i]}"]`)
       next.style.borderColor = color
       next.querySelector('.cueNo').textContent = i+1
       next.querySelector('.cueNo').style.color = color
       // let 
-       = `border-right-color:${color};border-top-color:${color};border-left-color:${color};color:${changeColor(color,'.2',true)}`
+      = `border-right-color:${color};border-top-color:${color};border-left-color:${color};color:${changeColor(color,'.2',true)}`
       next.querySelectorAll('.adj li').forEach((adj)=>{
         adj.style.borderColor  = color
         adj.style.color = changeColor(color,'.2',true)
@@ -722,21 +745,21 @@ function removeFromCue(compId, compPanel){
       adj.removeAttribute('style');         
     })
     for(var i=cue.length-1; i>=0;i--){
-        if(cue[i]===compId){
+      if(cue[i]===compId){
             cue.splice(i,1);
+          }
         }
-    }
 } // removeFromCue
 
 function adjustButton(){
   if (this.closest('.compPanel').classList.contains('finished') ) {
-      let compid = this.closest('.compPanel').getAttribute('id')
+    let compid = this.closest('.compPanel').getAttribute('id')
       let raceid = raceSelected
       let start = document.querySelector('#startTimeInput').value
       const date = document.querySelector('#date').textContent
       var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
       var d = new Date();
-
+      
       if (this.classList.contains('minus')) {
           //subtract 10ths
           var timeText= timeDisplay.textContent.split(':');
@@ -756,8 +779,8 @@ function adjustButton(){
           timeDisplay.textContent = finish
           let elapsed = getElapsedTime(start,date,finish)
           updateResult({start,finish,elapsed,date,raceid,compid})
-      }
-      else if(this.classList.contains('plus')) {
+        }
+        else if(this.classList.contains('plus')) {
           //add 10ths
           var timeText= timeDisplay.textContent.split(':');
           if(timeText.length <= 1){
@@ -778,18 +801,18 @@ function adjustButton(){
           // LL("PLUS: ", start, "date:", date, "finish:",finish)
           let elapsed = getElapsedTime(start,date,finish)
           updateResult({start,finish,elapsed,date,raceid,compid})
-      }
+        }
   }
   else if(this.closest('.compPanel').classList.contains('selected')){
-      var compPanel = this.closest('.compPanel');
-      var cueNo = this.closest('.compRow').querySelector('.cueNo').textContent;
-      var compId = compPanel.getAttribute('id');
-      removeFromCue(compId, compPanel);
-      if (this.classList.contains('minus')) {
-          cue.splice(new Number(cueNo), 0, compId);
-      }
+    var compPanel = this.closest('.compPanel');
+    var cueNo = this.closest('.compRow').querySelector('.cueNo').textContent;
+    var compId = compPanel.getAttribute('id');
+    removeFromCue(compId, compPanel);
+    if (this.classList.contains('minus')) {
+      cue.splice(new Number(cueNo), 0, compId);
+    }
       else if(this.classList.contains('plus')) {
-          cue.splice(new Number(cueNo) - 2, 0, compId);
+        cue.splice(new Number(cueNo) - 2, 0, compId);
       }
       console.log('adjust(cue to finish):',cue);
       formatRows();
@@ -805,7 +828,7 @@ function adjustTime(){
   inText.focus()
   this.addEventListener("keyup", function(event) {
     if (event.keyCode === 13) {
-        sendTime(event)
+      sendTime(event)
     }
   })
   this.append(inText)
@@ -832,10 +855,18 @@ function sendTime(e){
 
 function setStart(e){
   var date = new Date();
-  var hour = date.getHours();
-  var min = date.getMinutes();
-  var sec = date.getSeconds();
-  document.querySelector('#startTimeInput').value = hour+":"+min+":"+sec
+  var startTimeString = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+  document.querySelector('#startTimeInput').value = startTimeString
+  let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
+  let races = getStore('races','readwrite')
+  let race = races.get(parseInt(raceId))
+  race.onsuccess = ()=>{
+    LL(date.getDate())
+    race.result.time = startTimeString
+    race.result.date = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+    LL(race.result)
+    races.put(race.result)
+  }
 };
 
 function finishButton(e){
@@ -976,13 +1007,13 @@ function updateResult(event){
       event.elapsed = ''
       event.rrestyp = '3'
     }
-
+    
     if(event.finish){
       let elapsed = getElapsedTime(event.start,event.date,event.finish)
       event.elapsed = elapsed
       event.code = ''
     }
-
+    
     event.id = parseInt(event.raceid+event.compid)
     merged = {...result, ...event}
     console.log("updateResult merged: ", merged)
