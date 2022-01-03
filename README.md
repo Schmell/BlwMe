@@ -16,6 +16,8 @@ First open the **localStorage.html** and select the one 1 of the WedSummer---.bl
 
 Then go to **Racing.html** and that should populte the indexedDB (you may have to refresh). You can use chrome dev tools under the application tab to see the database and localStorage items
 
+I have a github page set up for this at https://Schmell.github.io/BlwMe/www, but you will need to download one of the suggested files from the repo in the blw folder
+
 <hr/>
 Select a race to begin editing (Dark colored are races that have been sailed). I recommend using Race 3 to start
 
