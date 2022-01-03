@@ -1,5 +1,4 @@
 <head>
-  <style type="text/css" id="mine"></style>
   <link rel="stylesheet" href="css/racing.css"></link>
 </head>
 
@@ -410,39 +409,31 @@ function downloadExport(data, raceName){
 }
 
 function exportResults(){
-    // get raceId / name
-    let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
-    let raceName = document.querySelector('#raceInfo h3').textContent
-    LL(raceName)
+  // get raceId / name
+  let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
+  let raceName = document.querySelector('#raceInfo h3').textContent
+  let columns = [["RaceNo","Boat","Finish","Code"]]
+  let tx = db.transaction(["comps", "results"])
+  let results = tx.objectStore('results').index('raceid').openCursor()
 
-    let columns = [["RaceNo","Boat","Finish","Code"]]
-    // let store = getStore("results").index("raceid").getAll(raceId)
-    let tx = db.transaction(["comps", "results"])
-    let results = tx.objectStore('results').index('raceid').openCursor()
+  results.onsuccess = ()=>{
+    let item = results.result
+    // LL(item)
+    if(item){
+      let comps = tx.objectStore('comps').get(parseInt(item.value.compid))
+      comps.onsuccess = ()=>{
+        columns.push([raceName, comps.result.boat, (item.value.finish ? item.value.finish : null), (item.value.code ? item.value.code : null) ])
+        item.continue()
+      }
 
-    results.onsuccess = ()=>{
-      let item = results.result
-      // LL(item)
-      if(item){
-        let comps = tx.objectStore('comps').get(parseInt(item.value.compid))
-        comps.onsuccess = ()=>{
-          columns.push([raceName, comps.result.boat, (item.value.finish ? item.value.finish : null), (item.value.code ? item.value.code : null) ])
-          item.continue()
-        }
-
-        
-        // LL(item)
-        // columns.push([`${raceName},"${item.compid}","${item.finish ? item.finish : ""}", "${item.code ? item.code : ""}"`])
-      }else{
+    }else{
       let unparsed = Papa.unparse(columns, {quotes: true})
       LL(unparsed)
       raceName = raceName.replace(/\s/g, '');
       downloadExport(unparsed, raceName+".result.csv")
-      }
     }
-    results.oncomplete = ()=>{
+    }
 
-    }
 }
 
 async function relate(store1, store2, callback){
