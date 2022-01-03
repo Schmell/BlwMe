@@ -2,6 +2,7 @@
 <br/>
 ## Usage:
 <br/>
+
 First open the **localStorage.html** and select the one 1 of the WedSummer---.blw or MyNewTest.blw (empty races) files from the repos blw folder (the others don't always work)
 
 Then go to **Racing.html** and that should populte the indexedDB (you may have to refresh). You can use chrome dev tools under the application tab to see the database and localStorage items
@@ -18,7 +19,7 @@ Once the race is complete, pressing save will save the whole .blw file with the 
 The button should change to download and that will download file with .blw extension.
 If this file is opened with sailwave the results will already be in there and all that would be needed is to press score series button and it should work.
 <br/>
-
+DbManger uses a serviceworker to serve up indexedDb stuff, but i felt is was redundant, but might be a thing if the server DB is not dexie cloud (indexedDb server side)
 <hr/>
 TODO:
 
