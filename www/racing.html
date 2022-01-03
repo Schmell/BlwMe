@@ -495,11 +495,11 @@ function buildCompsRows(){
   let store = getStore('comps').getAll()
   store.onsuccess = (e)=>{
     let comps = e.target.result
-    if(comps[0].sailno){
-      comps.sort((a,b)=>{return a.sailno - b.sailno})
-    }
     if(comps[0].boat){
       comps.sort((a,b)=>{return a.boat - b.boat})
+    }
+    if(comps[0].sailno && !comps[0].boat){
+      comps.sort((a,b)=>{return a.sailno - b.sailno})
     }
     comps.forEach(function(comp){
       let clone = template.content.cloneNode(true);
@@ -586,8 +586,10 @@ function getResultsDb(raceId){
     let store = getStore('results').index('raceid').getAll(raceId)
     store.onsuccess = (e)=>{
       let races = e.target.result
+      
       clearCompRows()
       races.forEach( (item) => {
+        
        let compPanel = document.querySelector(`[id="${item.compid}"]`)
         if(item.finish && !item.code){
           compPanel.classList.add('finished')
@@ -595,6 +597,9 @@ function getResultsDb(raceId){
         }else if(item.elapsed){
           compPanel.classList.add('finished')
           compPanel.querySelector('.timeDisplay').textContent = item.elapsed
+        }else if(item.position){
+          compPanel.classList.add('finished')
+          compPanel.querySelector('.timeDisplay').textContent = item.position
         }else if(item.code){
           compPanel.classList.add('finished')
           compPanel.querySelector('.timeDisplay').textContent = item.code
@@ -636,7 +641,7 @@ function raceSelectChange(){
     raceInfo.setAttribute('raceId',result.raceid)
     raceInfo.setAttribute("sailed",result.sailed)
     let name = document.createElement('h3')
-    name.textContent = result.name
+    name.textContent = result.name ? result.name : `R${result.id}`
     let date = document.createElement('p')
     date.setAttribute('id', "date")
     date.textContent = result.date

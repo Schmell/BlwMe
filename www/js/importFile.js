@@ -136,7 +136,7 @@ const Csv = {
     let data = parsed.data;
     let resultsArr = [];
     let results = data.filter((item) => {
-      return item[0] == "rele";
+      return item[0] == "rdisc";
     });
     //LL('results', results)
     results.forEach(function (result) {

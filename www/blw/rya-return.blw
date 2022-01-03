@@ -146,7 +146,6 @@
 "scrcode","SCP|Percentage penalty|20|Yes|Yes|spare||spare|spare|spare|spare|Yes|Yes|Yes|20||Scoring penalty under rule 44.3","",""
 "scrcode","ZFP|Percentage penalty|20|Yes|Yes|spare||spare|spare|spare|spare|Yes|Yes|Yes|20||20% penalty under rule 30.2","",""
 "ui","1|0|0|0|0|0|0|0|0|0|0|0|0|0|0","",""
-
 "comptotal","7","10",""
 "compnett","7","10",""
 "comprank","4","10",""
@@ -160,7 +159,6 @@
 "compmedicalflag","0","10",""
 "comphelmname","Colin Jenkins","10",""
 "comphigh","0","10",""
-
 "comptotal","6","11",""
 "compnett","6","11",""
 "comprank","3","11",""
