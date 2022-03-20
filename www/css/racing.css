@@ -88,6 +88,7 @@ input {
   width: 144px;
   cursor: pointer;
 }
+
 #finishBtn .finishLabel {
   font-family: "Arial Black", "DroidSans", "Georgia", "sans";
   font-size: 40px;

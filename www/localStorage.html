@@ -17,22 +17,22 @@
 
     <div class="content">
       <h2>File management</h2>
-      <p>Upload Sailwave file</p>
-      <p>
-        <input
-          id="fileSelect"
-          class="btn custom-file-input"
-          type="file"
-          name="myFiles"
-        />
-      </p>
+      <label>Upload Sailwave file</label>
+
+      <input
+        id="fileSelect"
+        class="btn custom-file-input"
+        type="file"
+        name="myFiles"
+      />
 
       <div id="urlFile">
         <form id="urlForm">
-          <div>Input URL for Sailwave file</div>
+          <label>Input URL for Sailwave file</label>
           <input id="urlSelect" name="urlSelect" type="text" name="url" />
           <div>
             <button class="btn" href="#">Submit Url</button>
+            <br />
             <br />
             <div style="font-size: small; color: lightgray">
               https://schmell.github.io/BlwMe/www/blw/rya-return.blw
@@ -45,14 +45,15 @@
       </div>
 
       <div id="backUpFile">
-        <p>Back up current File</p>
-        <div>
-          <a href="#" class="btn" id="backUpButton">Back up</a>
-        </div>
-      </div>
+        <label class="mb-1">Back up current File</label>
 
+        <a href="#" class="btn" id="backUpButton">Back up</a>
+      </div>
+      <div>
+        <p>Current file: <span id="currentFile"></span></p>
+      </div>
       <div id="racingButton">
-        <a href="./racing.html" class="btn">Go to Racing</a>
+        <a href="./racing.html" class="btn cta">Go to Racing</a>
       </div>
 
       <div>
@@ -89,6 +90,7 @@
         document
           .getElementById("getSeries")
           .addEventListener("click", Utils.showData, false);
+        this.showCurrentFile(document.getElementById("currentFile"));
       }, // init
 
       /** UTIL
@@ -158,6 +160,11 @@
             break;
         }
       }, // showData
+
+      showCurrentFile: (placeholder) => {
+        const file = JSON.parse(localStorage.getItem("using"));
+        placeholder.innerHTML = file.name;
+      },
     }; // Utils
 
     window.addEventListener("DOMContentLoaded", (event) => {
