@@ -142,10 +142,13 @@
   <script src="js/colorChanger.js"></script>
   <script src="js/importFile.js"></script>
   <script src="js/papaparse.min.js"></script>
+  <script src="js/dbUtility.js"></script>
+  <script src="js/exportFile.js"></script>
 
+  <!-- 
   <script name="indexedDB_stuff" type="text/javascript">
     // Globals
-    let raceSelected;
+    // let raceSelected;
     let db;
     let dbPromise;
     const dbVersion = 17;
@@ -301,169 +304,253 @@
         } // else
       };
     } // writeAllDB
-  </script>
+  </script> -->
 
   <script type="text/javascript">
-    function makeTX(storeName, mode) {
-      const tx = db.transaction(storeName, mode);
-      tx.onerror = (err) => {
-        console.error("makeTX onerror", err.target);
-      };
-      return tx;
-    }
+    // Globals
+    let raceSelected;
 
-    function getStore(storeName, mode) {
-      if (mode == "undefined") {
-        mode = "readwrite";
-      }
-      let tx = makeTX(storeName, mode).objectStore(storeName);
-      return tx;
-    }
-
-    function getStoreAll(storeName, mode) {
-      let store = getStore(storeName, mode).getAll();
-      return store;
-    }
-
-    function saveResults() {
-      // check for race sailed
-      const sailed = document.getElementById("raceInfo").getAttribute("sailed");
-      if (+sailed) {
-        // I want to change the save button to update button when race is sailed
-        console.log("race already marked sailed");
-        return null;
-      }
-
-      // get raceId
-      // let raceId = document.querySelector("#raceInfo").getAttribute("raceid");
-
-      // mark race as sailed
-      const races = getStore("races", "readwrite");
-      const race = races.get(parseInt(raceSelected));
-      race.onsuccess = (e) => {
-        race.result.sailed = "1";
-        races.put(race.result);
-      };
-
-      // get currentFile from localstorage
-      const file = localStorage.getItem("currentFile");
-      const parsed = Papa.parse(file);
-      const data = parsed.data;
-      // get results
-      const store = getStore("results").index("raceid").getAll(raceId);
-      store.onsuccess = () => {
-        store.result.forEach((result) => {
-          // filter rdisc for index
-          // insert rele! rft strt
-          const lineNum = data.findIndex((item, index, array) => {
-            if (
-              item[0] == "rdisc" &&
-              item[2] == result.compid &&
-              item[3] == raceId &&
-              index
-            ) {
-              return index;
-            }
-          });
-
-          if (lineNum) {
-            // set rrestyp to 4 // i think this is result type? and 4 is for recording finish times
-            data[lineNum + 1][1] = result.rrestyp; // should set this value when setting result
-            if (result.finish) {
-              data.splice(lineNum, 0, [
-                "rft",
-                result.finish,
-                result.compid,
-                result.raceid,
-              ]);
-              data.splice(lineNum, 0, [
-                "rst",
-                result.start,
-                result.compid,
-                result.raceid,
-              ]);
-              data.splice(lineNum, 0, [
-                "rele",
-                result.elapsed,
-                result.compid,
-                result.raceid,
-              ]); // might not matter if just finish times
-            } else {
-              data.splice(lineNum, 0, [
-                "rcod",
-                result.code,
-                result.compid,
-                result.raceid,
-              ]);
-            }
+    function buildCompsRows() {
+      return new Promise((resolve, reject) => {
+        // Get insert point and the template
+        const insert = document.querySelector(".appTable");
+        insert.innerHTML = "";
+        // Get the template
+        const template = document.querySelector("#compTemplate");
+        // Get comps from db
+        const store = getStore("comps").index("boat").getAll();
+        store.onsuccess = (e) => {
+          const comps = e.target.result;
+          // Have to choose sort method as if they have both
+          // it will be confused
+          /* 
+          if (comps[0].boat) {
+            comps.sort((a, b) => {
+              return a.boat - b.boat;
+            });
           }
-          let unparsed = Papa.unparse(data, {
-            quotes: true,
-            skipEmptyLines: true,
+          if (comps[0].sailno) {
+            comps.sort((a, b) => {
+              return a.sailno - b.sailno;
+            });
+          } 
+          */
+
+          // Build comp rows
+          comps.forEach((comp) => {
+            const clone = template.content.cloneNode(true);
+            clone.querySelector(".compPanel").setAttribute("id", comp.id);
+            clone.querySelector(".compPanel").setAttribute("data-id", comp.id);
+            clone.querySelector(".compId").textContent = comp.id;
+            clone.querySelector(".helm").textContent = comp.helm;
+            clone.querySelector(".boatName").textContent = comp.boat
+              ? comp.boat
+              : comp.sailno;
+            clone.querySelector(".fleet").textContent = comp.fleet;
+            clone.querySelector(".rating").textContent = comp.rating;
+            insert.appendChild(clone);
+          }); // forEach
+
+          // Add listeners
+          document.querySelectorAll(".boat").forEach((elem) => {
+            elem.addEventListener("click", boatClick);
           });
-          localStorage.setItem("savedFile", unparsed);
+          document.querySelectorAll(".button").forEach((elem) => {
+            elem.addEventListener("click", adjustButton);
+          });
+          document.querySelectorAll(".timeDisplay").forEach((elem) => {
+            elem.addEventListener("dblclick", adjustTime);
+          });
+        }; // onsuccess
+
+        // Resolve the promise
+        resolve();
+      }); // buildCompsRows
+    }
+
+    async function buildRaceSelect() {
+      const selector = document.querySelector("#raceSelect");
+      selector.innerHTML = "";
+      // Get races from db
+      const races = getStoreAll("races");
+      races.onsuccess = (e) => {
+        const result = races.result;
+        // Scaffold dropdown elements
+        const fragment = document.createDocumentFragment();
+        const dropDown = document.createElement("div");
+        dropDown.classList.add("dropdown");
+        const span = document.createElement("span");
+        span.classList.add("dropbtn");
+        span.textContent = "Select Race";
+        const content = document.createElement("div");
+        content.classList.add("dropdown-content");
+        // Add data to elements
+        result.forEach((item, idx) => {
+          const row = document.createElement("a");
+          if (item.name) {
+            row.textContent = item.name;
+          } else {
+            row.textContent = `R${idx + 1}`;
+          }
+          row.setAttribute("id", item.id);
+          row.setAttribute("href", "#");
+          row.classList.add("dropdow-row");
+          if (item.sailed == "1") {
+            row.classList.add("disabled");
+          }
+          content.append(row);
+          row.addEventListener("click", raceSelectChange);
         });
-        let saveButton = document.querySelector("#save");
-        saveButton.removeEventListener("click", saveResults);
-        saveButton.addEventListener("click", downloadFile);
-        saveButton.textContent = "download";
+        // Add elements to list
+        fragment.append(dropDown);
+        dropDown.append(span);
+        dropDown.append(content);
+        raceSelect.append(fragment);
       };
     }
 
-    function downloadURL(url, name) {
-      var link = document.createElement("a");
-      link.download = name;
-      link.href = url;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      delete link;
+    document.addEventListener("DOMContentLoaded", () => {
+      // Move this to an init function
+      addListeners();
+      function addListeners() {
+        document
+          .querySelector("#finishBtn")
+          .addEventListener("click", finishButton);
+        document
+          .querySelector("#startSetBtn")
+          .addEventListener("click", setStart);
+        document.querySelector("#codeBtn").addEventListener("click", codeBtn);
+        document
+          .querySelector("#codeSelect select")
+          .addEventListener("change", changeCode);
+        document.querySelector("#save").addEventListener("click", saveResults);
+        document
+          .querySelector("#export")
+          .addEventListener("click", exportResults);
+      }
+    }); // dom ready
+
+    //=============================================================
+    setTimeout(function () {
+      buildCompsRows().then(getResultsDb()).then(buildRaceSelect());
+      getFleets();
+    }, 2000);
+    //=============================================================
+
+    function getResultsDb(raceId) {
+      if (raceId) {
+        const store = getStore("results").index("raceid").getAll(raceId);
+        store.onsuccess = (e) => {
+          clearCompRows();
+
+          const races = e.target.result;
+          races.forEach((item) => {
+            const compPanel = document.querySelector(`[id="${item.compid}"]`);
+            if (item.finish && !item.code) {
+              compPanel.classList.add("finished");
+              compPanel.querySelector(".timeDisplay").textContent = item.finish;
+            } else if (item.elapsed) {
+              compPanel.classList.add("finished");
+              compPanel.querySelector(".timeDisplay").textContent =
+                item.elapsed;
+            } else if (item.code) {
+              compPanel.classList.add("finished");
+              compPanel.querySelector(".timeDisplay").textContent = item.code;
+            } else {
+              compPanel.classList.remove("finished");
+              compPanel.querySelector(".timeDisplay").textContent = "";
+            }
+          });
+        };
+
+        store.onerror = (err) => {
+          console.log("err", err);
+        };
+      } else {
+        //cant figureout how to get default
+        //let selectedRace = document.querySelector('#raceSelector')
+        //selectedRace.children[0]
+        //console.dir(selectedRace.children.item(0))
+      }
+    } // getResultsDb
+
+    function clearCompRows() {
+      document.querySelectorAll(".compPanel").forEach((item) => {
+        item.classList.remove("finished");
+        item.querySelector(".timeDisplay").textContent = "";
+      });
     }
 
-    function downloadFile() {
-      var data = localStorage.getItem("savedFile");
-      var blob = new Blob([data], { type: "text/txt" });
-      var url = window.URL.createObjectURL(blob);
-      var using = JSON.parse(localStorage.getItem("using"));
-      downloadURL(url, using.name);
-    }
+    function raceSelectChange() {
+      // Sets raceSelected global
+      raceSelected = this.getAttribute("id");
 
-    function downloadExport(data, raceName) {
-      var blob = new Blob([data], { type: "text/txt" });
-      var url = window.URL.createObjectURL(blob);
-      downloadURL(url, raceName);
-    }
+      getResultsDb(this.getAttribute("id"));
+      const store = getStore("races").get(parseInt(this.getAttribute("id")));
+      store.onsuccess = (e) => {
+        const result = e.target.result;
+        const raceInfo = document.querySelector("#raceInfo");
+        raceInfo.innerHTML = "";
+        raceInfo.setAttribute("raceId", result.raceid);
+        raceInfo.setAttribute("sailed", result.sailed);
+        const name = document.createElement("h3");
+        name.textContent = result.name;
+        const date = document.createElement("p");
+        date.setAttribute("id", "date");
+        date.textContent = result.date;
+        const sailed = document.createElement("p");
+        sailed.textContent = `Race sailed: ${result.sailed} Race Id: ${result.raceid}`;
 
-    function exportResults() {
-      // get raceId / name
-      const raceId = document.querySelector("#raceInfo").getAttribute("raceid");
-      const raceName = document.querySelector("#raceInfo h3").textContent;
-      const columns = [["RaceNo", "Boat", "Finish", "Code"]];
-      const tx = db.transaction(["comps", "results"]);
-      const results = tx.objectStore("results").index("raceid").openCursor();
+        raceInfo.appendChild(name);
+        raceInfo.appendChild(date);
+        raceInfo.appendChild(sailed);
+        updateFinishPane();
 
-      results.onsuccess = () => {
-        const item = results.result;
-        if (item) {
-          const comps = tx
-            .objectStore("comps")
-            .get(parseInt(item.value.compid));
-          comps.onsuccess = () => {
-            columns.push([
-              raceName,
-              comps.result.boat,
-              item.value.finish ? item.value.finish : null,
-              item.value.code ? item.value.code : null,
-            ]);
-            item.continue();
-          };
-        } else {
-          const unparsed = Papa.unparse(columns, { quotes: true });
-          raceName = raceName.replace(/\s/g, "");
-          downloadExport(unparsed, raceName + ".result.csv");
-        }
+        // Need to clear cue
+        const cued = document.querySelectorAll(".cueNo");
+        cued.forEach((item) => {
+          item.closest(".compPanel").removeAttribute("style");
+          item.textContent = "";
+        });
       };
     }
+
+    function getFleets() {
+      let result = [];
+      let fleets = getStoreAll("fleets");
+      fleets.onsuccess = (e) => {
+        let result = e.target.result;
+        makeFinishPane(result);
+      };
+    }
+
+    function makeFinishPane(fleets) {
+      let template = document.querySelector("#finishPaneTemplate");
+      let insertAt = document.querySelector("#finishPane");
+      fleets.forEach(function (e) {
+        let clone = template.content.cloneNode(true);
+        let title = clone.querySelector(".finishListTitle");
+        title.textContent = e.name;
+        title.setAttribute("id", e.id);
+        title.setAttribute("data-key", e.name.replace(/ /g, ""));
+        insertAt.appendChild(clone);
+      }); // forEach
+    } // makeFinishPane
+
+    function updateFinishPane() {
+      // NOT WORKING
+      // Get comps that are finished and sort into fleets
+      // This would be cool to add scoring here
+
+      // Clear finishPane list items
+      document.querySelectorAll(".finishListTitle li").forEach((item) => {
+        item.remove();
+      });
+
+      let store1 = { store: "results", index: "raceid", search: raceSelected };
+      let store2 = { store: "comps", index: "compid", search: "" };
+      let rel = relate(store1, store2, relateDone);
+    } // updateFinishPane
 
     async function relate(store1, store2, callback) {
       let related = [];
@@ -503,260 +590,34 @@
             item.append(listItem);
           }
         });
-        // document.querySelectorAll(".compRow").forEach((item) => {});
       });
     } // relateDone
 
-    function buildCompsRows() {
-      return new Promise(function (resolve, reject) {
-        // Get insert point and the template
-        const insert = document.querySelector(".appTable");
-        insert.innerHTML = "";
-        const template = document.querySelector("#compTemplate");
-        // Get comps from db
-        const store = getStore("comps").index("boat").getAll();
-        store.onsuccess = (e) => {
-          const comps = e.target.result;
-          // Have to choose as if they have both it will be confused
-          // if (comps[0].boat) {
-          //   comps.sort((a, b) => {
-          //     return a.boat - b.boat;
-          //   });
-          // }
-          // if (comps[0].sailno) {
-          //   comps.sort((a, b) => {
-          //     return a.sailno - b.sailno;
-          //   });
-          // }
-
-          comps.forEach(function (comp) {
-            const clone = template.content.cloneNode(true);
-            clone.querySelector(".compPanel").setAttribute("id", comp.id);
-            clone.querySelector(".compPanel").setAttribute("data-id", comp.id);
-            clone.querySelector(".compId").textContent = comp.id;
-            clone.querySelector(".helm").textContent = comp.helm;
-            clone.querySelector(".boatName").textContent = comp.boat
-              ? comp.boat
-              : comp.sailno;
-            clone.querySelector(".fleet").textContent = comp.fleet;
-            clone.querySelector(".rating").textContent = comp.rating;
-            insert.appendChild(clone);
-          }); // forEach
-
-          document.querySelectorAll(".boat").forEach((elem) => {
-            elem.addEventListener("click", boatClick);
-          });
-          document.querySelectorAll(".button").forEach((elem) => {
-            elem.addEventListener("click", adjustButton);
-          });
-          document.querySelectorAll(".timeDisplay").forEach((elem) => {
-            elem.addEventListener("dblclick", adjustTime);
-          });
-        }; // onsuccess
-        resolve();
-      }); // buildCompsRows
-    }
-
-    async function buildRaceSelect() {
-      let selector = document.querySelector("#raceSelect");
-      selector.innerHTML = "";
-      //get races from db
-      let races = getStoreAll("races");
-      races.onsuccess = (e) => {
-        let result = races.result;
-        // selector.setAttribute('defaultRaceId',result[0].id)
-        let fragment = document.createDocumentFragment();
-        let dropDown = document.createElement("div");
-        dropDown.classList.add("dropdown");
-        let span = document.createElement("span");
-        span.classList.add("dropbtn");
-        span.textContent = "Select Race";
-        let content = document.createElement("div");
-        content.classList.add("dropdown-content");
-        result.forEach((item, idx) => {
-          let row = document.createElement("a");
-          if (item.name) {
-            row.textContent = item.name;
-          } else {
-            row.textContent = `R${idx + 1}`;
-          }
-          row.setAttribute("id", item.id);
-          row.setAttribute("href", "#");
-          row.classList.add("dropdow-row");
-          if (item.sailed == "1") {
-            row.classList.add("disabled");
-          }
-          content.append(row);
-          row.addEventListener("click", raceSelectChange);
-        });
-        fragment.append(dropDown);
-        dropDown.append(span);
-        dropDown.append(content);
-        raceSelect.append(fragment);
-      };
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-      addListeners();
-      function addListeners() {
-        document
-          .querySelector("#finishBtn")
-          .addEventListener("click", finishButton);
-        document
-          .querySelector("#startSetBtn")
-          .addEventListener("click", setStart);
-        document.querySelector("#codeBtn").addEventListener("click", codeBtn);
-        document
-          .querySelector("#codeSelect select")
-          .addEventListener("change", changeCode);
-        document.querySelector("#save").addEventListener("click", saveResults);
-        document
-          .querySelector("#export")
-          .addEventListener("click", exportResults);
-        //document.querySelector('.timeDisplay').addEventListener('dblclick', editTime)
-        //document.querySelector('#raceSelect select').addEventListener('change', raceSelectChange)
-        //document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
-        //document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
-      }
-    }); // dom ready
-
-    //=============================================================
-    setTimeout(function () {
-      buildCompsRows().then(getResultsDb()).then(buildRaceSelect());
-      getFleets();
-    }, 2000);
-    //=============================================================
-
-    function getResultsDb(raceId) {
-      if (raceId) {
-        let store = getStore("results").index("raceid").getAll(raceId);
-        store.onsuccess = (e) => {
-          let races = e.target.result;
-          clearCompRows();
-          races.forEach((item) => {
-            let compPanel = document.querySelector(`[id="${item.compid}"]`);
-            if (item.finish && !item.code) {
-              compPanel.classList.add("finished");
-              compPanel.querySelector(".timeDisplay").textContent = item.finish;
-            } else if (item.elapsed) {
-              compPanel.classList.add("finished");
-              compPanel.querySelector(".timeDisplay").textContent =
-                item.elapsed;
-            } else if (item.code) {
-              compPanel.classList.add("finished");
-              compPanel.querySelector(".timeDisplay").textContent = item.code;
-            } else {
-              compPanel.classList.remove("finished");
-              compPanel.querySelector(".timeDisplay").textContent = "";
-            }
-          });
-        };
-        store.onerror = (err) => {
-          console.log("err", err);
-        };
-      } else {
-        //cant figureout how to get default
-        //let selectedRace = document.querySelector('#raceSelector')
-        //selectedRace.children[0]
-        //console.dir(selectedRace.children.item(0))
-      }
-    } // getResultsDb
-
-    function clearCompRows() {
-      document.querySelectorAll(".compPanel").forEach((item) => {
-        item.classList.remove("finished");
-        item.querySelector(".timeDisplay").textContent = "";
-      });
-    }
-
-    function raceSelectChange() {
-      raceSelected = this.getAttribute("id");
-      getResultsDb(this.getAttribute("id"));
-      let store = getStore("races").get(parseInt(this.getAttribute("id")));
-      store.onsuccess = (e) => {
-        let result = e.target.result;
-        let raceInfo = document.querySelector("#raceInfo");
-        raceInfo.innerHTML = "";
-        raceInfo.setAttribute("raceId", result.raceid);
-        raceInfo.setAttribute("sailed", result.sailed);
-        let name = document.createElement("h3");
-        name.textContent = result.name;
-        let date = document.createElement("p");
-        date.setAttribute("id", "date");
-        date.textContent = result.date;
-        let sailed = document.createElement("p");
-        sailed.textContent = `Race sailed: ${result.sailed} Race Id: ${result.raceid}`;
-
-        raceInfo.appendChild(name);
-        raceInfo.appendChild(date);
-        raceInfo.appendChild(sailed);
-        updateFinishPane();
-
-        // need to clear cue
-        let cued = document.querySelectorAll(".cueNo");
-        cued.forEach((item) => {
-          item.closest(".compPanel").removeAttribute("style");
-          item.textContent = "";
-        });
-      };
-    }
-
-    function getFleets() {
-      let result = [];
-      let fleets = getStoreAll("fleets");
-      fleets.onsuccess = (e) => {
-        let result = e.target.result;
-        makeFinishPane(result);
-      };
-    }
-
-    function makeFinishPane(fleets) {
-      let template = document.querySelector("#finishPaneTemplate");
-      let insertAt = document.querySelector("#finishPane");
-      fleets.forEach(function (e) {
-        let clone = template.content.cloneNode(true);
-        let title = clone.querySelector(".finishListTitle");
-        title.textContent = e.name;
-        title.setAttribute("id", e.id);
-        title.setAttribute("data-key", e.name.replace(/ /g, ""));
-        insertAt.appendChild(clone);
-      }); // forEach
-    } // makeFinishPane
-
-    function updateFinishPane() {
-      //clear finishPane li's
-      document.querySelectorAll(".finishListTitle li").forEach((item) => {
-        item.remove();
-      });
-      //get current race
-      // let raceId = document.querySelector("#raceInfo").getAttribute("raceid");
-
-      let store1 = { store: "results", index: "raceid", search: raceSelected };
-      let store2 = { store: "comps", index: "compid", search: "" };
-      let rel = relate(store1, store2, relateDone);
-    } // updateFinishPane
-
-    //Globals
+    // Globals for ui
     var cue = [];
     var finished = [];
 
     function boatClick(e) {
-      let compPanel = e.target.closest(".compPanel");
-      let compId = compPanel.getAttribute("id");
+      // Add styling and boats to cue
+      const compPanel = e.target.closest(".compPanel");
+      const compId = compPanel.getAttribute("id");
       if (compPanel.classList.contains("finished")) {
         return;
       }
+      // If selected remove styling
       if (compPanel.classList.contains("selected")) {
         compPanel.classList.remove("selected");
         compPanel.removeAttribute("style");
         compPanel.querySelector(".cueNo").textContent = "";
         compPanel.querySelector(".adj li").removeAttribute("style");
+        // Need for loop for decrementing index
         for (let i = cue.length - 1; i >= 0; i--) {
           if (cue[i] === compId) {
             cue.splice(i, 1);
           }
         }
       } else {
+        // Just add to cue
         cue.push(compId);
         compPanel.classList.add("selected");
       }

@@ -1,6 +1,10 @@
 const Csv = {
+  // Might not need to use this namespace moving forward
+
   // Use file from file input button
-  fromInput: function (e) {
+  fromInput: (e) => {
+    // Accepts file input and puts it in local storage
+    // Also this adds some versioning info in localstorage
     let file;
     let fileName;
     let url;
@@ -9,6 +13,7 @@ const Csv = {
     } else {
       url = e.target.urlSelect.value;
       fileName = url.substr(url.lastIndexOf("/") + 1);
+      // Keep this log
       console.log("target file: ", url);
       e.preventDefault();
       // Return some file info
@@ -21,6 +26,7 @@ const Csv = {
     // Organize localstorage so we can tell if file is current
     let last = JSON.parse(localStorage.getItem("using"));
     if (!last) {
+      // Keep ths log
       console.log("no last");
       last = {};
       last.name = "nofile";
@@ -31,23 +37,24 @@ const Csv = {
       file.name != last.name ||
       (file.lastModified != last.lastModified && last)
     ) {
-      console.log("File has been changed, using new file");
+      // Keep this warning
+      console.warn("File has been changed, using new file");
       // Back up old file and remove current so we can store new file
-      let oldFile = localStorage.getItem("currentFile");
-      let notUsing = localStorage.getItem("using");
+      const oldFile = localStorage.getItem("currentFile");
+      const notUsing = localStorage.getItem("using");
       localStorage.setItem("oldFile", oldFile);
       localStorage.setItem("notUsing", notUsing);
       localStorage.removeItem("currentFile");
       localStorage.removeItem("using");
 
-      // if there is url then it is fromUrl file
+      // If there is url then it is fromUrl file
       if (file.url) {
         file = file.url;
       }
       Papa.parse(file, {
-        // download: true,
-        complete: function (results) {
-          let unParsed = Papa.unparse(results.data, {
+        download: true, // This is for fromUrl
+        complete: (results) => {
+          const unParsed = Papa.unparse(results.data, {
             quotes: true,
             quoteChar: '"',
           });
@@ -64,7 +71,7 @@ const Csv = {
             };
           }
 
-          let fileArr = {
+          const fileArr = {
             name: file.name,
             lastModified: file.lastModified,
             lastModifiedDate: file.lastModifiedDate,
@@ -75,95 +82,112 @@ const Csv = {
         },
       });
     } else {
+      // Keep this log
       console.log("File not changed, using file from storage");
       console.log("using:", JSON.parse(localStorage.getItem("using")));
     }
   }, // fromInput
 
-  fromUrl: function (e) {
-    let url = document.querySelector("#urlSelect").value;
+  fromUrl: (e) => {
+    // NOT USED
+    // This is implemented in fromInput,
+    // but probably makes more sense to move it here
+    const url = document.querySelector("#urlSelect").value;
   },
 
-  backUpCurrent: function () {
-    let file = localStorage.getItem("currentFile");
+  backUpCurrent: () => {
+    // NOT WORKING
+    const file = localStorage.getItem("currentFile");
     console.log("file: ", file);
-    var myBlob = URL.createObjectURL(new Blob([file]));
+    const myBlob = URL.createObjectURL(new Blob([file]));
     console.log("myBlob: ", myBlob);
-    // var request = require("request");
     return myBlob;
   },
 
-  getStarts: function () {
-    let file = localStorage.getItem("currentFile");
-    let parsed = Papa.parse(file);
-    let data = parsed.data;
-    let startData = [];
+  downloadURL: (url, name) => {
+    // NOT USED
+    const link = document.createElement("a");
+    link.download = name;
+    link.href = url;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    delete link;
   },
 
-  getComps: function () {
-    let file = localStorage.getItem("currentFile");
-    let parsed = Papa.parse(file);
-    let data = parsed.data;
+  downloadFile: (localStoreFile) => {
+    // NOT USED
+    const data = localStorage.getItem("savedFile");
+    const blob = new Blob([data], { type: "text/txt" });
+    const url = window.URL.createObjectURL(blob);
+    const using = JSON.parse(localStorage.getItem("using"));
+    // console.log(using)
+    downloadURL(url, using.name);
+  },
 
-    var compData = [];
-    // Filter for csv property that is on every comp
-    // to make an array of all comps ids
-    var compBoats = data.filter(function (item) {
-      return item[0] == "comphigh";
+  /*
+   * All the getters
+   */
+
+  getCurrentFile: () => {
+    // Util to get localStorage the file we are using
+    const file = localStorage.getItem("currentFile");
+    const parsed = Papa.parse(file);
+    const data = parsed.data;
+    return data;
+  },
+
+  getComps: () => {
+    // Get comps
+    const data = Csv.getCurrentFile();
+
+    let compData = [];
+    // Filter for property to create index
+    // comptotal is always first in .blw
+    const compBoats = data.filter((item) => {
+      return item[0] == "comptotal";
     });
 
-    compBoats.sort().forEach(function (compBoat) {
+    compBoats.sort().forEach((compBoat) => {
       let competitor = {};
-      competitor.id = parseInt(compBoat[2]);
+      // Create id's
+      competitor.id = +compBoat[2]; // Int
       competitor.compid = compBoat[2];
-      let compRows = data.filter(function (item) {
-        var regex = new RegExp(`^comp`, "g");
+      // Filter using prefix and compid
+      const compRows = data.filter((item) => {
+        const regex = new RegExp(`^comp`, "g");
         return item[0].match(regex) && item[2] == compBoat[2];
       });
-      compRows.forEach(function (item) {
+      // Remove prefix and add property
+      compRows.forEach((item) => {
         const newName = item[0].replace("comp", "");
         competitor[newName] = item[1];
       });
+
       compData.push(competitor);
     }); //each compBoats
-    var sorted = compData.sort(function (a, b) {
+
+    compData.sort((a, b) => {
       return a.boat - b.boat;
     });
-    //console.log(compData)
+
     return compData;
   }, // getComps
 
-  /** RESULT ROWS
-   *   This is the result rows from blw file
-   *   "rft","19:37:23","26","106"
-   *   "rst","18:40:00","26","106"
-   *   "rpts","5","26","106"
-   *   "rpos","5","26","106"
-   *   "rdisc","0","26","106"
-   *   "rcor","0:57:05","26","106"
-   *   "rrestyp","4","26","106"
-   *   "rele","0:57:23","26","106"
-   *   "srat","0","26","106"
-   *   "rewin","0:06:21","26","106"
-   *   "rrwin","238.841","26","106"
-   *   "rrset","0","26","106"
-   */
-
-  getResults: function () {
-    let file = localStorage.getItem("currentFile");
-    let parsed = Papa.parse(file);
-    let data = parsed.data;
+  getResults: () => {
+    // Get results
+    const data = Csv.getCurrentFile();
 
     let resultsArr = [];
-    // Filter results using a prperty that always exists on result
-    // to make results array
-    let results = data.filter((item) => {
+    // Filter for property to create index
+    // rdisc is always first in .blw
+    const results = data.filter((item) => {
       return item[0] == "rdisc";
     });
-    //console.log('results', results)
-    results.forEach(function (result) {
-      // have to map this manually as there is no prefix
-      let resultRow = {
+
+    results.forEach((result) => {
+      // Have to map this manually as there is no usable prefix
+      const resultRow = {
         id: parseInt(result[3] + result[2]),
         compid: result[2],
         raceid: result[3],
@@ -180,15 +204,16 @@ const Csv = {
         rrwin: Csv.resultHelp("rrwin", data, result),
         rrset: Csv.resultHelp("rrset", data, result),
       };
+
       resultsArr.push(resultRow);
     }); // forEach
-    //console.log(resultsArr);
+
     return resultsArr;
   }, // getResults
 
-  resultHelp: function (resultTag, data, result) {
-    let res = data.filter(function (item) {
-      // console.log(resultTag);
+  resultHelp: (resultTag, data, result) => {
+    // Util for mapping result items
+    const res = data.filter((item) => {
       return (
         item[0] == resultTag && item[2] == result[2] && item[3] == result[3]
       );
@@ -198,55 +223,62 @@ const Csv = {
     }
   }, // resultsHelp
 
-  getFleets: function () {
-    let file = localStorage.getItem("currentFile");
-    let parsed = Papa.parse(file);
-    let data = parsed.data;
-    var fleetsRaw = data.filter(function (item) {
+  getFleets: () => {
+    // May not be needed
+    // Fleets and starts are added to individual races
+    const data = Csv.getCurrentFile();
+
+    const fleetsRaw = data.filter((item) => {
       return item[0] == "serpubgroupvalues";
     });
-    var fleets = fleetsRaw[0][1].match(/[^|]+/g);
+    const fleets = fleetsRaw[0][1].match(/[^|]+/g);
     //console.log(fleets);
     return fleets;
   }, // getFleets
 
-  getRaces: function () {
-    let file = localStorage.getItem("currentFile");
-    let parsed = Papa.parse(file);
-    let data = parsed.data;
-    var raceData = [];
-    //races =[0-racename,1-NAME,2-space,3-ID]
-    var races = data.filter(function (item) {
+  getRaces: () => {
+    // Get races from CSV
+    const data = Csv.getCurrentFile();
+
+    let raceData = [];
+    // Filter for property to create index
+    // racerank is always first in .blw
+    const races = data.filter((item) => {
       return item[0] == "racerank";
     });
-    races.forEach(function (race) {
+    races.forEach((race) => {
       //console.log('race',race)
-      var raceObj = {};
-      raceObj.id = parseInt(race[3]);
+      let raceObj = {};
+
+      raceObj.id = +race[3]; // Int
       raceObj.raceid = race[3];
-      let resultRows = data.filter(function (item) {
-        var regex = new RegExp(`^race`, "g");
+      // Search for 'race' prefix
+      const resultRows = data.filter((item) => {
+        const regex = new RegExp(`^race`, "g");
         return item[0].match(regex) && item[3] == race[3];
       });
+
       let raceStarts = [];
+
       resultRows.forEach((item) => {
         if (item[0] == "racestart") {
-          let stringToSplit = item[1].split("|");
-          let fleetStart = stringToSplit[1];
-          let fleetName = stringToSplit[0].split("^")[1];
-          // console.log(fleetStart, fleetName);
+          // Get fleets and starts and add to array
+          const stringToSplit = item[1].split("|");
+          const fleetStart = stringToSplit[1];
+          const fleetName = stringToSplit[0].split("^")[1];
           raceStarts.push({ fleet: fleetName, start: fleetStart });
         } else {
+          // Remove prefix and add property
           const newName = item[0].replace("race", "");
           raceObj[newName] = item[1];
         }
       });
+
+      // Add fleets and starts to race
       raceStarts.forEach((start) => {
         raceObj.starts = raceStarts;
       });
-      // for (let i = 0; i < raceStarts.length; i++) {
-      //   raceObj.racestart = raceStarts;
-      // }
+
       raceData.push(raceObj);
     });
 
@@ -254,16 +286,18 @@ const Csv = {
   }, // getRaces
 
   getSeries: () => {
-    const file = localStorage.getItem("currentFile");
-    const parsed = Papa.parse(file);
-    const data = parsed.data;
+    // Get series
+    const data = Csv.getCurrentFile();
+
     let seriesData = [];
+    // Find props with prefix
     const seriesRows = data.filter((item) => {
       const regex = new RegExp(`^ser`, "g");
       return item[0].match(regex);
     });
 
     let seriesObj = {};
+    // Remove prefix and add property
     seriesRows.forEach((item) => {
       const newName = item[0].replace("ser", "");
       seriesObj[newName] = item[1];
@@ -272,23 +306,4 @@ const Csv = {
     seriesData.push(seriesObj);
     return seriesData;
   }, // getSeries
-
-  downloadURL: function (url, name) {
-    var link = document.createElement("a");
-    link.download = name;
-    link.href = url;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    delete link;
-  },
-
-  downloadFile: function (localStoreFile) {
-    var data = localStorage.getItem("savedFile");
-    var blob = new Blob([data], { type: "text/txt" });
-    var url = window.URL.createObjectURL(blob);
-    var using = JSON.parse(localStorage.getItem("using"));
-    // console.log(using)
-    downloadURL(url, using.name);
-  },
 }; // Csv namespace
