@@ -1,48 +1,69 @@
 const Csv = {
+  // Use file from file input button
   fromInput: function (e) {
-    var file;
-    // may need to make fromFile and fromUrl functions to return a file.object to keep track of versions
+    let file;
+    let fileName;
+    let url;
     if (e.target.files) {
       file = e.target.files[0];
     } else {
-      LL("fromUrl");
-      Papa.parse(e, {
-        download: true,
-        quoteChar: '"',
-        complete: function (results) {
-          LL(results);
-        },
-      });
+      url = e.target.urlSelect.value;
+      fileName = url.substr(url.lastIndexOf("/") + 1);
+      console.log("target file: ", url);
+      e.preventDefault();
+      // Return some file info
+      file = {
+        name: fileName,
+        url: url,
+      };
     }
-    //let file = e.target.files[0];
+
+    // Organize localstorage so we can tell if file is current
     let last = JSON.parse(localStorage.getItem("using"));
     if (!last) {
-      LL("no last");
+      console.log("no last");
       last = {};
       last.name = "nofile";
       last.lastModified = Date.now();
-    } //localStorage
+    }
+
     if (
       file.name != last.name ||
       (file.lastModified != last.lastModified && last)
     ) {
       console.log("File has been changed, using new file");
-      //TODO: backup old files text to a new file
+      // Back up old file and remove current so we can store new file
       let oldFile = localStorage.getItem("currentFile");
       let notUsing = localStorage.getItem("using");
       localStorage.setItem("oldFile", oldFile);
-      //does not work as you cannot iterate File obj.
-      //not too sure if i need this anyway
       localStorage.setItem("notUsing", notUsing);
       localStorage.removeItem("currentFile");
       localStorage.removeItem("using");
+
+      // if there is url then it is fromUrl file
+      if (file.url) {
+        file = file.url;
+      }
       Papa.parse(file, {
+        // download: true,
         complete: function (results) {
           let unParsed = Papa.unparse(results.data, {
             quotes: true,
             quoteChar: '"',
           });
-          //console.log(file);
+
+          // Cant seem to figure out how to get File info
+          // so just make so me dummy stuff
+          if (!file.name) {
+            file = {
+              name: fileName,
+              url: url,
+              lastModified: "?",
+              lastModifiedDate: "?",
+              size: "?",
+            };
+          }
+
           let fileArr = {
             name: file.name,
             lastModified: file.lastModified,
@@ -65,8 +86,11 @@ const Csv = {
 
   backUpCurrent: function () {
     let file = localStorage.getItem("currentFile");
-    LL(file);
-    var fs = require("fs");
+    console.log("file: ", file);
+    var myBlob = URL.createObjectURL(new Blob([file]));
+    console.log("myBlob: ", myBlob);
+    // var request = require("request");
+    return myBlob;
   },
 
   getStarts: function () {
@@ -82,11 +106,13 @@ const Csv = {
     let data = parsed.data;
 
     var compData = [];
+    // Filter for csv property that is on every comp
+    // to make an array of all comps ids
     var compBoats = data.filter(function (item) {
       return item[0] == "comphigh";
     });
-    var sortedBoats = compBoats.sort();
-    sortedBoats.forEach(function (compBoat) {
+
+    compBoats.sort().forEach(function (compBoat) {
       let competitor = {};
       competitor.id = parseInt(compBoat[2]);
       competitor.compid = compBoat[2];
@@ -95,7 +121,8 @@ const Csv = {
         return item[0].match(regex) && item[2] == compBoat[2];
       });
       compRows.forEach(function (item) {
-        competitor[item[0]] = item[1];
+        const newName = item[0].replace("comp", "");
+        competitor[newName] = item[1];
       });
       compData.push(competitor);
     }); //each compBoats
@@ -122,24 +149,20 @@ const Csv = {
    *   "rrset","0","26","106"
    */
 
-  writeResult: function (data) {
-    // get new result
-    // forEach new result we find match's in CSV for rft, rst, rele
-    let store = getStore("results").get(
-      parseInt(`${data.getResult[1]}${data.getResult[0]}`)
-    );
-  },
-
   getResults: function () {
     let file = localStorage.getItem("currentFile");
     let parsed = Papa.parse(file);
     let data = parsed.data;
+
     let resultsArr = [];
+    // Filter results using a prperty that always exists on result
+    // to make results array
     let results = data.filter((item) => {
-      return item[0] == "rele";
+      return item[0] == "rdisc";
     });
-    //LL('results', results)
+    //console.log('results', results)
     results.forEach(function (result) {
+      // have to map this manually as there is no prefix
       let resultRow = {
         id: parseInt(result[3] + result[2]),
         compid: result[2],
@@ -165,7 +188,7 @@ const Csv = {
 
   resultHelp: function (resultTag, data, result) {
     let res = data.filter(function (item) {
-      // LL(resultTag);
+      // console.log(resultTag);
       return (
         item[0] == resultTag && item[2] == result[2] && item[3] == result[3]
       );
@@ -206,37 +229,47 @@ const Csv = {
         return item[0].match(regex) && item[3] == race[3];
       });
       let raceStarts = [];
-      resultRows.forEach(function (item) {
+      resultRows.forEach((item) => {
         if (item[0] == "racestart") {
-          raceStarts.push(item[1]);
+          let stringToSplit = item[1].split("|");
+          let fleetStart = stringToSplit[1];
+          let fleetName = stringToSplit[0].split("^")[1];
+          // console.log(fleetStart, fleetName);
+          raceStarts.push({ fleet: fleetName, start: fleetStart });
         } else {
-          raceObj[item[0]] = item[1];
+          const newName = item[0].replace("race", "");
+          raceObj[newName] = item[1];
         }
       });
-      for (let i = 0; i < raceStarts.length; i++) {
-        raceObj.racestart = raceStarts;
-      }
+      raceStarts.forEach((start) => {
+        raceObj.starts = raceStarts;
+      });
+      // for (let i = 0; i < raceStarts.length; i++) {
+      //   raceObj.racestart = raceStarts;
+      // }
       raceData.push(raceObj);
     });
 
     return raceData;
   }, // getRaces
 
-  getSeries: function () {
-    let file = localStorage.getItem("currentFile");
-    let parsed = Papa.parse(file);
-    let data = parsed.data;
-    var seriesData = [];
-    let seriesRows = data.filter(function (item) {
-      var regex = new RegExp(`^ser`, "g");
+  getSeries: () => {
+    const file = localStorage.getItem("currentFile");
+    const parsed = Papa.parse(file);
+    const data = parsed.data;
+    let seriesData = [];
+    const seriesRows = data.filter((item) => {
+      const regex = new RegExp(`^ser`, "g");
       return item[0].match(regex);
     });
-    seriesObj = {};
+
+    let seriesObj = {};
     seriesRows.forEach((item) => {
-      seriesObj[item[0]] = item[1];
+      const newName = item[0].replace("ser", "");
+      seriesObj[newName] = item[1];
     });
+
     seriesData.push(seriesObj);
-    //console.log(seriesData);
     return seriesData;
   }, // getSeries
 
@@ -249,14 +282,13 @@ const Csv = {
     document.body.removeChild(link);
     delete link;
   },
-  
-  downloadFile: function (localStoreFile){
-    var data = localStorage.getItem('savedFile')
-    var blob = new Blob([data], {type: 'text/txt'});
-    var url  = window.URL.createObjectURL(blob);
-    var using = JSON.parse(localStorage.getItem("using"))
-    // LL(using)
+
+  downloadFile: function (localStoreFile) {
+    var data = localStorage.getItem("savedFile");
+    var blob = new Blob([data], { type: "text/txt" });
+    var url = window.URL.createObjectURL(blob);
+    var using = JSON.parse(localStorage.getItem("using"));
+    // console.log(using)
     downloadURL(url, using.name);
   },
-
 }; // Csv namespace

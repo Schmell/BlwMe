@@ -1,81 +1,111 @@
-<head>
-  <link rel="stylesheet" href="css/racing.css"></link>
-  <link rel="manifest" href="manifest.webmanifest">
-</head>
+<html>
+  <head>
+    <link rel="stylesheet" href="css/racing.css" />
+    <!-- <link rel="manifest" href="manifest.webmanifest" /> -->
+  </head>
 
-
-<body>
-  <div id="main">
-    <div id="infoPane">
-      <div id="raceSelect">
-        <!-- raceSelected template -- option only-->
-        <select id="raceSelector" defaultraceid=""></select>
-      </div>
-      <!-- Todo: set value from raceData -->
-      <div id="startTime"><input id="startTimeInput" type="text" value="18:35:00" size="9"/>
-       <br/> <div id="startSetBtn" class="btn">Set Start</div>
-      </div>
-      <div id="save" class="btn">save</div>
-      
-      <div id="clock"></div>
-      <div id="raceInfo"></div>
-    </div>
-                
-    <div id="mainPane">
-      <table cellpadding="0" cellspacing="5px" width="100%">
-        <tr><td>
-            <div id="compPane">
-              <div class="app">
-                <table class="appTable" cellpadding="0" cellspacing="5px" height="1400px">
-                  <!-- replaced by compTemplate -->
-                </table>
-              </div><!-- app -->
-            </div><!-- compPane -->
-          </td><!-- compPane cell -->
-          <td width="160px" id="btnPaneCell">          
-            <div id="btnPane">
-            <div id="finishBtn" class="btn"><div class="finishLabel">Finish</div></div>
-            <div id="codeBtn" class="btn"><div id="codeLabel">DNF</div></div>    
-            <div id="codeSelect">
-              <select>
-                  <option value="DNF">DNF</option>
-                  <option value="OCS">OCS</option>
-                  <option value="DSQ">DSQ</option>
-                  <option value="RAF">RAF</option>
-              </select>
-            </div>
-            <div id="finishPane"><!-- Replaced by finishPaneTemplate --></div>
-          </td><!-- btn cell -->
-        </tr>
-      </table><!-- mainPaneTable -->
-      <div id="export" class="btn">export</div>
-    </div> <!-- mainPane -->
-  </div><!-- main -->
-
-</body> 
-    
-    <!-- Templates -->
-    <template id="raceSelectItems">
-        <div class="dropdown">
-          <button class="dropbtn">Dropdown</button>
-          <div class="dropdown-content">
-          <a href="#">Link 1</a>
-          <a href="#">Link 2</a>
-          <a href="#">Link 3</a>
-          </div>
+  <body>
+    <div id="main">
+      <div id="infoPane">
+        <div id="raceSelect">
+          <!-- raceSelected template -- option only-->
+          <select id="raceSelector" defaultraceid=""></select>
         </div>
-    </template>
+        <!-- Todo: set value from raceData -->
+        <div id="startTime">
+          <input id="startTimeInput" type="text" value="18:35:00" size="9" />
+          <br />
+          <div id="startSetBtn" class="btn">Set Start</div>
+        </div>
+        <div id="save" class="btn">save</div>
 
-    <template id="finishPaneTemplate">
-      <!-- need to set finishListTitle textContent and <ol> id -->
-      <ul class="finishListTitle"><!-- <?= fleets[i] ?> -->
-        <ol id="" class="finishList"></ol>
-      </ul>
-    </template>
-    
-    <template id="compTemplate">
-      <tr><td>
-        <table id="" class="compPanel" cellpadding="0" cellspacing="0" data-id="">
+        <div id="clock"></div>
+        <div id="raceInfo"></div>
+      </div>
+
+      <div id="mainPane">
+        <table cellpadding="0" cellspacing="5px" width="100%">
+          <tr>
+            <td>
+              <div id="compPane">
+                <div class="app">
+                  <table
+                    class="appTable"
+                    cellpadding="0"
+                    cellspacing="5px"
+                    height="1400px"
+                  >
+                    <!-- replaced by compTemplate -->
+                  </table>
+                </div>
+                <!-- app -->
+              </div>
+              <!-- compPane -->
+            </td>
+            <!-- compPane cell -->
+
+            <td width="160px" id="btnPaneCell">
+              <div id="btnPane">
+                <div id="finishBtn" class="btn">
+                  <div class="finishLabel">Finish</div>
+                </div>
+                <div id="codeBtn" class="btn">
+                  <div id="codeLabel">DNF</div>
+                </div>
+                <div id="codeSelect">
+                  <select>
+                    <option value="DNF">DNF</option>
+                    <option value="OCS">OCS</option>
+                    <option value="DSQ">DSQ</option>
+                    <option value="RAF">RAF</option>
+                  </select>
+                </div>
+                <div id="finishPane">
+                  <!-- Replaced by finishPaneTemplate -->
+                </div>
+              </div>
+            </td>
+            <!-- btn cell -->
+          </tr>
+        </table>
+        <!-- mainPaneTable -->
+        <div id="export" class="btn">export</div>
+      </div>
+      <!-- mainPane -->
+    </div>
+    <!-- main -->
+  </body>
+
+  <!-- Templates -->
+  <template id="raceSelectItems">
+    <div class="dropdown">
+      <button class="dropbtn">Dropdown</button>
+      <div class="dropdown-content">
+        <a href="#">Link 1</a>
+        <a href="#">Link 2</a>
+        <a href="#">Link 3</a>
+      </div>
+    </div>
+  </template>
+
+  <template id="finishPaneTemplate">
+    <!-- need to set finishListTitle textContent and <ol> id -->
+    <ul class="finishListTitle">
+      <!-- <?= fleets[i] ?> -->
+      <ol id="" class="finishList"></ol>
+    </ul>
+  </template>
+
+  <template id="compTemplate">
+    <tr>
+      <td>
+        <table
+          id=""
+          class="compPanel"
+          cellpadding="0"
+          cellspacing="0"
+          data-id=""
+        >
           <tr class="compRow">
             <td class="boat">
               <div class="cueNo"></div>
@@ -87,6 +117,7 @@
               <div class="start hidden"></div>
               <div class="date hidden"></div>
             </td>
+
             <td width="20px">
               <div class="adj">
                 <ul>
@@ -97,941 +128,992 @@
             </td>
             <td class="time">
               <table class="timeTable" cellpadding="0" cellspacing="0">
-              <tr>
-                <td class="timeDisplay"></td>
-              </tr>
+                <tr>
+                  <td class="timeDisplay"></td>
+                </tr>
               </table>
             </td>
           </tr>
         </table>
-      </td></tr>
-    </template>
-    
-    <script src="js/colorChanger.js"></script>
-    <script src="js/importFile.js"></script><!-- change to localStorageManager -->
-    <script src="js/papaparse.min.js"></script>
+      </td>
+    </tr>
+  </template>
 
-<script name="indexedDB_stuff" type="text/javascript">
+  <script src="js/colorChanger.js"></script>
+  <script src="js/importFile.js"></script>
+  <!-- change to localStorageManager -->
+  <script src="js/papaparse.min.js"></script>
+
+  <script name="indexedDB_stuff" type="text/javascript">
     // Globals
     var logging = false;
     var LL = console.log; //LazyLog
     var raceSelected;
-    var db;
-    var dbPromise;
-    var updateDB = false;
+    let db;
+    let dbPromise;
+    // var updateDB = false;
     const dbVersion = 17;
 
-    function log(e,eObj){
-      if(logging){console.log(e,eObj)}
-    }   
+    function openDatabase(name) {
+      if (!window.indexedDB) {
+        console.log("Your browser doesn't support IndexedDB.");
+      }
 
-    function openDatabase(name){
-        if (!window.indexedDB) { console.log("Your browser doesn't support a stable version of IndexedDB."); }
+      dbPromise = indexedDB.open(name, 15);
 
-        let dbPromise = indexedDB.open(name, 15);
-    
-        dbPromise.onupgradeneeded = function(e) {
-            console.log('onupgradeneeded');
-            db = e.target.result;
-        
-            if (!db.objectStoreNames.contains('races')) {
-                let store = db.createObjectStore('races', {keyPath: 'id'});
-                store.createIndex("name", "name", { unique: true });
-                store.createIndex("date", "date", { unique: false });
-                store.createIndex("time", "time", { unique: false });
-                store.createIndex("sailed", "sailed", { unique: false });
-            }
-        
-            if (!db.objectStoreNames.contains('comps')) {
-                let store = db.createObjectStore('comps', {keyPath: 'id'});
-                store.createIndex("id", "id", { unique: true });
-                store.createIndex("compid", "compid", { unique: false });
-                store.createIndex("boat", "boat", { unique: false });
-                store.createIndex("fleet", "fleet", { unique: false });
-                store.createIndex("helm", "helm", { unique: true });
-         
-            }
-        
-            if (!db.objectStoreNames.contains('fleets')) {
-                let store = db.createObjectStore('fleets', {keyPath: 'id'});
-                store.createIndex("name", "name", { unique: false });
-            }
-        
-            if (!db.objectStoreNames.contains('results')) { 
-                let store = db.createObjectStore('results', {keyPath: 'id', autoIncrement:true});
-                store.createIndex("raceid", "raceid", { unique: false });
-                store.createIndex("compid", "compid", { unique: false });
-                store.createIndex("start", "start", { unique: false });
-                store.createIndex("elapsed", "elapsed", { unique: false });
-                store.createIndex("finish", "finish", { unique: false });
-            }
-            if (!db.objectStoreNames.contains('series')) { 
-                let store = db.createObjectStore('series', {keyPath: 'id'});
-            }
-            if (!db.objectStoreNames.contains('using')) { 
-                let store = db.createObjectStore('using', {keyPath: 'id'});
-            }
+      dbPromise.onupgradeneeded = function (e) {
+        console.log("onupgradeneeded");
+        db = e.target.result;
 
-            return db;
-    
-        }; // onupgradeneeded
-    
-        dbPromise.onerror = function(e) { console.warn("Error", e.target.error); };
-        dbPromise.onblocked = function(e) { console.warn("onblocked", e.target.result); }
-        dbPromise.onsuccess = function(e) {
-            db = e.target.result;
-            writeAllDB(db)
-            return db;
-        };
+        if (!db.objectStoreNames.contains("races")) {
+          const store = db.createObjectStore("races", { keyPath: "id" });
+          store.createIndex("name", "name", { unique: false });
+          store.createIndex("date", "date", { unique: false });
+          store.createIndex("time", "time", { unique: false });
+          store.createIndex("sailed", "sailed", { unique: false });
+        }
 
+        if (!db.objectStoreNames.contains("comps")) {
+          const store = db.createObjectStore("comps", { keyPath: "id" });
+          store.createIndex("id", "id", { unique: true });
+          store.createIndex("compid", "compid", { unique: false });
+          store.createIndex("boat", "boat", { unique: false });
+          store.createIndex("fleet", "fleet", { unique: false });
+          store.createIndex("helm", "helm", { unique: true });
+        }
+
+        if (!db.objectStoreNames.contains("fleets")) {
+          const store = db.createObjectStore("fleets", { keyPath: "id" });
+          store.createIndex("name", "name", { unique: false });
+        }
+
+        if (!db.objectStoreNames.contains("results")) {
+          const store = db.createObjectStore("results", {
+            keyPath: "id",
+            autoIncrement: true,
+          });
+          store.createIndex("raceid", "raceid", { unique: false });
+          store.createIndex("compid", "compid", { unique: false });
+          store.createIndex("start", "start", { unique: false });
+          store.createIndex("elapsed", "elapsed", { unique: false });
+          store.createIndex("finish", "finish", { unique: false });
+        }
+        if (!db.objectStoreNames.contains("series")) {
+          const store = db.createObjectStore("series", { keyPath: "id" });
+        }
+        if (!db.objectStoreNames.contains("using")) {
+          const store = db.createObjectStore("using", { keyPath: "id" });
+        }
+
+        return db;
+      }; // onupgradeneeded
+
+      dbPromise.onerror = (e) => {
+        console.error("Error", e.target.error);
+      };
+      dbPromise.onblocked = (e) => {
+        console.error("onblocked", e.target.result);
+      };
+      dbPromise.onsuccess = (e) => {
+        db = e.target.result;
+        writeAllDB(db);
+        return db;
+      };
     } // openDatabase
 
-    const dbw = openDatabase('store');
+    const dbw = openDatabase("store");
 
-    function writeCompsDB(db){
-      let comps = Csv.getComps()
-      // let tx = makeTX('comps', 'readwrite'); 
-      let compsData = getStore("comps", "readwrite")
-      
-      comps.forEach(function(comp){
-      let competitor = {
-          'id': parseInt(comp.compid), 
-          'compid': comp.compid, 
-          'boat': comp.compboat, 
-          'sailno': comp.compsailno,
-          'rating': comp.comprating, 
-          'fleet': comp.compfleet, 
-          'helm': comp.comphelmname, 
-          'alias':comp.compalias, 
-          'club':comp.compclub, 
-          'exclude':comp.compexclude, 
-          'high':comp.comphigh, 
-          'medicalflag':comp.compmedicalflag, 
-          'nett':comp.compnett, 
-          'rank':comp.comprank, 
-          'total':comp.comptotal
-        }
-      let request = compsData.add(competitor);
-      // LL(comps)
-    })// forEach
+    function writeCompsDB() {
+      const comps = Csv.getComps();
+      const compsData = getStore("comps", "readwrite");
+      // console.log('comps: ',comps )
+      comps.forEach((comp) => {
+        compsData.add(comp);
+      });
     }
 
-    function writeFleetsDB(db){
-         let fleets = Csv.getFleets();
-        let tx = makeTX('fleets', 'readwrite');
-        let store = tx.objectStore('fleets')
-        for (let i = 0; i < fleets.length; i++) {
-          let fleet = {'name':fleets[i],'id':i}
-          let request = store.put(fleet);
-        }
-        store.onerror = function(e){
-          console.warn('onerror',e)
-        }
+    function writeFleetsDB() {
+      const fleets = Csv.getFleets();
+      const fleetData = getStore("fleets", "readwrite");
+      // console.log('fleets: ',fleets )
+      fleets.forEach((fleet, idx) => {
+        // let add = { name: fleet, id: idx };
+        fleetData.add({ name: fleet, id: idx });
+      });
     }
 
-    function writeRacesDB(db){
-        let races = Csv.getRaces();
-        let transaction = makeTX("races", "readwrite");
-        let racesData = transaction.objectStore("races");
-        
-        for (let i = 0; i < races.length; i++) {
-          let race = {
-            'id':races[i].id,
-            'raceid':races[i].raceid,
-            'name':races[i].racename,
-            'date':races[i].racedate, 
-            'notes':races[i].racenotes, 
-            'rank':races[i].racerank, 
-            'sailed': races[i].racesailed, 
-            'start':races[i].racestart, 
-            'time':races[i].racetime
-            }
-          let request = racesData.put(race);
-        }
+    function writeRacesDB(db) {
+      const races = Csv.getRaces();
+      const racesData = getStore("races", "readwrite");
+      // console.log("races: ", races);
+      races.forEach((race) => {
+        racesData.add(race);
+      });
     }
 
-    function writeResultsDB(db){
-        let results = Csv.getResults();
-        let transaction = makeTX("results", "readwrite");
-        let resultsData = transaction.objectStore("results");
-        for (let i = 0; i < results.length; i++) {
-            let request = resultsData.put(results[i]);
-            //console.log(results[i]);
-        }
+    function writeResultsDB(db) {
+      const results = Csv.getResults();
+      const resultsData = getStore("results", "readwrite");
+      // console.log("results: ", results);
+      results.forEach((result) => {
+        resultsData.add(result);
+      });
     }
 
-    function writeSeriesDB(db){
-      let results = Csv.getSeries()
-      let tx = makeTX('series', 'readwrite')
-      let resultsData = tx.objectStore("series");
-      for (let i = 0; i < results.length; i++) {
-        results[i].id = 1
-        let request = resultsData.add(results[i]);
-        //console.log(results[i]);
-      }
+    function writeSeriesDB(db) {
+      const series = Csv.getSeries();
+      const seriesData = getStore("series", "readwrite");
+      // console.log("series: ", series);
+      series.forEach((ser) => {
+        ser.id = 1;
+        seriesData.put(ser);
+      });
     }
 
-    function writeUsingDB(db){
-      let using = localStorage.getItem('using')
-      //LL(JSON.parse(using))
-      let jsoned = JSON.parse(using)
-      jsoned.id = 1
-      let tx = makeTX('using', 'readwrite')
-      let store = tx.objectStore("using");
-      store.put(jsoned)
+    function writeUsingDB(db) {
+      const using = localStorage.getItem("using");
+      // console.log("using: ", using);
+      const jsoned = JSON.parse(using);
+      jsoned.id = 1;
+      const store = getStore("using", "readwrite");
+      store.add(jsoned);
     }
 
-    function writeAllDB(db){
-      let using = JSON.parse(localStorage.getItem('using')).lastModifiedDate
-      let tx = makeTX('using', 'readwrite')
-      let store = tx.objectStore("using").get(1)
-      store.onsuccess = (e)=>{
-        let dbv = e.target.result
-        if(dbv && using == dbv.lastModifiedDate && !updateDB){
-          console.log('File matches DB no update required')
-        }else{
-          console.log('File does not match DB, updating')
-          // purge data from db
-          // var request = indexedDB.deleteDatabase(name);
-          // request.onsucess = ()=>{
-          //   const dbw = openDatabase('store');
-          // }
-          writeCompsDB(db)
-          writeRacesDB(db);
-          writeFleetsDB(db)
-          writeResultsDB(db)
-          writeSeriesDB(db)
-          writeUsingDB(db)
-        }
-      }
+    function writeAllDB() {
+      const using = JSON.parse(localStorage.getItem("using"));
+      const store = getStore("using", "readwrite").get(1);
+      store.onsuccess = (e) => {
+        const dbv = e.target.result;
+        if (dbv && using.lastModified === dbv.lastModified) {
+          console.log("Same File - no update required");
+          return;
+        } else {
+          console.log("File does not match DB, updating");
+          // This will delete the db on refresh ???
+          // Need to be able to clear the database before writing new data
+
+          // var request = indexedDB.deleteDatabase("store");
+          // request.onsucess = () => {
+          //   db = openDatabase("store");
+          // };
+          writeCompsDB();
+          writeRacesDB();
+          writeFleetsDB();
+          writeResultsDB();
+          writeSeriesDB();
+          writeUsingDB();
+        } // else
+      };
     } // writeAllDB
+  </script>
 
-</script>
-<script type="text/javascript">
-  
-  function makeTX(storeName,mode){
-    // console.log('makeTX',db)
-  let tx = db.transaction(storeName, mode);
-  // LL(tx)
-  tx.onerror = (err) => {
-    console.error('makeTX onerror',err.target.error);
-  }
-  return tx;
-}
+  <script type="text/javascript">
+    function makeTX(storeName, mode) {
+      // console.log('makeTX',db)
+      let tx = db.transaction(storeName, mode);
+      tx.onerror = (err) => {
+        console.error("makeTX onerror", err.target.error);
+      };
+      return tx;
+    }
 
-function getStore(storeName,mode){
-  if(mode == 'undefined'){mode = 'readwrite'}
-  let tx = makeTX(storeName,mode).objectStore(storeName);
-  return tx;
-}
+    function getStore(storeName, mode) {
+      if (mode == "undefined") {
+        mode = "readwrite";
+      }
+      let tx = makeTX(storeName, mode).objectStore(storeName);
+      return tx;
+    }
 
-function getStoreAll(storeName,mode){
-  let store = getStore(storeName,mode).getAll()
-  return store;
-}
+    function getStoreAll(storeName, mode) {
+      let store = getStore(storeName, mode).getAll();
+      return store;
+    }
 
-function saveResults(){
-  // check for race sailed
-  let sailed = document.getElementById('raceInfo').getAttribute('sailed')
-  if(parseInt(sailed)){
-    // I want to change the save button to update button when race is sailed
-    console.log('race already marked sailed')
-    return null
-  }
-  
-  // get raceId
-  let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
+    function saveResults() {
+      // check for race sailed
+      let sailed = document.getElementById("raceInfo").getAttribute("sailed");
+      if (parseInt(sailed)) {
+        // I want to change the save button to update button when race is sailed
+        console.log("race already marked sailed");
+        return null;
+      }
 
-  // mark race as sailed
-  let races = getStore('races', 'readwrite')
-  let race = races.get(parseInt(raceId))
-  race.onsuccess = (e)=>{
-    // LL(race.result.sailed)
-    race.result.sailed = "1"
-    races.put(race.result)
-    
-  }
-  
-  // get currentFile from localstorage
-  let file = localStorage.getItem("currentFile");
-  let parsed = Papa.parse(file);
-  let data = parsed.data;
-  // get results
-  let store = getStore("results").index("raceid").getAll(raceId)
-  store.onsuccess = ()=>{
-    store.result.forEach((result)=>{
-      // filter rdisc for index
-      // insert rele! rft strt 
-      let lineNum = data.findIndex((item, index, array)=>{
-        if (item[0] == 'rdisc' && item[2] == result.compid && item[3] == raceId && index){
-          return index
+      // get raceId
+      let raceId = document.querySelector("#raceInfo").getAttribute("raceid");
+
+      // mark race as sailed
+      let races = getStore("races", "readwrite");
+      let race = races.get(parseInt(raceId));
+      race.onsuccess = (e) => {
+        race.result.sailed = "1";
+        races.put(race.result);
+      };
+
+      // get currentFile from localstorage
+      let file = localStorage.getItem("currentFile");
+      let parsed = Papa.parse(file);
+      let data = parsed.data;
+      // get results
+      let store = getStore("results").index("raceid").getAll(raceId);
+      store.onsuccess = () => {
+        store.result.forEach((result) => {
+          // filter rdisc for index
+          // insert rele! rft strt
+          let lineNum = data.findIndex((item, index, array) => {
+            if (
+              item[0] == "rdisc" &&
+              item[2] == result.compid &&
+              item[3] == raceId &&
+              index
+            ) {
+              return index;
+            }
+          });
+
+          if (lineNum) {
+            // set rrestyp to 4 // i think this is result type? and 4 is for recording finish times
+            data[lineNum + 1][1] = result.rrestyp; // should set this value when setting result
+            if (result.finish) {
+              data.splice(lineNum, 0, [
+                "rft",
+                result.finish,
+                result.compid,
+                result.raceid,
+              ]);
+              data.splice(lineNum, 0, [
+                "rst",
+                result.start,
+                result.compid,
+                result.raceid,
+              ]);
+              data.splice(lineNum, 0, [
+                "rele",
+                result.elapsed,
+                result.compid,
+                result.raceid,
+              ]); // might not matter if just finish times
+            } else {
+              data.splice(lineNum, 0, [
+                "rcod",
+                result.code,
+                result.compid,
+                result.raceid,
+              ]);
+            }
+          }
+          let unparsed = Papa.unparse(data, {
+            quotes: true,
+            skipEmptyLines: true,
+          });
+          localStorage.setItem("savedFile", unparsed);
+        });
+        let saveButton = document.querySelector("#save");
+        saveButton.removeEventListener("click", saveResults);
+        saveButton.addEventListener("click", downloadFile);
+        saveButton.textContent = "download";
+      };
+    }
+
+    function downloadURL(url, name) {
+      var link = document.createElement("a");
+      link.download = name;
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      delete link;
+    }
+
+    function downloadFile() {
+      var data = localStorage.getItem("savedFile");
+      var blob = new Blob([data], { type: "text/txt" });
+      var url = window.URL.createObjectURL(blob);
+      var using = JSON.parse(localStorage.getItem("using"));
+      downloadURL(url, using.name);
+    }
+
+    function downloadExport(data, raceName) {
+      var blob = new Blob([data], { type: "text/txt" });
+      var url = window.URL.createObjectURL(blob);
+      downloadURL(url, raceName);
+    }
+
+    function exportResults() {
+      // get raceId / name
+      let raceId = document.querySelector("#raceInfo").getAttribute("raceid");
+      let raceName = document.querySelector("#raceInfo h3").textContent;
+      let columns = [["RaceNo", "Boat", "Finish", "Code"]];
+      let tx = db.transaction(["comps", "results"]);
+      let results = tx.objectStore("results").index("raceid").openCursor();
+
+      results.onsuccess = () => {
+        let item = results.result;
+        if (item) {
+          let comps = tx.objectStore("comps").get(parseInt(item.value.compid));
+          comps.onsuccess = () => {
+            columns.push([
+              raceName,
+              comps.result.boat,
+              item.value.finish ? item.value.finish : null,
+              item.value.code ? item.value.code : null,
+            ]);
+            item.continue();
+          };
+        } else {
+          let unparsed = Papa.unparse(columns, { quotes: true });
+          raceName = raceName.replace(/\s/g, "");
+          downloadExport(unparsed, raceName + ".result.csv");
         }
-      })
-      
-      if(lineNum){
-        // set rrestyp to 4 // i think this is result type? and 4 is for recording finish times
-        data[lineNum +1][1] = result.rrestyp // should set this value when setting result
-        // LL(result.rrestyp)
-        if(result.finish){
-          data.splice(lineNum, 0, ['rft', result.finish, result.compid, result.raceid]);
-          data.splice(lineNum, 0, ['rst', result.start, result.compid, result.raceid]);
-          data.splice(lineNum, 0, ['rele', result.elapsed, result.compid, result.raceid]); // might not matter if just finish times
-        }else{
-          data.splice(lineNum, 0, ['rcod', result.code, result.compid, result.raceid]);
+      };
+    }
+
+    async function relate(store1, store2, callback) {
+      let related = new Array();
+      let tx = db.transaction([store1.store, store2.store], "readonly");
+      tx.oncomplete = function () {
+        let txcomplete = 1;
+        callback(related);
+      };
+      let results = tx.objectStore(store1.store).index(store1.index);
+      let result = results.openCursor(store1.search);
+      result.onsuccess = function (e) {
+        let cursor = event.target.result;
+        if (cursor) {
+          let comps = tx.objectStore(store2.store).index(store2.index);
+          let comp = comps.get(cursor.value.compid);
+          comp.onsuccess = function (e) {
+            let first = e.target.result;
+            let second = cursor.value;
+            let merged = { ...first, ...second };
+            // console.log('merged results',merged)
+            related.push(merged);
+          };
+          cursor.continue();
         }
+      };
+    }
+
+    function relateDone(related) {
+      related.forEach(function (relatedItems) {
+        let list = document
+          .querySelectorAll(".finishListTitle")
+          .forEach(function (item) {
+            let dataKey = item.getAttribute("data-key");
+            if (dataKey == relatedItems.fleet.replace(/ /g, "")) {
+              let listItem = document.createElement("li");
+              listItem.setAttribute("key", relatedItems.compId);
+              listItem.textContent = relatedItems.boat;
+              item.append(listItem);
+            }
+          });
+        let compPane = document
+          .querySelectorAll(".compRow")
+          .forEach(function (item) {});
+      });
+    } // relateDone
+
+    function buildCompsRows() {
+      return new Promise(function (resolve, reject) {
+        // get insert point and the template
+        let insert = document.querySelector(".appTable");
+        insert.innerHTML = "";
+        let template = document.querySelector("#compTemplate");
+        //get comps from db
+        let store = getStore("comps").getAll();
+        store.onsuccess = (e) => {
+          let comps = e.target.result;
+          if (comps[0].sailno) {
+            comps.sort((a, b) => {
+              return a.sailno - b.sailno;
+            });
+          }
+          if (comps[0].boat) {
+            comps.sort((a, b) => {
+              return a.boat - b.boat;
+            });
+          }
+          comps.forEach(function (comp) {
+            let clone = template.content.cloneNode(true);
+            clone.querySelector(".compPanel").setAttribute("id", comp.id);
+            clone.querySelector(".compPanel").setAttribute("data-id", comp.id);
+            clone.querySelector(".compId").textContent = comp.id;
+            clone.querySelector(".helm").textContent = comp.helm;
+            clone.querySelector(".boatName").textContent = comp.boat
+              ? comp.boat
+              : comp.sailno;
+            clone.querySelector(".fleet").textContent = comp.fleet;
+            clone.querySelector(".rating").textContent = comp.rating;
+            insert.appendChild(clone);
+          }); // forEach
+          document.querySelectorAll(".boat").forEach((elem) => {
+            elem.addEventListener("click", boatClick);
+          });
+          document.querySelectorAll(".button").forEach((elem) => {
+            elem.addEventListener("click", adjustButton);
+          });
+          document.querySelectorAll(".timeDisplay").forEach((elem) => {
+            elem.addEventListener("dblclick", adjustTime);
+          });
+        }; // onsuccess
+        resolve();
+      }); // buildCompsRows
+    }
+
+    async function buildRaceSelect() {
+      let selector = document.querySelector("#raceSelect");
+      selector.innerHTML = "";
+      //get races from db
+      let races = getStoreAll("races");
+      races.onsuccess = (e) => {
+        let result = races.result;
+        // selector.setAttribute('defaultRaceId',result[0].id)
+        let fragment = document.createDocumentFragment();
+        let dropDown = document.createElement("div");
+        dropDown.classList.add("dropdown");
+        let span = document.createElement("span");
+        span.classList.add("dropbtn");
+        span.textContent = "Select Race";
+        let content = document.createElement("div");
+        content.classList.add("dropdown-content");
+        result.forEach((item, idx) => {
+          let row = document.createElement("a");
+          if (item.name) {
+            row.textContent = item.name;
+          } else {
+            row.textContent = `R${idx + 1}`;
+          }
+          row.setAttribute("id", item.id);
+          row.setAttribute("href", "#");
+          row.classList.add("dropdow-row");
+          if (item.sailed == "1") {
+            row.classList.add("disabled");
+          }
+          content.append(row);
+          row.addEventListener("click", raceSelectChange);
+        });
+        fragment.append(dropDown);
+        dropDown.append(span);
+        dropDown.append(content);
+        raceSelect.append(fragment);
+      };
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      addListeners();
+      function addListeners() {
+        document
+          .querySelector("#finishBtn")
+          .addEventListener("click", finishButton);
+        document
+          .querySelector("#startSetBtn")
+          .addEventListener("click", setStart);
+        document.querySelector("#codeBtn").addEventListener("click", codeBtn);
+        document
+          .querySelector("#codeSelect select")
+          .addEventListener("change", changeCode);
+        document.querySelector("#save").addEventListener("click", saveResults);
+        document
+          .querySelector("#export")
+          .addEventListener("click", exportResults);
+        //document.querySelector('.timeDisplay').addEventListener('dblclick', editTime)
+        //document.querySelector('#raceSelect select').addEventListener('change', raceSelectChange)
+        //document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
+        //document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
       }
-      let unparsed = Papa.unparse(data,{quotes:true, skipEmptyLines: true})
-      localStorage.setItem('savedFile', unparsed)
-    })
-    let saveButton = document.querySelector("#save")
-    saveButton.removeEventListener('click', saveResults)
-    saveButton.addEventListener("click", downloadFile)
-    saveButton.textContent = "download"
-  }
-}
+    }); // dom ready
 
-function downloadURL(url, name) {
-  var link = document.createElement("a");
-  link.download = name;
-  link.href = url;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  delete link;
-}
+    //=============================================================
+    setTimeout(function () {
+      buildCompsRows().then(getResultsDb()).then(buildRaceSelect());
+      getFleets();
+    }, 2000);
+    //=============================================================
 
-function downloadFile() {
-  var data = localStorage.getItem('savedFile')
-  var blob = new Blob([data], {type: 'text/txt'});
-  var url  = window.URL.createObjectURL(blob);
-  var using = JSON.parse(localStorage.getItem("using"))
-  // LL(using)
-  downloadURL(url, using.name);
-}
-
-function downloadExport(data, raceName){
-  var blob = new Blob([data], {type: 'text/txt'});
-  var url  = window.URL.createObjectURL(blob);
-  downloadURL(url, raceName);
-}
-
-function exportResults(){
-  // get raceId / name
-  let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
-  let raceName = document.querySelector('#raceInfo h3').textContent
-  let columns = [["RaceNo","Boat","Finish","Code"]]
-  let tx = db.transaction(["comps", "results"])
-  let results = tx.objectStore('results').index('raceid').openCursor()
-  
-  results.onsuccess = ()=>{
-    let item = results.result
-    LL(item.value)
-    if(item){
-      let comps = tx.objectStore('comps').get(parseInt(item.value.compid))
-      comps.onsuccess = ()=>{
-        columns.push([raceName, comps.result.boat, (item.value.finish ? item.value.finish : null), (item.value.code ? item.value.code : null) ])
-        item.continue()
+    function getResultsDb(raceId) {
+      if (raceId) {
+        let store = getStore("results").index("raceid").getAll(raceId);
+        store.onsuccess = (e) => {
+          let races = e.target.result;
+          clearCompRows();
+          races.forEach((item) => {
+            let compPanel = document.querySelector(`[id="${item.compid}"]`);
+            if (item.finish && !item.code) {
+              compPanel.classList.add("finished");
+              compPanel.querySelector(".timeDisplay").textContent = item.finish;
+            } else if (item.elapsed) {
+              compPanel.classList.add("finished");
+              compPanel.querySelector(".timeDisplay").textContent =
+                item.elapsed;
+            } else if (item.code) {
+              compPanel.classList.add("finished");
+              compPanel.querySelector(".timeDisplay").textContent = item.code;
+            } else {
+              compPanel.classList.remove("finished");
+              compPanel.querySelector(".timeDisplay").textContent = "";
+            }
+          });
+        };
+        store.onerror = (err) => {
+          console.log("err", err);
+        };
+      } else {
+        //cant figureout how to get default
+        //let selectedRace = document.querySelector('#raceSelector')
+        //selectedRace.children[0]
+        //console.dir(selectedRace.children.item(0))
       }
+    } // getResultsDb
 
-    }else{
-      let unparsed = Papa.unparse(columns, {quotes: true})
-      LL(unparsed)
-      raceName = raceName.replace(/\s/g, '');
-      downloadExport(unparsed, raceName+".result.csv")
+    function clearCompRows() {
+      document.querySelectorAll(".compPanel").forEach((item) => {
+        item.classList.remove("finished");
+        item.querySelector(".timeDisplay").textContent = "";
+      });
     }
-  }
 
-}
+    function raceSelectChange() {
+      raceSelected = this.getAttribute("id");
+      getResultsDb(this.getAttribute("id"));
+      let store = getStore("races").get(parseInt(this.getAttribute("id")));
+      store.onsuccess = (e) => {
+        let result = e.target.result;
+        let raceInfo = document.querySelector("#raceInfo");
+        raceInfo.innerHTML = "";
+        raceInfo.setAttribute("raceId", result.raceid);
+        raceInfo.setAttribute("sailed", result.sailed);
+        let name = document.createElement("h3");
+        name.textContent = result.name;
+        let date = document.createElement("p");
+        date.setAttribute("id", "date");
+        date.textContent = result.date;
+        let sailed = document.createElement("p");
+        sailed.textContent = `Race sailed: ${result.sailed} Race Id: ${result.raceid}`;
 
-async function relate(store1, store2, callback){
-  let related = new Array;
-  let tx = db.transaction([ store1.store, store2.store ], 'readonly')
-  tx.oncomplete = function(){
-    let txcomplete = 1
-    callback(related)
-  }
-  let results = tx.objectStore(store1.store).index(store1.index)
-  let result = results.openCursor(store1.search)
-  result.onsuccess = function(e){
-    let cursor = event.target.result
-    if (cursor){
-      let comps = tx.objectStore(store2.store).index(store2.index)
-      let comp = comps.get(cursor.value.compid)
-      comp.onsuccess = function(e){
-        let first = e.target.result
-        let second = cursor.value
-        let merged = {...first, ...second}
-        // console.log('merged results',merged)
-        related.push(merged)
-      }
-      cursor.continue(); 
+        raceInfo.appendChild(name);
+        raceInfo.appendChild(date);
+        raceInfo.appendChild(sailed);
+        updateFinishPane();
+
+        // need to clear cue
+        let cued = document.querySelectorAll(".cueNo");
+        cued.forEach((item) => {
+          item.closest(".compPanel").removeAttribute("style");
+          item.textContent = "";
+        });
+      };
     }
-  }
-}
 
-function relateDone(related){
-  related.forEach(function(relatedItems){
-    let list = document.querySelectorAll('.finishListTitle').forEach(function(item){
-      let dataKey = item.getAttribute('data-key');
-      if(dataKey == relatedItems.fleet.replace(/ /g,'')){
-        let listItem = document.createElement('li')
-        listItem.setAttribute('key',relatedItems.compId)
-        listItem.textContent = relatedItems.boat
-        item.append(listItem)
-      }
-    })
-    let compPane = document.querySelectorAll('.compRow').forEach(function(item){
-    })
-  })
-} // relateDone
-
-function buildCompsRows(){
-  return new Promise(function(resolve, reject){
-  // get insert point and the template
-  let insert = document.querySelector('.appTable')
-  insert.innerHTML = ''
-  let template = document.querySelector('#compTemplate')
-  //get comps from db
-  let store = getStore('comps').getAll()
-  store.onsuccess = (e)=>{
-    let comps = e.target.result
-    if(comps[0].sailno){
-      comps.sort((a,b)=>{return a.sailno - b.sailno})
+    function getFleets() {
+      let result = [];
+      let fleets = getStoreAll("fleets");
+      fleets.onsuccess = (e) => {
+        let result = e.target.result;
+        makeFinishPane(result);
+      };
     }
-    if(comps[0].boat){
-      comps.sort((a,b)=>{return a.boat - b.boat})
-    }
-    comps.forEach(function(comp){
-      let clone = template.content.cloneNode(true);
-      clone.querySelector('.compPanel').setAttribute('id', comp.id)
-      clone.querySelector('.compPanel').setAttribute('data-id', comp.id)
-      clone.querySelector('.compId').textContent = comp.id
-      clone.querySelector('.helm').textContent = comp.helm
-      clone.querySelector('.boatName').textContent = (comp.boat ? comp.boat : comp.sailno)
-      clone.querySelector('.fleet').textContent = comp.fleet
-      clone.querySelector('.rating').textContent = comp.rating
-      insert.appendChild(clone);
-    }) // forEach
-    document.querySelectorAll('.boat').forEach((elem)=>{elem.addEventListener('click',boatClick)})
-    document.querySelectorAll('.button').forEach((elem)=>{elem.addEventListener('click',adjustButton)})
-    document.querySelectorAll('.timeDisplay').forEach((elem)=>{elem.addEventListener('dblclick',adjustTime)})
-  } // onsuccess
-  resolve()
-}) // buildCompsRows
-}
 
-async function buildRaceSelect(){
-  let selector = document.querySelector('#raceSelect')
-  selector.innerHTML = ''
-  //get races from db
-  let races = getStoreAll('races')
-  races.onsuccess = (e)=>{
-    let result = races.result
-    // selector.setAttribute('defaultRaceId',result[0].id)
-    let fragment = document.createDocumentFragment();
-    let dropDown = document.createElement('div')
-    dropDown.classList.add('dropdown')
-    let span = document.createElement('span')
-    span.classList.add('dropbtn')
-    span.textContent = 'Select Race'
-    let content = document.createElement('div')
-    content.classList.add('dropdown-content')
-    result.forEach((item, idx)=>{
-      let row = document.createElement('a')
-      if(item.name){
-        row.textContent = item.name
-      }else{
-        row.textContent = `R${idx+1}`
-      }
-      row.setAttribute('id',item.id)
-      row.setAttribute('href','#')
-      row.classList.add('dropdow-row')
-      if(item.sailed == "1"){row.classList.add('disabled')}
-      content.append(row)
-      row.addEventListener('click',raceSelectChange)
-    })
-    fragment.append(dropDown)
-    dropDown.append(span)
-    dropDown.append(content)
-    raceSelect.append(fragment)
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function(){   
-  addListeners()
-  function addListeners(){
-    document.querySelector('#finishBtn').addEventListener('click', finishButton)
-    document.querySelector('#startSetBtn').addEventListener('click', setStart)
-    document.querySelector('#codeBtn').addEventListener('click', codeBtn)
-    document.querySelector('#codeSelect select').addEventListener('change',changeCode)
-    document.querySelector('#save').addEventListener('click', saveResults)
-    document.querySelector('#export').addEventListener('click', exportResults)
-    //document.querySelector('.timeDisplay').addEventListener('dblclick', editTime)
-    //document.querySelector('#raceSelect select').addEventListener('change', raceSelectChange)
-    //document.querySelector('.btn').addEventListener('mousedown',(e)=>{e.classList.toggle('mousedown')})
-    //document.querySelector('.btn').addEventListener('mouseup',(e)=>{e.classList.toggle('mouseup')})
-  }
-
-});// dom ready
-
-//=============================================================
-setTimeout(function(){
-  buildCompsRows().then(getResultsDb()).then(buildRaceSelect())
-  getFleets()
-}, 2000);
-//=============================================================
-
-function getResultsDb(raceId){
-  if(raceId){
-    let store = getStore('results').index('raceid').getAll(raceId)
-    store.onsuccess = (e)=>{
-      let races = e.target.result
-      clearCompRows()
-      races.forEach( (item) => {
-       let compPanel = document.querySelector(`[id="${item.compid}"]`)
-        if(item.finish && !item.code){
-          compPanel.classList.add('finished')
-          compPanel.querySelector('.timeDisplay').textContent = item.finish
-        }else if(item.elapsed){
-          compPanel.classList.add('finished')
-          compPanel.querySelector('.timeDisplay').textContent = item.elapsed
-        }else if(item.code){
-          compPanel.classList.add('finished')
-          compPanel.querySelector('.timeDisplay').textContent = item.code
-        }else{
-          compPanel.classList.remove('finished')
-          compPanel.querySelector('.timeDisplay').textContent = ""
-        }
-      })
-    }
-    store.onerror = (err) => {
-      console.log('err', err)
-    }
-  }else{
-    //cant figureout how to get default
-    //let selectedRace = document.querySelector('#raceSelector')
-    //selectedRace.children[0]
-    //console.dir(selectedRace.children.item(0))
-  }
-  
-} // getResultsDb
-
-function clearCompRows(){
-  document.querySelectorAll('.compPanel').forEach((item)=>{
-    item.classList.remove('finished')
-    item.querySelector('.timeDisplay').textContent = ''
-  })
-}
-
-function raceSelectChange(){
-  //LL(this.getAttribute('id'))
-  raceSelected = this.getAttribute('id')
-  getResultsDb(this.getAttribute('id'))
-  //LL(this.getAttribute('id'))
-  let store = getStore('races').get(parseInt(this.getAttribute('id')))
-  store.onsuccess = (e) => {
-    let result = e.target.result
-    let raceInfo = document.querySelector('#raceInfo')
-    raceInfo.innerHTML = ""
-    raceInfo.setAttribute('raceId',result.raceid)
-    raceInfo.setAttribute("sailed",result.sailed)
-    let name = document.createElement('h3')
-    name.textContent = result.name
-    let date = document.createElement('p')
-    date.setAttribute('id', "date")
-    date.textContent = result.date
-    let sailed = document.createElement('p')
-    sailed.textContent = `Race sailed: ${result.sailed} Race Id: ${result.raceid}`
-    
-    raceInfo.appendChild(name)
-    raceInfo.appendChild(date)
-    raceInfo.appendChild(sailed)
-    updateFinishPane()
-
-    // need to clear cue
-    let cued = document.querySelectorAll('.cueNo')
-    cued.forEach((item)=>{
-      item.closest(".compPanel").removeAttribute('style')
-      item.textContent = ""
-    })
-  }
-}
-
-function getFleets(){
-  let result = [];
-  let fleets = getStoreAll('fleets')
-  fleets.onsuccess = (e)=>{
-    let result = e.target.result
-    makeFinishPane(result)
-  }
-}
-
-function makeFinishPane(fleets){
-  let template = document.querySelector('#finishPaneTemplate')
-    let insertAt = document.querySelector('#finishPane');
-    fleets.forEach(function(e){
-      let clone = template.content.cloneNode(true);
-      let title = clone.querySelector(".finishListTitle");
+    function makeFinishPane(fleets) {
+      let template = document.querySelector("#finishPaneTemplate");
+      let insertAt = document.querySelector("#finishPane");
+      fleets.forEach(function (e) {
+        let clone = template.content.cloneNode(true);
+        let title = clone.querySelector(".finishListTitle");
         title.textContent = e.name;
-        title.setAttribute('id', e.id)
-        title.setAttribute('data-key', e.name.replace(/ /g,''))
+        title.setAttribute("id", e.id);
+        title.setAttribute("data-key", e.name.replace(/ /g, ""));
         insertAt.appendChild(clone);
       }); // forEach
-      
     } // makeFinishPane
-    
-function updateFinishPane(){
+
+    function updateFinishPane() {
       //clear finishPane li's
-      document.querySelectorAll('.finishListTitle li').forEach(function(item){
+      document.querySelectorAll(".finishListTitle li").forEach(function (item) {
         item.remove();
-      })
-  //get current race
-  let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
-  let store1 = {'store':'results','index':'raceid','search':raceId}
-  let store2 = {'store':'comps','index':'compid','search':''}
-  let rel = relate(store1, store2, relateDone)
-}// updateFinishPane
+      });
+      //get current race
+      let raceId = document.querySelector("#raceInfo").getAttribute("raceid");
+      let store1 = { store: "results", index: "raceid", search: raceId };
+      let store2 = { store: "comps", index: "compid", search: "" };
+      let rel = relate(store1, store2, relateDone);
+    } // updateFinishPane
 
-//Globals
-var cue = [];
-var finished = [];
+    //Globals
+    var cue = [];
+    var finished = [];
 
-function boatClick(e){
-  let compPanel = e.target.closest('.compPanel');
-  let compId = compPanel.getAttribute('id');
-  if(compPanel.classList.contains('finished')){return;}
-  if(compPanel.classList.contains('selected')){
-    compPanel.classList.remove('selected')
-      compPanel.removeAttribute('style')
-      compPanel.querySelector('.cueNo').textContent = ''
-      compPanel.querySelector('.adj li').removeAttribute('style');
-      for(let i=cue.length-1; i>=0;i--){
-        if(cue[i]===compId){
-          cue.splice(i,1);
-          }
-        }
-  }else{
-    cue.push(compId);
-    compPanel.classList.add('selected');
-  }
-  formatRows();
-}; // boatClick
-
-function formatRows(){
-  let color = '#000099';
-  let gradColor = '#66FF33';
-  let ratio = '0.20';
-  for (let i=0; i<cue.length; i++) {
-    let newColor = changeColor(color, ratio, false);
-    let next = document.querySelector(`[id="${cue[i]}"]`)
-      next.style.borderColor = color
-      next.querySelector('.cueNo').textContent = i+1
-      next.querySelector('.cueNo').style.color = color
-      // let 
-      = `border-right-color:${color};border-top-color:${color};border-left-color:${color};color:${changeColor(color,'.2',true)}`
-      next.querySelectorAll('.adj li').forEach((adj)=>{
-        adj.style.borderColor  = color
-        adj.style.color = changeColor(color,'.2',true)
-      })
-      next.style.backgroundColor = changeColor(newColor,'.3',false)
-      color = newColor;
-  };
-} // formatRows
-
-function removeFromCue(compId, compPanel){
-    compPanel.removeAttribute('style')
-    compPanel.querySelector('.cueNo').textContent = ""
-    compPanel.querySelectorAll('.adj li').forEach((adj)=>{
-      adj.removeAttribute('style');         
-    })
-    for(var i=cue.length-1; i>=0;i--){
-      if(cue[i]===compId){
-            cue.splice(i,1);
-          }
-        }
-} // removeFromCue
-
-function adjustButton(){
-  if (this.closest('.compPanel').classList.contains('finished') ) {
-    let compid = this.closest('.compPanel').getAttribute('id')
-      let raceid = raceSelected
-      let start = document.querySelector('#startTimeInput').value
-      const date = document.querySelector('#date').textContent
-      var timeDisplay = this.closest('.compRow').querySelector('.timeDisplay')
-      var d = new Date();
-      
-      if (this.classList.contains('minus')) {
-          //subtract 10ths
-          var timeText= timeDisplay.textContent.split(':');
-          if(timeText.length <= 1){
-            // LL("time text = true")
-            return null
-          }
-          var t = new Date();
-          var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
-          t.setTime(t.getTime()-1000);
-          var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
-          //add 0 where needed
-          if(ta[0]<=9){ta[0]="0"+ta[0]}; 
-          if(ta[1]<=9){ta[1]="0"+ta[1]}; 
-          if(ta[2]<=9){ta[2]="0"+ta[2]};
-          let finish = ta.join(':')
-          timeDisplay.textContent = finish
-          let elapsed = getElapsedTime(start,date,finish)
-          updateResult({start,finish,elapsed,date,raceid,compid})
-        }
-        else if(this.classList.contains('plus')) {
-          //add 10ths
-          var timeText= timeDisplay.textContent.split(':');
-          if(timeText.length <= 1){
-            // LL("time text = true")
-            return null
-          }
-          var t = new Date();
-          var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
-          t.setTime(t.getTime()+1000);
-          // LL("t.getDate: ",t.getDate())
-          var ta = [t.getHours(),t.getMinutes(),t.getSeconds()];
-          //add 0 where needed
-          if(ta[0]<=9){ta[0]="0"+ta[0]}; 
-          if(ta[1]<=9){ta[1]="0"+ta[1]}; 
-          if(ta[2]<=9){ta[2]="0"+ta[2]};
-          let finish = ta.join(':')
-          timeDisplay.textContent = finish
-          // LL("PLUS: ", start, "date:", date, "finish:",finish)
-          let elapsed = getElapsedTime(start,date,finish)
-          updateResult({start,finish,elapsed,date,raceid,compid})
-        }
-  }
-  else if(this.closest('.compPanel').classList.contains('selected')){
-    var compPanel = this.closest('.compPanel');
-    var cueNo = this.closest('.compRow').querySelector('.cueNo').textContent;
-    var compId = compPanel.getAttribute('id');
-    removeFromCue(compId, compPanel);
-    if (this.classList.contains('minus')) {
-      cue.splice(new Number(cueNo), 0, compId);
-    }
-      else if(this.classList.contains('plus')) {
-        cue.splice(new Number(cueNo) - 2, 0, compId);
+    function boatClick(e) {
+      let compPanel = e.target.closest(".compPanel");
+      let compId = compPanel.getAttribute("id");
+      if (compPanel.classList.contains("finished")) {
+        return;
       }
-      console.log('adjust(cue to finish):',cue);
+      if (compPanel.classList.contains("selected")) {
+        compPanel.classList.remove("selected");
+        compPanel.removeAttribute("style");
+        compPanel.querySelector(".cueNo").textContent = "";
+        compPanel.querySelector(".adj li").removeAttribute("style");
+        for (let i = cue.length - 1; i >= 0; i--) {
+          if (cue[i] === compId) {
+            cue.splice(i, 1);
+          }
+        }
+      } else {
+        cue.push(compId);
+        compPanel.classList.add("selected");
+      }
       formatRows();
-  }
-} // adjustButton
+    } // boatClick
 
-function adjustTime(){
-  this.classList.add('show-input')
-  let inText = document.createElement('input')
-  inText.setAttribute('type','text')
-  inText.classList.add('time-input')
-  inText.value = this.textContent
-  inText.focus()
-  this.addEventListener("keyup", function(event) {
-    if (event.keyCode === 13) {
-      sendTime(event)
-    }
-  })
-  this.append(inText)
-}
-
-function sendTime(e){
-  let compid = e.target.closest('.compPanel').querySelector('.compId').textContent
-  let raceid = document.querySelector('#raceInfo').getAttribute('raceid')
-  let newValue = e.target.value
-  let timeDisplay = e.target.parentNode
-  timeDisplay.innerHTML = ""
-  timeDisplay.textContent = ""
-  timeDisplay.classList.remove('show-input')
-  timeDisplay.textContent = e.target.value
-  let date = document.querySelector("#date").textContent
-  if(newValue.includes(':')){
-    let finish = newValue
-    updateResult({raceid,compid,finish,date})
-  }else{
-    let code = newValue
-    updateResult({raceid,compid,code})
-  }
-}
-
-function setStart(e){
-  var date = new Date();
-  var startTimeString = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-  document.querySelector('#startTimeInput').value = startTimeString
-  let raceId = document.querySelector('#raceInfo').getAttribute('raceid')
-  let races = getStore('races','readwrite')
-  let race = races.get(parseInt(raceId))
-  race.onsuccess = ()=>{
-    LL(date.getDate())
-    race.result.time = startTimeString
-    race.result.date = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
-    LL(race.result)
-    races.put(race.result)
-  }
-};
-
-function finishButton(e){
-  var finishTime = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-  var compPanel = document.querySelector(`[id="${cue[0]}"]`)
-  removeFromCue(cue[0], compPanel)
-  compPanel.classList.remove('selected')
-  compPanel.classList.add('finished')
-  compPanel.querySelector('.timeDisplay').textContent = finishTime
-  let raceId = raceSelected
-  let compId = compPanel.getAttribute('id')
-  // get start time for current fleet
-  let currentFleet = compPanel.querySelector('.fleet').textContent
-  let races = getStore('races')
-  let race = races.get(parseInt(raceId))
-  race.onsuccess = (e)=>{
-    let result = e.target.result
-    var currentStart
-    result.start.forEach((item)=>{
-      let stringToSplit = item.split("|")
-      let fleetStart = stringToSplit[1]
-      let fleetName = stringToSplit[0].split('^')[1]
-      if(currentFleet == fleetName){
-        currentStart = fleetStart
+    function formatRows() {
+      let color = "#000099";
+      let gradColor = "#66FF33";
+      let ratio = "0.20";
+      for (let i = 0; i < cue.length; i++) {
+        let newColor = changeColor(color, ratio, false);
+        let next = document.querySelector(`[id="${cue[i]}"]`);
+        next.style.borderColor = color;
+        next.querySelector(".cueNo").textContent = i + 1;
+        next.querySelector(".cueNo").style.color = color =
+          // let
+          `border-right-color:${color};border-top-color:${color};border-left-color:${color};color:${changeColor(
+            color,
+            ".2",
+            true
+          )}`;
+        next.querySelectorAll(".adj li").forEach((adj) => {
+          adj.style.borderColor = color;
+          adj.style.color = changeColor(color, ".2", true);
+        });
+        next.style.backgroundColor = changeColor(newColor, ".3", false);
+        color = newColor;
       }
-    })
-    compPanel.querySelector('.start').textContent = currentStart
-    compPanel.querySelector('.date').textContent = result.date
-    let elapsed = getElapsedTime(currentStart,result.date,finishTime)
-    let currentResult = {
-      'id':parseInt(raceId+compId),
-      'compid': compId,
-      'raceid': raceId,
-      'elapsed': elapsed,
-      'finish': finishTime,
-      'start': currentStart,
-      'rrestyp': "4" // race result type - 4 is for finishtime
-    }
+    } // formatRows
 
-    //this will fail if result is already there
-    let resultStore = getStore('results','readwrite')
-    resultStore.add(currentResult)
-    updateFinishPane()
-  } // race.onsuccess
- 
-} // finishButton
-
-function getElapsedTime(start, date, finish){
-  let startTimeInput = document.getElementById('startTimeInput').value
-  LL("startTimeInput: ",startTimeInput)
-  let startDate = new Date(date+' '+startTimeInput)
-  LL("startDate: ", startDate)
-  let finishDate = new Date(date+' '+finish)
-  LL("finishDate: ", finishDate)
-  let elapsed = convertHMS((finishDate - startDate)/1000)
-  console.log(elapsed)
-  return elapsed
-}
-
-function convertHMS(value) {
-  const sec = parseInt(value, 10);
-  let hours   = Math.floor(sec / 3600);
-  let minutes = Math.floor((sec - (hours * 3600)) / 60);
-  let seconds = sec - (hours * 3600) - (minutes * 60);
-  if (hours   < 10) {hours   = "0"+hours;}
-  if (minutes < 10) {minutes = "0"+minutes;}
-  if (seconds < 10) {seconds = "0"+seconds;}
-  return hours+':'+minutes+':'+seconds;
-}
-
-async function codeBtn(){
-  var code = document.querySelector('#codeSelect select').value;
-  var compPanel = this.closest('#main').querySelector(`[id="${cue[0]}"]`);
-  let compid = compPanel.getAttribute('id')
-  let raceid = raceSelected
-  var currentStart
-  let currentFleet = compPanel.querySelector('.fleet').textContent
-  let races = getStore('races')
-  let race = races.get(parseInt(raceid))
-  race.onsuccess = (e)=>{
-    let result = e.target.result
-    let date = result.date
-    result.start.forEach((item)=>{
-      let stringToSplit = item.split("|")
-      let fleetStart = stringToSplit[1]
-      let fleetName = stringToSplit[0].split('^')[1]
-      if(currentFleet == fleetName){
-        currentStart = fleetStart
+    function removeFromCue(compId, compPanel) {
+      compPanel.removeAttribute("style");
+      compPanel.querySelector(".cueNo").textContent = "";
+      compPanel.querySelectorAll(".adj li").forEach((adj) => {
+        adj.removeAttribute("style");
+      });
+      for (var i = cue.length - 1; i >= 0; i--) {
+        if (cue[i] === compId) {
+          cue.splice(i, 1);
+        }
       }
-    })
-    compPanel.querySelector('.timeDisplay').textContent = code;
-    compPanel.classList.remove('selected')
-    compPanel.removeAttribute('style')
-    compPanel.classList.add('finished')
-    compPanel.querySelector('.cueNo').textContent = '';
-    compPanel.querySelector('.adj li').removeAttribute('style');
-    compPanel.querySelectorAll('.button').forEach( item => item.removeEventListener('click', adjustButton));
-    cue.shift();
-    formatRows();
-    let start = currentStart
-    updateResult({compid,raceid,code,start,date})
-  }
-}; // codeBtn
+    } // removeFromCue
 
-async function getCompStart(compPanel,raceId){
-  var currentStart
-  let currentFleet = compPanel.querySelector('.fleet').textContent
-  let races = getStore('races')
-  let race = races.get(parseInt(raceId))
-  race.onsuccess = (e)=>{
-    let result = e.target.result
-    result.start.forEach((item)=>{
-      let stringToSplit = item.split("|")
-      let fleetStart = stringToSplit[1]
-      let fleetName = stringToSplit[0].split('^')[1]
-      if(currentFleet == fleetName){
-        currentStart = fleetStart
+    function adjustButton() {
+      if (this.closest(".compPanel").classList.contains("finished")) {
+        let compid = this.closest(".compPanel").getAttribute("id");
+        let raceid = raceSelected;
+        let start = document.querySelector("#startTimeInput").value;
+        const date = document.querySelector("#date").textContent;
+        var timeDisplay =
+          this.closest(".compRow").querySelector(".timeDisplay");
+        var d = new Date();
+
+        if (this.classList.contains("minus")) {
+          //subtract 10ths
+          var timeText = timeDisplay.textContent.split(":");
+          if (timeText.length <= 1) {
+            return null;
+          }
+          var t = new Date();
+          var d = [
+            t.setHours(timeText[0]),
+            t.setMinutes(timeText[1]),
+            t.setSeconds(timeText[2]),
+          ];
+          t.setTime(t.getTime() - 1000);
+          var ta = [t.getHours(), t.getMinutes(), t.getSeconds()];
+          //add 0 where needed
+          if (ta[0] <= 9) {
+            ta[0] = "0" + ta[0];
+          }
+          if (ta[1] <= 9) {
+            ta[1] = "0" + ta[1];
+          }
+          if (ta[2] <= 9) {
+            ta[2] = "0" + ta[2];
+          }
+          let finish = ta.join(":");
+          timeDisplay.textContent = finish;
+          let elapsed = getElapsedTime(start, date, finish);
+          updateResult({ start, finish, elapsed, date, raceid, compid });
+        } else if (this.classList.contains("plus")) {
+          //add 10ths
+          var timeText = timeDisplay.textContent.split(":");
+          if (timeText.length <= 1) {
+            return null;
+          }
+          var t = new Date();
+          var d = [
+            t.setHours(timeText[0]),
+            t.setMinutes(timeText[1]),
+            t.setSeconds(timeText[2]),
+          ];
+          t.setTime(t.getTime() + 1000);
+          var ta = [t.getHours(), t.getMinutes(), t.getSeconds()];
+          //add 0 where needed
+          if (ta[0] <= 9) {
+            ta[0] = "0" + ta[0];
+          }
+          if (ta[1] <= 9) {
+            ta[1] = "0" + ta[1];
+          }
+          if (ta[2] <= 9) {
+            ta[2] = "0" + ta[2];
+          }
+          let finish = ta.join(":");
+          timeDisplay.textContent = finish;
+          let elapsed = getElapsedTime(start, date, finish);
+          updateResult({ start, finish, elapsed, date, raceid, compid });
+        }
+      } else if (this.closest(".compPanel").classList.contains("selected")) {
+        var compPanel = this.closest(".compPanel");
+        var cueNo =
+          this.closest(".compRow").querySelector(".cueNo").textContent;
+        var compId = compPanel.getAttribute("id");
+        removeFromCue(compId, compPanel);
+        if (this.classList.contains("minus")) {
+          cue.splice(new Number(cueNo), 0, compId);
+        } else if (this.classList.contains("plus")) {
+          cue.splice(new Number(cueNo) - 2, 0, compId);
+        }
+        console.log("adjust(cue to finish):", cue);
+        formatRows();
       }
-    })
-      return currentStart
-  }
-} // getCompStart
+    } // adjustButton
 
-function changeCode(){
-  document.querySelector('#codeLabel').textContent = this.value
-}
-
-function updateResult(event){
-  /**
-   * takes an object using destructuring
-   */
-  LL("updateResult event: ", event)
-  var merged = {}
-  let store = getStore('results').get(parseInt(event.raceid+event.compid))
-  store.onsuccess = (e)=>{
-    let result = e.target.result
-    if(event.code){
-      event.elapsed = ''
-      event.rrestyp = '3'
+    function adjustTime() {
+      this.classList.add("show-input");
+      let inText = document.createElement("input");
+      inText.setAttribute("type", "text");
+      inText.classList.add("time-input");
+      inText.value = this.textContent;
+      inText.focus();
+      this.addEventListener("keyup", function (event) {
+        if (event.keyCode === 13) {
+          sendTime(event);
+        }
+      });
+      this.append(inText);
     }
-    
-    if(event.finish){
-      let elapsed = getElapsedTime(event.start,event.date,event.finish)
-      event.elapsed = elapsed
-      event.code = ''
+
+    function sendTime(e) {
+      let compid = e.target
+        .closest(".compPanel")
+        .querySelector(".compId").textContent;
+      let raceid = document.querySelector("#raceInfo").getAttribute("raceid");
+      let newValue = e.target.value;
+      let timeDisplay = e.target.parentNode;
+      timeDisplay.innerHTML = "";
+      timeDisplay.textContent = "";
+      timeDisplay.classList.remove("show-input");
+      timeDisplay.textContent = e.target.value;
+      let date = document.querySelector("#date").textContent;
+      if (newValue.includes(":")) {
+        let finish = newValue;
+        updateResult({ raceid, compid, finish, date });
+      } else {
+        let code = newValue;
+        updateResult({ raceid, compid, code });
+      }
     }
-    
-    event.id = parseInt(event.raceid+event.compid)
-    merged = {...result, ...event}
-    console.log("updateResult merged: ", merged)
-    let write = getStore('results','readwrite').put(merged)
-    // updateFinishPane()
-  }
-} // updateResult
 
-function showClock(){
-  var digital=new Date();
-  var hours=digital.getHours();
-  var minutes=digital.getMinutes();
-  var seconds=digital.getSeconds();
-  if (minutes<=9){ minutes="0"+minutes; } 
-  if (seconds <= 9) { seconds = "0" + seconds; }
-  document.querySelector('#clock').textContent = hours+":"+minutes+":"+seconds
-  setTimeout(showClock,1000);
-} // showClock
-showClock();
+    function setStart(e) {
+      var date = new Date();
+      var startTimeString = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+      document.querySelector("#startTimeInput").value = startTimeString;
+      let raceId = document.querySelector("#raceInfo").getAttribute("raceid");
+      let races = getStore("races", "readwrite");
+      let race = races.get(parseInt(raceId));
+      race.onsuccess = () => {
+        race.result.time = startTimeString;
+        race.result.date = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+        races.put(race.result);
+      };
+    }
 
-</script>
+    function finishButton(e) {
+      var finishTime = new Date()
+        .toTimeString()
+        .replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+      var compPanel = document.querySelector(`[id="${cue[0]}"]`);
+      removeFromCue(cue[0], compPanel);
+      compPanel.classList.remove("selected");
+      compPanel.classList.add("finished");
+      compPanel.querySelector(".timeDisplay").textContent = finishTime;
+      let raceId = raceSelected;
+      let compId = compPanel.getAttribute("id");
+      // get start time for current fleet
+      let currentFleet = compPanel.querySelector(".fleet").textContent;
+      let races = getStore("races");
+      let race = races.get(parseInt(raceId));
+      race.onsuccess = (e) => {
+        let result = e.target.result;
+        var currentStart;
+        result.start.forEach((item) => {
+          let stringToSplit = item.split("|");
+          let fleetStart = stringToSplit[1];
+          let fleetName = stringToSplit[0].split("^")[1];
+          if (currentFleet == fleetName) {
+            currentStart = fleetStart;
+          }
+        });
+        compPanel.querySelector(".start").textContent = currentStart;
+        compPanel.querySelector(".date").textContent = result.date;
+        let elapsed = getElapsedTime(currentStart, result.date, finishTime);
+        let currentResult = {
+          id: parseInt(raceId + compId),
+          compid: compId,
+          raceid: raceId,
+          elapsed: elapsed,
+          finish: finishTime,
+          start: currentStart,
+          rrestyp: "4", // race result type - 4 is for finishtime
+        };
+
+        //this will fail if result is already there
+        let resultStore = getStore("results", "readwrite");
+        resultStore.add(currentResult);
+        updateFinishPane();
+      }; // race.onsuccess
+    } // finishButton
+
+    function getElapsedTime(start, date, finish) {
+      let startTimeInput = document.getElementById("startTimeInput").value;
+      console.log("startTimeInput: ", startTimeInput);
+      let startDate = new Date(date + " " + startTimeInput);
+      console.log("startDate: ", startDate);
+      let finishDate = new Date(date + " " + finish);
+      console.log("finishDate: ", finishDate);
+      let elapsed = convertHMS((finishDate - startDate) / 1000);
+      console.log(elapsed);
+      return elapsed;
+    }
+
+    function convertHMS(value) {
+      const sec = parseInt(value, 10);
+      let hours = Math.floor(sec / 3600);
+      let minutes = Math.floor((sec - hours * 3600) / 60);
+      let seconds = sec - hours * 3600 - minutes * 60;
+      if (hours < 10) {
+        hours = "0" + hours;
+      }
+      if (minutes < 10) {
+        minutes = "0" + minutes;
+      }
+      if (seconds < 10) {
+        seconds = "0" + seconds;
+      }
+      return hours + ":" + minutes + ":" + seconds;
+    }
+
+    async function codeBtn() {
+      var code = document.querySelector("#codeSelect select").value;
+      var compPanel = this.closest("#main").querySelector(`[id="${cue[0]}"]`);
+      let compid = compPanel.getAttribute("id");
+      let raceid = raceSelected;
+      var currentStart;
+      let currentFleet = compPanel.querySelector(".fleet").textContent;
+      let races = getStore("races");
+      let race = races.get(parseInt(raceid));
+      race.onsuccess = (e) => {
+        let result = e.target.result;
+        let date = result.date;
+        result.start.forEach((item) => {
+          let stringToSplit = item.split("|");
+          let fleetStart = stringToSplit[1];
+          let fleetName = stringToSplit[0].split("^")[1];
+          if (currentFleet == fleetName) {
+            currentStart = fleetStart;
+          }
+        });
+        compPanel.querySelector(".timeDisplay").textContent = code;
+        compPanel.classList.remove("selected");
+        compPanel.removeAttribute("style");
+        compPanel.classList.add("finished");
+        compPanel.querySelector(".cueNo").textContent = "";
+        compPanel.querySelector(".adj li").removeAttribute("style");
+        compPanel
+          .querySelectorAll(".button")
+          .forEach((item) => item.removeEventListener("click", adjustButton));
+        cue.shift();
+        formatRows();
+        let start = currentStart;
+        updateResult({ compid, raceid, code, start, date });
+      };
+    } // codeBtn
+
+    async function getCompStart(compPanel, raceId) {
+      var currentStart;
+      let currentFleet = compPanel.querySelector(".fleet").textContent;
+      let races = getStore("races");
+      let race = races.get(parseInt(raceId));
+      race.onsuccess = (e) => {
+        let result = e.target.result;
+        result.start.forEach((item) => {
+          let stringToSplit = item.split("|");
+          let fleetStart = stringToSplit[1];
+          let fleetName = stringToSplit[0].split("^")[1];
+          if (currentFleet == fleetName) {
+            currentStart = fleetStart;
+          }
+        });
+        return currentStart;
+      };
+    } // getCompStart
+
+    function changeCode() {
+      document.querySelector("#codeLabel").textContent = this.value;
+    }
+
+    function updateResult(event) {
+      /**
+       * takes an object using destructuring
+       */
+      let merged = {};
+      const store = getStore("results").get(
+        parseInt(event.raceid + event.compid)
+      );
+      store.onsuccess = (e) => {
+        const result = e.target.result;
+        if (event.code) {
+          event.elapsed = "";
+          event.rrestyp = "3";
+        }
+
+        if (event.finish) {
+          const elapsed = getElapsedTime(event.start, event.date, event.finish);
+          event.elapsed = elapsed;
+          event.code = "";
+        }
+
+        event.id = parseInt(event.raceid + event.compid);
+        merged = { ...result, ...event };
+        console.log("updateResult merged: ", merged);
+        let write = getStore("results", "readwrite").put(merged);
+        // updateFinishPane()
+      };
+    } // updateResult
+
+    function showClock() {
+      var digital = new Date();
+      var hours = digital.getHours();
+      var minutes = digital.getMinutes();
+      var seconds = digital.getSeconds();
+      if (minutes <= 9) {
+        minutes = "0" + minutes;
+      }
+      if (seconds <= 9) {
+        seconds = "0" + seconds;
+      }
+      document.querySelector("#clock").textContent =
+        hours + ":" + minutes + ":" + seconds;
+      setTimeout(showClock, 1000);
+    } // showClock
+    showClock();
+  </script>
+</html>

@@ -1,183 +1,167 @@
 <!DOCTYPE html>
-<html><head>
-<script src="js/papaparse.min.js"></script>
-<script src="js/importFile.js"></script>
-<script type="text/javascript">
-//LazyLog
-var LL = console.log;
-</script>
-<style>
-    * {
-      box-sizing: border-box;
-    }
-    a{
-        text-decoration: none;
-    }
-    
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
-    #displayData {
-        word-wrap: break-word;
-        font-size: 14px;
-
-    }
-
-    /* Style the side navigation */
-    .sidenav {
-      height: 100%;
-      width: 200px;
-      position: fixed;
-      z-index: 1;
-      top: 0;
-      left: 0;
-      background-color: #111;
-      overflow-x: hidden;
-    }
-    
-    
-    /* Side navigation links */
-    .sidenav a {
-      color: white;
-      padding: 16px;
-      text-decoration: none;
-      display: block;
-    }
-    
-    /* Change color on hover */
-    .sidenav a:hover {
-      background-color: #ddd;
-      color: black;
-    }
-    
-    /* Style the content */
-    .content {
-      width: 100%;
-      margin-left: 200px;
-      padding-left: 20px;
-    }
-
-    #submitUrl {
-        background-color: beige;
-        font-size: 15px;
-        padding: 5px;
-    }
-
-</style>
-</head>
-<body>
+<html>
+  <head>
+    <script src="js/papaparse.min.js"></script>
+    <script src="js/importFile.js"></script>
+    <script src="https://requirejs.org/docs/release/2.3.5/minified/require.js"></script>
+    <link rel="stylesheet" href="./css/localStorage.css" />
+  </head>
+  <body>
     <div class="sidenav">
-        <a href="#" id="getComps" >getComps</a>
-        <a href="#" id="getResults" >getResults</a>
-        <a href="#" id="getFleets" >getFleets</a>
-        <a href="#" id="getRaces" >getRaces</a>
-        <a href="#" id="getSeries" >getSeries</a>
-      </div>
-      
-      <div class="content">
-        <h2>File management</h2>
-        <p>Select .blw file from your files</p>
-        <p><input id="fileSelect" type="file" name="myFiles" /></p>
-        <a href="./racing.html">Racing</a>
-        <p>input URL for .blw file</p>
-    <div id="urlFile">
-        <p><input id="urlSelect" type="text" name="url" /></p>
-        <a id="submitUrl" href="#" >Submit Url - - - - - - - - - - -</a>
-    </div>
-    <div id="backUpFile">
-        <p>Back up current File</p>
-        <a href="#" id="backUpButton">Back up</a>
+      <a href="#" id="getComps">getComps</a>
+      <a href="#" id="getResults">getResults</a>
+      <a href="#" id="getFleets">getFleets</a>
+      <a href="#" id="getRaces">getRaces</a>
+      <a href="#" id="getSeries">getSeries</a>
     </div>
 
-    </div>
+    <div class="content">
+      <h2>File management</h2>
+      <p>Upload Sailwave file</p>
+      <p>
+        <input
+          id="fileSelect"
+          class="btn custom-file-input"
+          type="file"
+          name="myFiles"
+        />
+      </p>
+
+      <div id="urlFile">
+        <form id="urlForm">
+          <div>Input URL for Sailwave file</div>
+          <input id="urlSelect" name="urlSelect" type="text" name="url" />
+          <div>
+            <button class="btn" href="#">Submit Url</button>
+            <br />
+            <div style="font-size: small; color: lightgray">
+              https://schmell.github.io/BlwMe/www/blw/rya-return.blw
+            </div>
+            <div style="font-size: small; color: lightgray">
+              https://schmell.github.io/BlwMe/www/blw/MyNewTest2011.blw
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div id="backUpFile">
+        <p>Back up current File</p>
+        <div>
+          <a href="#" class="btn" id="backUpButton">Back up</a>
+        </div>
+      </div>
+
+      <div id="racingButton">
+        <a href="./racing.html" class="btn">Go to Racing</a>
+      </div>
+
+      <div>
         <pre id="displayData"></pre>
       </div>
+    </div>
+  </body>
 
-</body>
-</html>
-<script>//Utils
-const Utils = {
-    init: function(){
-        document.getElementById("fileSelect").addEventListener("change", Csv.fromInput, false)
-        document.getElementById('submitUrl').addEventListener('click', Csv.fromInput, false)
-        document.getElementById('backUpButton').addEventListener('click', Csv.backUpCurrent, false)
-        document.getElementById('getComps').addEventListener('click', Utils.showData, false)
-        document.getElementById('getResults').addEventListener('click', Utils.showData, false)
-        document.getElementById('getFleets').addEventListener('click', Utils.showData, false)
-        document.getElementById('getRaces').addEventListener('click', Utils.showData, false)
-        document.getElementById('getSeries').addEventListener('click', Utils.showData, false)
-        
-    }, // init
+  <script>
+    //Utils
+    const Utils = {
+      init: function () {
+        document
+          .getElementById("fileSelect")
+          .addEventListener("change", Csv.fromInput, false);
+        document
+          .getElementById("urlForm")
+          .addEventListener("submit", Csv.fromInput, false);
+        document
+          .getElementById("backUpButton")
+          .addEventListener("click", Csv.backUpCurrent, false);
+        document
+          .getElementById("getComps")
+          .addEventListener("click", Utils.showData, false);
+        document
+          .getElementById("getResults")
+          .addEventListener("click", Utils.showData, false);
+        document
+          .getElementById("getFleets")
+          .addEventListener("click", Utils.showData, false);
+        document
+          .getElementById("getRaces")
+          .addEventListener("click", Utils.showData, false);
+        document
+          .getElementById("getSeries")
+          .addEventListener("click", Utils.showData, false);
+      }, // init
 
-    /** UTIL
-     * Utility to console csv data
-     * 
-     */
-     showData: function(){
-        console.log(this.getAttribute('id'));
-        let div = document.getElementById('displayData')
-        switch(this.getAttribute('id')) {
-            case "getComps": 
-                let comps = Csv.getComps()
-                console.log(comps);
-                div.innerHTML = '';
-                comps.forEach(function(item){ 
-                    let p = document.createElement('p');
-                    div.append(p); 
-                    p.textContent = JSON.stringify(item).replace(/(?:\r\n|\r|\n)/g, '<br>')
-                   //str.replace(/(?:\r\n|\r|\n)/g, '<br>');
-                })
-                break;
-            case "getResults": 
-                let results = Csv.getResults()
-                console.log(results);
-                div.innerHTML = '';
-                results.forEach(function(item){ 
-                    let p = document.createElement('p');
-                    div.append(p); 
-                    p.textContent = JSON.stringify(item).replace(/(?:\r\n|\r|\n)/g, '<br>')
-                })
-                break;
-            case "getFleets": 
-                let fleets = Csv.getFleets()
-                console.log(fleets);
-                div.innerHTML = '';
-                fleets.forEach(function(item){ 
-                    let p = document.createElement('p');
-                    div.append(p); 
-                    p.textContent = JSON.stringify(item).replace(/(?:\r\n|\r|\n)/g, '<br>') 
-                })
-                break;
-            case "getRaces": 
-                let races = Csv.getRaces()
-                console.log(races);
-                div.innerHTML = '';
-                races.forEach(function(item){ 
-                    let p = document.createElement('p');
-                    div.append(p); 
-                    p.textContent = JSON.stringify(item).replace(/(?:\r\n|\r|\n)/g, '<br>')
-                })
-                break;
-            case "getSeries": 
-                let series = Csv.getSeries()
-                console.log(series);
-                div.innerHTML = '';
-                series.forEach(function(item){ 
-                    let p = document.createElement('p');
-                    div.append(p); 
-                    p.textContent = JSON.stringify(item).replace(/(?:\r\n|\r|\n)/g, '<br>')
-                })
-                break;
-            default: break;
+      /** UTIL
+       * Utility to console csv data
+       */
+
+      showData: function () {
+        console.log(this.getAttribute("id"));
+        let div = document.getElementById("displayData");
+        switch (this.getAttribute("id")) {
+          case "getComps":
+            let comps = Csv.getComps();
+            console.log(comps);
+            div.innerHTML = "";
+            comps.forEach(function (item) {
+              let p = document.createElement("p");
+              div.append(p);
+              p.innerHTML = JSON.stringify(item, undefined, 2);
+            });
+            break;
+
+          case "getResults":
+            let results = Csv.getResults();
+            console.log(results);
+            div.innerHTML = "";
+            results.forEach(function (item) {
+              let p = document.createElement("p");
+              div.append(p);
+              p.textContent = JSON.stringify(item, undefined, 2);
+            });
+            break;
+
+          case "getFleets":
+            let fleets = Csv.getFleets();
+            console.log(fleets);
+            div.innerHTML = "";
+            fleets.forEach(function (item) {
+              let p = document.createElement("p");
+              div.append(p);
+              p.textContent = JSON.stringify(item, undefined, 2);
+            });
+            break;
+
+          case "getRaces":
+            let races = Csv.getRaces();
+            console.log(races);
+            div.innerHTML = "";
+            races.forEach(function (item) {
+              let p = document.createElement("p");
+              div.append(p);
+              p.textContent = JSON.stringify(item, undefined, 2);
+            });
+            break;
+
+          case "getSeries":
+            let series = Csv.getSeries();
+            console.log(series);
+            div.innerHTML = "";
+            series.forEach(function (item) {
+              let p = document.createElement("p");
+              div.append(p);
+              p.textContent = JSON.stringify(item, undefined, 2);
+            });
+            break;
+
+          default:
+            break;
         }
-    }// showData
+      }, // showData
+    }; // Utils
 
-} // Utils
-
-window.addEventListener('DOMContentLoaded', (event) => {
-    Utils.init();
-});
-
-</script>
+    window.addEventListener("DOMContentLoaded", (event) => {
+      Utils.init();
+    });
+  </script>
+</html>
