@@ -321,21 +321,7 @@
         const store = getStore("comps").index("boat").getAll();
         store.onsuccess = (e) => {
           const comps = e.target.result;
-          // Have to choose sort method as if they have both
-          // it will be confused
-          /* 
-          if (comps[0].boat) {
-            comps.sort((a, b) => {
-              return a.boat - b.boat;
-            });
-          }
-          if (comps[0].sailno) {
-            comps.sort((a, b) => {
-              return a.sailno - b.sailno;
-            });
-          } 
-          */
-
+          // TODO: choose sort method
           // Build comp rows
           comps.forEach((comp) => {
             const clone = template.content.cloneNode(true);
@@ -365,7 +351,14 @@
 
         // Resolve the promise
         resolve();
-      }); // buildCompsRows
+      }); 
+    }// buildCompsRows
+
+    function clearCompRows() {
+      document.querySelectorAll(".compPanel").forEach((item) => {
+        item.classList.remove("finished");
+        item.querySelector(".timeDisplay").textContent = "";
+      });
     }
 
     async function buildRaceSelect() {
@@ -407,8 +400,10 @@
         dropDown.append(content);
         raceSelect.append(fragment);
       };
-    }
+    } // buildRaceSelect
 
+    // Document ready 
+    // Set listeners
     document.addEventListener("DOMContentLoaded", () => {
       // Move this to an init function
       addListeners();
@@ -430,6 +425,7 @@
       }
     }); // dom ready
 
+    // Not sure how to solve this yet
     //=============================================================
     setTimeout(function () {
       buildCompsRows().then(getResultsDb()).then(buildRaceSelect());
@@ -474,12 +470,7 @@
       }
     } // getResultsDb
 
-    function clearCompRows() {
-      document.querySelectorAll(".compPanel").forEach((item) => {
-        item.classList.remove("finished");
-        item.querySelector(".timeDisplay").textContent = "";
-      });
-    }
+  
 
     function raceSelectChange() {
       // Sets raceSelected global
@@ -515,6 +506,7 @@
       };
     }
 
+    // Not sure i am using this or need it
     function getFleets() {
       let result = [];
       let fleets = getStoreAll("fleets");
@@ -576,7 +568,7 @@
           cursor.continue();
         }
       };
-    }
+    } // relate
 
     function relateDone(related) {
       console.log("related: ", related);
@@ -815,6 +807,7 @@
       const race = races.get(parseInt(raceId));
       race.onsuccess = (e) => {
         const result = e.target.result;
+        console.table("result",result);
         let currentStart;
         result.starts.forEach((item) => {
           if (item.fleet === currentFleet) {
@@ -843,34 +836,7 @@
       }; // race.onsuccess
     } // finishButton
 
-    function getElapsedTime(start, date, finish) {
-      const startTimeInput = document.getElementById("startTimeInput").value;
-      console.log("startTimeInput: ", startTimeInput);
-      const startDate = new Date(date + " " + startTimeInput);
-      console.log("startDate: ", startDate);
-      const finishDate = new Date(date + " " + finish);
-      console.log("finishDate: ", finishDate);
-      const elapsed = convertHMS((finishDate - startDate) / 1000);
-      console.log(elapsed);
-      return elapsed;
-    }
-
-    function convertHMS(value) {
-      const sec = parseInt(value, 10);
-      let hours = Math.floor(sec / 3600);
-      let minutes = Math.floor((sec - hours * 3600) / 60);
-      let seconds = sec - hours * 3600 - minutes * 60;
-      if (hours < 10) {
-        hours = "0" + hours;
-      }
-      if (minutes < 10) {
-        minutes = "0" + minutes;
-      }
-      if (seconds < 10) {
-        seconds = "0" + seconds;
-      }
-      return hours + ":" + minutes + ":" + seconds;
-    }
+    
 
     async function codeBtn() {
       const code = document.querySelector("#codeSelect select").value;
@@ -950,9 +916,38 @@
         const merged = { ...result, ...event };
         // console.log("updateResult merged: ", merged);
         const write = getStore("results", "readwrite").put(merged);
-        // updateFinishPane()
+        updateFinishPane()
       };
     } // updateResult
+
+    function getElapsedTime(start, date, finish) {
+      const startTimeInput = document.getElementById("startTimeInput").value;
+      console.log("startTimeInput: ", startTimeInput);
+      const startDate = new Date(date + " " + startTimeInput);
+      console.log("startDate: ", startDate);
+      const finishDate = new Date(date + " " + finish);
+      console.log("finishDate: ", finishDate);
+      const elapsed = convertHMS((finishDate - startDate) / 1000);
+      console.log(elapsed);
+      return elapsed;
+    }
+
+    function convertHMS(value) {
+      const sec = parseInt(value, 10);
+      let hours = Math.floor(sec / 3600);
+      let minutes = Math.floor((sec - hours * 3600) / 60);
+      let seconds = sec - hours * 3600 - minutes * 60;
+      if (hours < 10) {
+        hours = "0" + hours;
+      }
+      if (minutes < 10) {
+        minutes = "0" + minutes;
+      }
+      if (seconds < 10) {
+        seconds = "0" + seconds;
+      }
+      return `${hours}:${minutes}:${seconds}`;
+    }
 
     function showClock() {
       var digital = new Date();
@@ -966,7 +961,7 @@
         seconds = "0" + seconds;
       }
       document.querySelector("#clock").textContent =
-        hours + ":" + minutes + ":" + seconds;
+        `${hours}:${minutes}:${seconds}`;
       setTimeout(showClock, 1000);
     } // showClock
     showClock();
