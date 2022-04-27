@@ -231,18 +231,23 @@ input {
   color: #ffffff;
 }
 
-.cueNo {
-  display: inline;
+.cueNo.cued{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  /* text-align: center; */
   left: -5px;
-  top: -5px;
+  top: -15px;
   width: 25px;
   height: 25px;
-  padding: 2px;
-  background-color: #66ff66;
-  border: #333 solid 1px;
+  padding: 15px;
+  /* padding-bottom: 20px; */
+  /* margin: auto; */
+  background-color: #fff;
+  box-shadow: #333 0px 0px 5px;
+  border: #66ff66 solid 4px;
   border-radius: 50%;
-  position: absolute;
-  text-align: left;
   z-index: 1;
 }
 .compId {

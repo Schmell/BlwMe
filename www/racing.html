@@ -580,7 +580,8 @@
         compPanel.classList.remove("selected");
         compPanel.removeAttribute("style");
         compPanel.querySelector(".cueNo").textContent = "";
-        compPanel.querySelector(".adj li").removeAttribute("style");
+        compPanel.querySelector(".cueNo").classList.remove("cued");
+        // compPanel.querySelector(".adj li").removeAttribute("style");
         // Need for loop for decrementing index
         for (let i = cue.length - 1; i >= 0; i--) {
           if (cue[i] === compId) {
@@ -591,6 +592,7 @@
         // Just add to cue
         cue.push(compId);
         compPanel.classList.add("selected");
+        compPanel.querySelector(".cueNo").classList.add("cued");
       }
       formatRows();
     } // boatClick
@@ -601,7 +603,7 @@
       let color = "#000099";
       let gradColor = "#66FF33";
       let ratio = "0.20";
-      
+
       cue.forEach((item, idx)=>{
         let newColor = changeColor(color, ratio, false);
         let next = document.querySelector(`[id="${cue[idx]}"]`);
