@@ -29,12 +29,7 @@
             <td>
               <div id="compPane">
                 <div class="app">
-                  <table
-                    class="appTable"
-                    cellpadding="0"
-                    cellspacing="5px"
-                    height="1400px"
-                  >
+                  <table class="appTable" cellpadding="0" cellspacing="5px" height="1400px">
                     <!-- replaced by compTemplate -->
                   </table>
                 </div>
@@ -99,13 +94,7 @@
   <template id="compTemplate">
     <tr>
       <td>
-        <table
-          id=""
-          class="compPanel"
-          cellpadding="0"
-          cellspacing="0"
-          data-id=""
-        >
+        <table id="" class="compPanel" cellpadding="0" cellspacing="0" data-id="">
           <tr class="compRow">
             <td class="boat">
               <div class="cueNo"></div>
@@ -329,9 +318,7 @@
             clone.querySelector(".compPanel").setAttribute("data-id", comp.id);
             clone.querySelector(".compId").textContent = comp.id;
             clone.querySelector(".helm").textContent = comp.helm;
-            clone.querySelector(".boatName").textContent = comp.boat
-              ? comp.boat
-              : comp.sailno;
+            clone.querySelector(".boatName").textContent = comp.boat ? comp.boat : comp.sailno;
             clone.querySelector(".fleet").textContent = comp.fleet;
             clone.querySelector(".rating").textContent = comp.rating;
             insert.appendChild(clone);
@@ -351,8 +338,8 @@
 
         // Resolve the promise
         resolve();
-      }); 
-    }// buildCompsRows
+      });
+    } // buildCompsRows
 
     function clearCompRows() {
       document.querySelectorAll(".compPanel").forEach((item) => {
@@ -402,28 +389,24 @@
       };
     } // buildRaceSelect
 
-    // Document ready 
+    // Document ready
     // Set listeners
     document.addEventListener("DOMContentLoaded", () => {
       // Move this to an init function
       addListeners();
       function addListeners() {
-        document
-          .querySelector("#finishBtn")
-          .addEventListener("click", finishButton);
-        document
-          .querySelector("#startSetBtn")
-          .addEventListener("click", setStart);
+        document.querySelector("#finishBtn").addEventListener("click", finishButton);
+        document.querySelector("#startSetBtn").addEventListener("click", setStart);
         document.querySelector("#codeBtn").addEventListener("click", codeBtn);
-        document
-          .querySelector("#codeSelect select")
-          .addEventListener("change", changeCode);
+        document.querySelector("#codeSelect select").addEventListener("change", changeCode);
         document.querySelector("#save").addEventListener("click", saveResults);
-        document
-          .querySelector("#export")
-          .addEventListener("click", exportResults);
+        document.querySelector("#export").addEventListener("click", exportResults);
       }
     }); // dom ready
+
+    function changeCode() {
+      document.querySelector("#codeLabel").textContent = this.value;
+    }
 
     // Not sure how to solve this yet
     //=============================================================
@@ -434,43 +417,33 @@
     //=============================================================
 
     function getResultsDb(raceId) {
-      if (raceId) {
-        const store = getStore("results").index("raceid").getAll(raceId);
-        store.onsuccess = (e) => {
-          clearCompRows();
-
-          const races = e.target.result;
-          races.forEach((item) => {
-            const compPanel = document.querySelector(`[id="${item.compid}"]`);
-            if (item.finish && !item.code) {
-              compPanel.classList.add("finished");
-              compPanel.querySelector(".timeDisplay").textContent = item.finish;
-            } else if (item.elapsed) {
-              compPanel.classList.add("finished");
-              compPanel.querySelector(".timeDisplay").textContent =
-                item.elapsed;
-            } else if (item.code) {
-              compPanel.classList.add("finished");
-              compPanel.querySelector(".timeDisplay").textContent = item.code;
-            } else {
-              compPanel.classList.remove("finished");
-              compPanel.querySelector(".timeDisplay").textContent = "";
-            }
-          });
-        };
-
-        store.onerror = (err) => {
-          console.log("err", err);
-        };
-      } else {
-        //cant figureout how to get default
-        //let selectedRace = document.querySelector('#raceSelector')
-        //selectedRace.children[0]
-        //console.dir(selectedRace.children.item(0))
-      }
+      // if (raceId) {
+      const store = getStore("results")
+        .index("raceid")
+        .getAll(raceId ? raceId : "");
+      store.onsuccess = (e) => {
+        //
+        clearCompRows();
+        //
+        const races = e.target.result;
+        races.forEach((race) => {
+          const compPanel = document.querySelector(`[id="${race.compid}"]`);
+          if (race.finish && !race.code) {
+            compPanel.classList.add("finished");
+            compPanel.querySelector(".timeDisplay").textContent = race.finish;
+          } else if (race.elapsed) {
+            compPanel.classList.add("finished");
+            compPanel.querySelector(".timeDisplay").textContent = race.elapsed;
+          } else if (race.code) {
+            compPanel.classList.add("finished");
+            compPanel.querySelector(".timeDisplay").textContent = race.code;
+          } else {
+            compPanel.classList.remove("finished");
+            compPanel.querySelector(".timeDisplay").textContent = "";
+          }
+        });
+      };
     } // getResultsDb
-
-  
 
     function raceSelectChange() {
       // Sets raceSelected global
@@ -531,17 +504,19 @@
 
     function updateFinishPane() {
       // NOT WORKING
-      // Get comps that are finished and sort into fleets
-      // This would be cool to add scoring here
-
+      // i think this called alot
       // Clear finishPane list items
       document.querySelectorAll(".finishListTitle li").forEach((item) => {
         item.remove();
       });
 
-      let store1 = { store: "results", index: "raceid", search: raceSelected };
-      let store2 = { store: "comps", index: "compid", search: "" };
-      let rel = relate(store1, store2, relateDone);
+      // Get comps that are finished 
+      const finished = document.querySelectorAll(".finished");
+      finished.forEach((e)=>{
+        // console.log('finished', e);
+      })
+      
+      
     } // updateFinishPane
 
     async function relate(store1, store2, callback) {
@@ -549,7 +524,8 @@
       const tx = db.transaction([store1.store, store2.store], "readonly");
       tx.oncomplete = () => {
         let txcomplete = 1;
-        callback(related);
+        return related
+        // callback(related);
       };
       const results = tx.objectStore(store1.store).index(store1.index);
       const result = results.openCursor(store1.search);
@@ -572,17 +548,18 @@
 
     function relateDone(related) {
       console.log("related: ", related);
-      related.forEach((relatedItems) => {
-        document.querySelectorAll(".finishListTitle").forEach((item) => {
-          const dataKey = item.getAttribute("data-key");
-          if (dataKey == relatedItems.fleet.replace(/ /g, "")) {
-            const listItem = document.createElement("li");
-            listItem.setAttribute("key", relatedItems.compid);
-            listItem.textContent = relatedItems.boat;
-            item.append(listItem);
-          }
-        });
-      });
+      return related;
+      // related.forEach((relatedItems) => {
+      //   document.querySelectorAll(".finishListTitle").forEach((item) => {
+      //     const dataKey = item.getAttribute("data-key");
+      //     if (dataKey == relatedItems.fleet.replace(/ /g, "")) {
+      //       const listItem = document.createElement("li");
+      //       listItem.setAttribute("key", relatedItems.compid);
+      //       listItem.textContent = relatedItems.boat;
+      //       item.append(listItem);
+      //     }
+      //   });
+      // });
     } // relateDone
 
     // Globals for ui
@@ -660,8 +637,7 @@
         let raceid = raceSelected;
         let start = document.querySelector("#startTimeInput").value;
         const date = document.querySelector("#date").textContent;
-        var timeDisplay =
-          this.closest(".compRow").querySelector(".timeDisplay");
+        var timeDisplay = this.closest(".compRow").querySelector(".timeDisplay");
         var d = new Date();
 
         if (this.classList.contains("minus")) {
@@ -671,11 +647,7 @@
             return null;
           }
           const t = new Date();
-          var d = [
-            t.setHours(timeText[0]),
-            t.setMinutes(timeText[1]),
-            t.setSeconds(timeText[2]),
-          ];
+          var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
           t.setTime(t.getTime() - 1000);
           var ta = [t.getHours(), t.getMinutes(), t.getSeconds()];
           //add 0 where needed
@@ -699,11 +671,7 @@
             return null;
           }
           var t = new Date();
-          var d = [
-            t.setHours(timeText[0]),
-            t.setMinutes(timeText[1]),
-            t.setSeconds(timeText[2]),
-          ];
+          var d = [t.setHours(timeText[0]), t.setMinutes(timeText[1]), t.setSeconds(timeText[2])];
           t.setTime(t.getTime() + 1000);
           var ta = [t.getHours(), t.getMinutes(), t.getSeconds()];
           //add 0 where needed
@@ -723,8 +691,7 @@
         }
       } else if (this.closest(".compPanel").classList.contains("selected")) {
         var compPanel = this.closest(".compPanel");
-        var cueNo =
-          this.closest(".compRow").querySelector(".cueNo").textContent;
+        var cueNo = this.closest(".compRow").querySelector(".cueNo").textContent;
         var compId = compPanel.getAttribute("id");
         removeFromCue(compId, compPanel);
         if (this.classList.contains("minus")) {
@@ -753,9 +720,7 @@
     }
 
     function sendTime(e) {
-      const compid = e.target
-        .closest(".compPanel")
-        .querySelector(".compId").textContent;
+      const compid = e.target.closest(".compPanel").querySelector(".compId").textContent;
       const raceid = document.querySelector("#raceInfo").getAttribute("raceid");
       const newValue = e.target.value;
       const timeDisplay = e.target.parentNode;
@@ -790,34 +755,37 @@
       };
     }
 
-    function finishButton(e) {
-      const finishTime = new Date()
-        .toTimeString()
-        .replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+    function finishButton() {
+      const finishTime = new Date().toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
       const compPanel = document.querySelector(`[id="${cue[0]}"]`);
+
+      // take comp out of selected cue and add to finished
       removeFromCue(cue[0], compPanel);
       compPanel.classList.remove("selected");
       compPanel.classList.add("finished");
+
+      // put current time in dom
       compPanel.querySelector(".timeDisplay").textContent = finishTime;
-      const raceId = raceSelected;
-      const compId = compPanel.getAttribute("id");
+      
       // get start time for current fleet
       const currentFleet = compPanel.querySelector(".fleet").textContent;
+      
+      // Get current race
+      const raceId = raceSelected;
       const races = getStore("races");
       const race = races.get(parseInt(raceId));
-      race.onsuccess = (e) => {
-        const result = e.target.result;
-        console.table("result",result);
+      race.onsuccess = () => {
         let currentStart;
-        result.starts.forEach((item) => {
+        race.result.starts.forEach((item) => {
           if (item.fleet === currentFleet) {
             currentStart = item.start;
           }
         });
-
+        
+        const compId = compPanel.getAttribute("id");
         compPanel.querySelector(".start").textContent = currentStart;
-        compPanel.querySelector(".date").textContent = result.date;
-        const elapsed = getElapsedTime(currentStart, result.date, finishTime);
+        compPanel.querySelector(".date").textContent = race.result.date;
+        const elapsed = getElapsedTime(currentStart, race.result.date, finishTime);
         const currentResult = {
           id: parseInt(raceId + compId),
           compid: compId,
@@ -828,30 +796,34 @@
           rrestyp: "4", // race result type - 4 is for finishtime
         };
 
-        // this was failing if result is already there
-        // Changed this to put
         const resultStore = getStore("results", "readwrite");
         resultStore.put(currentResult);
+
         updateFinishPane();
+
       }; // race.onsuccess
     } // finishButton
 
-    
-
     async function codeBtn() {
+      // Get current code selected
       const code = document.querySelector("#codeSelect select").value;
+      // Get comp from cue
       const compPanel = this.closest("#main").querySelector(`[id="${cue[0]}"]`);
       const compid = compPanel.getAttribute("id");
-      let start;
 
+
+      const compStart = await getCompStart(compPanel, raceSelected)
+      console.log('compStart: ', compStart);
+
+
+      // Get current race from idb
+      let start;
+      const raceid = raceSelected;
       const currentFleet = compPanel.querySelector(".fleet").textContent;
       const races = getStore("races");
-      console.log("raceSelected: ", raceSelected);
-      const raceid = raceSelected;
       const race = races.get(parseInt(raceid));
-      race.onsuccess = (e) => {
-        const result = e.target.result;
-        result.starts.forEach((item) => {
+      race.onsuccess = () => {
+        race.result.starts.forEach((item) => {
           if (currentFleet == item.fleet) {
             start = item.start;
           }
@@ -862,45 +834,41 @@
         compPanel.classList.add("finished");
         compPanel.querySelector(".cueNo").textContent = "";
         compPanel.querySelector(".adj li").removeAttribute("style");
-        compPanel
-          .querySelectorAll(".button")
-          .forEach((item) => item.removeEventListener("click", adjustButton));
+        compPanel.querySelectorAll(".button").forEach((item) => {
+          item.removeEventListener("click", adjustButton)
+        });
         cue.shift();
         formatRows();
         updateResult({ compid, raceid, code, start });
       };
     } // codeBtn
 
-    async function getCompStart(compPanel, raceId) {
-      var currentStart;
-      let currentFleet = compPanel.querySelector(".fleet").textContent;
-      let races = getStore("races");
-      let race = races.get(parseInt(raceId));
-      race.onsuccess = (e) => {
-        let result = e.target.result;
-        result.start.forEach((item) => {
-          let stringToSplit = item.split("|");
-          let fleetStart = stringToSplit[1];
-          let fleetName = stringToSplit[0].split("^")[1];
-          if (currentFleet == fleetName) {
-            currentStart = fleetStart;
+    function getCompStart(compPanel, raceId) {
+      return new Promise((resolve, reject) => {
+        let currentStart;
+      const currentFleet = compPanel.querySelector(".fleet").textContent;
+      const races = getStore("races");
+      const race = races.get(parseInt(raceId));
+      race.onsuccess = () => {
+        const result = race.result;
+        result.starts.forEach((item) => {
+          if (currentFleet == item.fleet) {
+            // currentStart = item.start;
+            resolve(item.start) ;
           }
         });
-        return currentStart;
+       
       };
-    } // getCompStart
 
-    function changeCode() {
-      document.querySelector("#codeLabel").textContent = this.value;
-    }
+      })
+      
+    } // getCompStart
 
     function updateResult(event) {
       // event can be code or finish
-      const store = getStore("results").get(
-        parseInt(event.raceid + event.compid)
-      );
-      store.onsuccess = (e) => {
-        const result = e.target.result;
+      const store = getStore("results").get(parseInt(event.raceid + event.compid));
+      store.onsuccess = () => {
+        const result = store.result;
         if (event.code) {
           event.elapsed = "";
           event.rrestyp = "3";
@@ -914,7 +882,6 @@
 
         event.id = parseInt(event.raceid + event.compid);
         const merged = { ...result, ...event };
-        // console.log("updateResult merged: ", merged);
         const write = getStore("results", "readwrite").put(merged);
         updateFinishPane()
       };
@@ -960,8 +927,7 @@
       if (seconds <= 9) {
         seconds = "0" + seconds;
       }
-      document.querySelector("#clock").textContent =
-        `${hours}:${minutes}:${seconds}`;
+      document.querySelector("#clock").textContent = `${hours}:${minutes}:${seconds}`;
       setTimeout(showClock, 1000);
     } // showClock
     showClock();
