@@ -525,8 +525,8 @@
     }
 
     function makeFinishPane(fleets) {
-      let template = document.querySelector("#finishPaneTemplate");
-      let insertAt = document.querySelector("#finishPane");
+      const template = document.querySelector("#finishPaneTemplate");
+      const insertAt = document.querySelector("#finishPane");
       fleets.forEach(function (e) {
         let clone = template.content.cloneNode(true);
         let title = clone.querySelector(".finishListTitle");
@@ -541,15 +541,32 @@
       // NOT WORKING
       // Get comps that are finished and sort into fleets
       // This would be cool to add scoring here
-
       // Clear finishPane list items
+      console.log("updateFinishPane: ");
       document.querySelectorAll(".finishListTitle li").forEach((item) => {
         item.remove();
       });
 
-      let store1 = { store: "results", index: "raceid", search: raceSelected };
-      let store2 = { store: "comps", index: "compid", search: "" };
-      let rel = relate(store1, store2, relateDone);
+      // Get finished comps
+      // This hard from indexedDb.? how are they finished??
+      // const comps = getStoreAll("comps", "readwrite");
+      // comps.onsuccess = (e) => {
+      //   console.log("e: ", e.target.result);
+      // };
+      // Can't do this approach because the race is async
+      // const finishers = document.querySelectorAll(".finished");
+      // finishers.forEach((item) => {
+      //   console.log("item: ", item);
+      // });
+      // comps.onerror = (err) => {
+      //   console.log("err: ", err);
+      // };
+      // Get finished copm fleet
+      // Add to appropriate list
+
+      // let store1 = { store: "results", index: "raceid", search: raceSelected };
+      // let store2 = { store: "comps", index: "compid", search: "" };
+      // let rel = relate(store1, store2, relateDone);
     } // updateFinishPane
 
     async function relate(store1, store2, callback) {
@@ -628,6 +645,27 @@
       let color = "#000099";
       let gradColor = "#66FF33";
       let ratio = "0.20";
+      // It would appear that global scop is not passed to forEach
+      // cue.forEach((c, i) => {
+      //   let newColor = changeColor(color, ratio, false);
+      //   let next = document.querySelector(`[id="${c[i]}"]`);
+      //   next.style.borderColor = color;
+      //   next.querySelector(".cueNo").textContent = i + 1;
+      //   next.querySelector(".cueNo").style.color = color =
+      //     // let
+      //     `border-right-color:${color};border-top-color:${color};border-left-color:${color};color:${changeColor(
+      //       color,
+      //       ".2",
+      //       true
+      //     )}`;
+      //   next.querySelectorAll(".adj li").forEach((adj) => {
+      //     adj.style.borderColor = color;
+      //     adj.style.color = changeColor(color, ".2", true);
+      //   });
+      //   next.style.backgroundColor = changeColor(newColor, ".3", false);
+      //   color = newColor;
+      // });
+
       for (let i = 0; i < cue.length; i++) {
         let newColor = changeColor(color, ratio, false);
         let next = document.querySelector(`[id="${cue[i]}"]`);
@@ -663,14 +701,21 @@
     } // removeFromCue
 
     function adjustButton() {
+      // This is a very complicated function
+      // The new ui will not work like this anyway,
+      // but the logic for the operations should be sound
+
+      // Once finished the buttons adjust the time recorded
       if (this.closest(".compPanel").classList.contains("finished")) {
+        //Get current compid
         let compid = this.closest(".compPanel").getAttribute("id");
+        // Need to change raceid to global
         let raceid = raceSelected;
         let start = document.querySelector("#startTimeInput").value;
         const date = document.querySelector("#date").textContent;
-        var timeDisplay =
+        let timeDisplay =
           this.closest(".compRow").querySelector(".timeDisplay");
-        var d = new Date();
+        var _date = new Date();
 
         if (this.classList.contains("minus")) {
           //subtract 10ths
@@ -679,7 +724,7 @@
             return null;
           }
           const t = new Date();
-          var d = [
+          _date = [
             t.setHours(timeText[0]),
             t.setMinutes(timeText[1]),
             t.setSeconds(timeText[2]),
@@ -707,7 +752,7 @@
             return null;
           }
           var t = new Date();
-          var d = [
+          var date = [
             t.setHours(timeText[0]),
             t.setMinutes(timeText[1]),
             t.setSeconds(timeText[2]),
@@ -730,17 +775,24 @@
           updateResult({ start, finish, elapsed, date, raceid, compid });
         }
       } else if (this.closest(".compPanel").classList.contains("selected")) {
+        // If not finished and selected
         var compPanel = this.closest(".compPanel");
+        // Get current cue number from the DOM
+        // they say 'Don't Do This', but this function  has been the most reliable
         var cueNo =
           this.closest(".compRow").querySelector(".cueNo").textContent;
+        // I think this was a bad way to deal with this
         var compId = compPanel.getAttribute("id");
         removeFromCue(compId, compPanel);
+
         if (this.classList.contains("minus")) {
+          // Reduce cue
           cue.splice(new Number(cueNo), 0, compId);
         } else if (this.classList.contains("plus")) {
+          // Increase cue
           cue.splice(new Number(cueNo) - 2, 0, compId);
         }
-        console.log("adjust(cue to finish):", cue);
+        // console.log("adjust(cue to finish):", cue);
         formatRows();
       }
     } // adjustButton
@@ -845,11 +897,11 @@
 
     function getElapsedTime(start, date, finish) {
       const startTimeInput = document.getElementById("startTimeInput").value;
-      console.log("startTimeInput: ", startTimeInput);
+      // console.log("startTimeInput: ", startTimeInput);
       const startDate = new Date(date + " " + startTimeInput);
-      console.log("startDate: ", startDate);
+      // console.log("startDate: ", startDate);
       const finishDate = new Date(date + " " + finish);
-      console.log("finishDate: ", finishDate);
+      // console.log("finishDate: ", finishDate);
       const elapsed = convertHMS((finishDate - startDate) / 1000);
       console.log(elapsed);
       return elapsed;

@@ -21,7 +21,7 @@ function saveResults() {
   const data = parsed.data;
 
   // Get results
-  const store = getStore("results").index("raceid").getAll(raceId);
+  const store = getStore("results").index("raceid").getAll(raceSelected);
   store.onsuccess = () => {
     store.result.forEach((result) => {
       // Filter rdisc for index
@@ -30,7 +30,7 @@ function saveResults() {
         if (
           item[0] == "rdisc" &&
           item[2] == result.compid &&
-          item[3] == raceId &&
+          item[3] == raceSelected &&
           index
         ) {
           return index;
@@ -109,7 +109,7 @@ function downloadExport(data, raceName) {
 
 function exportResults() {
   // get raceId / name
-  const raceId = document.querySelector("#raceInfo").getAttribute("raceid");
+  // const raceId = document.querySelector("#raceInfo").getAttribute("raceid");
   let raceName = document.querySelector("#raceInfo h3").textContent;
   const columns = [["RaceNo", "Boat", "Finish", "Code"]];
   const tx = db.transaction(["comps", "results"]);

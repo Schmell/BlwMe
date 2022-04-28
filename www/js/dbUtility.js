@@ -168,6 +168,10 @@ function getStore(storeName, mode) {
     mode = "readwrite";
   }
   let tx = makeTX(storeName, mode).objectStore(storeName);
+  tx.onerror = (err) => {
+    console.error("getStore onerror", err.target);
+  };
+
   return tx;
 }
 
